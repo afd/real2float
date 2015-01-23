@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using Microsoft.Boogie;
 using Microsoft.Basetypes;
 
@@ -27,30 +28,16 @@ namespace Real2Float
 
       ExecutionEngine.ResolveAndTypecheck(prog, filename, out UnusedLinearTypeChecker, out UnusedMoverTypeChecker);
 
-
-      OldBackup Backup = new OldBackup();
-      Backup.Visit(prog);
-
-      FloatConverter Converter = new FloatConverter();
-      Converter.Visit(prog);
-
-      Converter.GetResultBound(3, Backup);
-
-      prog.AddTopLevelDeclarations(Converter.GetEpsilons());
-      Converter.GetFreshPrecision();
-      prog.AddTopLevelDeclarations(Converter.GetPrecisions());
-      Converter.GetAxiomPrecision(3);
-      Converter.GetEpsilonBounds(Converter.GetEpsilons());
-      foreach (Axiom axiom in Converter.GetAxioms())
-      {
-        prog.AddTopLevelDeclaration(axiom);
-      }
+      var Converter = new FloatConverter(prog);
+      Converter.ApplyTransformation();
 
       using (TokenTextWriter writer = new TokenTextWriter("output.bpl", false)) {
         prog.Emit(writer);
       }
 
     }
+
+
   }
   class OldBackup : StandardVisitor {
 
@@ -70,23 +57,136 @@ namespace Real2Float
     }    
   }
 
-  class FloatConverter : StandardVisitor {
+  class FloatConverter : Duplicator {
 
-    private List<Constant> Epsilons = new List<Constant>();
+    private Program Prog;
+    private Implementation Impl;
+    private int EpsilonCounter = 0;
 
     private List<Constant> Precisions = new List<Constant>();
 
     public List<Axiom> Axioms = new List<Axiom>();
 
-    public List<Constant> GetEpsilons() {
-      return Epsilons;
-    }
     public List<Constant> GetPrecisions() {
       return Precisions;
     }
     public List<Axiom> GetAxioms() {
       return Axioms;
     }
+
+    public FloatConverter(Program Prog) {
+      this.Prog = Prog;
+      // For now, assume that the input has a single implementation
+      Debug.Assert(Prog.Implementations.Count() == 1);
+      this.Impl = Prog.Implementations.ToList()[0];
+    }
+
+    public void ApplyTransformation()
+    {
+      DuplicateLocalVariablesAndParameters();
+
+      // For now assume that there is a single block of statements,
+      // with no stuctured statements (i.e., no if or while)
+      Debug.Assert(Impl.StructuredStmts.BigBlocks.Count() == 1);
+      var BigBlock = Impl.StructuredStmts.BigBlocks.ToList()[0];
+      // This asserts that there is no if or while
+      Debug.Assert(BigBlock.ec == null);
+
+      DuplicateAssignments(BigBlock);
+
+      InitialiseFloatParameterVariables(BigBlock);
+
+      SpecifyResultBound(3);
+
+      GetFreshPrecision();
+
+      /*prog.AddTopLevelDeclarations(Converter.GetPrecisions());
+      Converter.GetAxiomPrecision(3);
+      //Converter.GetEpsilonBounds(Converter.GetEpsilons());
+      foreach (Axiom axiom in Converter.GetAxioms())
+      {
+        prog.AddTopLevelDeclaration(axiom);
+      }*/
+
+    }
+
+    private void DuplicateAssignments(BigBlock bb)
+    {
+      List<Cmd> NewCmds = new List<Cmd>();
+      foreach(Cmd c in bb.simpleCmds) {
+        var Assign = c as AssignCmd;
+        Debug.Assert(Assign != null);
+
+        Debug.Assert(Assign.Lhss.Count() == 1);
+        Debug.Assert(Assign.Rhss.Count() == 1);
+
+        var Lhs = (SimpleAssignLhs)Assign.Lhss[0];
+        var Rhs = Assign.Rhss[0];
+
+        var FloatLhs = new SimpleAssignLhs(Token.NoToken,
+          Expr.Ident(ConvertToFloatName(Lhs.AssignedVariable.Name), Lhs.AssignedVariable.Type));
+        var FloatRhs = (Expr)Rhs.Clone();
+        FloatRhs = VisitExpr(FloatRhs);
+
+        NewCmds.Add(new AssignCmd(Token.NoToken,
+          new List<AssignLhs> { Lhs, FloatLhs }, new List<Expr> { Rhs, FloatRhs }));
+      }
+      bb.simpleCmds = NewCmds;
+    }
+
+    private void DuplicateLocalVariablesAndParameters()
+    {
+
+      // Make a $float local variable to duplicate each local variable
+      // and input parameter.
+      foreach(var v in Impl.LocVars.ToList().Union(Impl.InParams.ToList())) {
+        Impl.LocVars.Add(
+          new LocalVariable(Token.NoToken, new TypedIdent(Token.NoToken,
+            ConvertToFloatName(v.Name), v.TypedIdent.Type)));
+      }
+
+      // Also duplicate each output parameter
+      // to have a $float counterpart
+      foreach(var v in Impl.OutParams.ToList()) {
+        Variable NewOutParam = new LocalVariable(Token.NoToken, new TypedIdent(Token.NoToken,
+            ConvertToFloatName(v.Name), v.TypedIdent.Type));
+        Impl.OutParams.Add(NewOutParam);
+        Impl.Proc.OutParams.Add(NewOutParam);
+      }
+
+    }
+
+    private void InitialiseFloatParameterVariables(BigBlock BigBlock)
+    {
+      // If p is a parameter, we want initially to set
+      // p$float := p
+      var ReversedParams = Impl.InParams.ToList();
+      ReversedParams.Reverse();
+      foreach(var p in ReversedParams) {
+        BigBlock.simpleCmds.Insert(0, new AssignCmd(Token.NoToken,
+          new List<AssignLhs> {
+            new SimpleAssignLhs(Token.NoToken, Expr.Ident(
+              ConvertToFloatName(p.Name), p.TypedIdent.Type))
+          }, 
+          new List<Expr> { Expr.Ident(p) }));
+      }
+    }
+
+    private static string ConvertToFloatName(string name)
+    {
+      return name + "$float";
+    }
+
+    private static bool IsFloatName(string name) {
+      return name.EndsWith("$float");
+    }
+
+    private static string ConvertFromFloatName(string name)
+    {
+      Debug.Assert(IsFloatName(name));
+      return name.Substring(0, name.Count() - "$float".Count());
+    }
+
 
     public override Expr VisitNAryExpr(NAryExpr node)
     {
@@ -100,29 +200,34 @@ namespace Real2Float
         case BinaryOperator.Opcode.Mul:
         case BinaryOperator.Opcode.Sub:
         case BinaryOperator.Opcode.Div:
-          node.Args[0] = VisitExpr(node.Args[0]);
-          node.Args[1] = VisitExpr(node.Args[1]);
-          return Expr.Mul(node, Expr.Add(Expr.Literal(
+          NAryExpr TransformedExpr =
+            new NAryExpr(Token.NoToken, new BinaryOperator(Token.NoToken, Binop.Op),
+              new List<Expr> { VisitExpr(node.Args[0]), VisitExpr(node.Args[1]) });
+          return Expr.Mul(TransformedExpr, Expr.Add(Expr.Literal(
             BigDec.FromString("1.0")), GetFreshEpsilon()));
       }
       return base.VisitNAryExpr(node);
     }
 
-   private int Count1 (List<Constant> l)
-   {
-     return l.Count() + 1;
-   }
+    private int Count1 (List<Constant> l)
+    {
+      return l.Count() + 1;
+    }
 
     private Expr GetFreshEpsilon ()
     {
-      Epsilons.Add(new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
-          "_eps" + Count1(Epsilons), Microsoft.Boogie.Type.Real), false));
-      return Expr.Ident(Epsilons.Last());
+      var Epsilon = new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
+          "_eps" + EpsilonCounter, Microsoft.Boogie.Type.Real), false);
+      Prog.AddTopLevelDeclaration(Epsilon);
+      EpsilonCounter++;
+      return Expr.Ident(Epsilon);
     }
+
     public void GetFreshPrecision () {
       Precisions.Add(new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
           "delta", Microsoft.Boogie.Type.Real), false));
     }
+
     public void GetAxiomPrecision (int precision) {
       Expr prec = Expr.Literal(BigDec.FromString("2e-"+precision));
       Expr axiomExpr = Expr.Eq (Expr.Ident(Precisions.Last()),prec);
@@ -135,12 +240,14 @@ namespace Real2Float
         Axioms.Add(new Axiom(Token.NoToken, axiomExpr));
     }
     
-    public void GetResultBound(int precision, OldBackup Backup) {
-        Expr rhs = Expr.Literal(BigDec.FromString("2e-"+precision));
-        Console.WriteLine("{0}", Backup.GetOldRhss().Last());
-        Expr lhs = (Backup.GetOldRhss())[0];
-        Expr axiomExpr = Expr.Ge(lhs,rhs);
-        Axioms.Add(new Axiom(Token.NoToken, axiomExpr));
+    public void SpecifyResultBound(int precision) {
+      // Expr rhs = Expr.Literal(BigDec.FromString("2e-"+precision));
+      foreach(var r in Impl.OutParams) {
+        if(!IsFloatName(r.Name)) {
+          Impl.Proc.Ensures.Add(new Ensures(false,
+            Expr.Ge(Expr.Ident(r), Expr.Ident(ConvertToFloatName(r.Name), r.TypedIdent.Type))));
+        }
+      }
     }
 
     private Expr BinaryTreeAnd(List<Constant> terms, int start, int end)

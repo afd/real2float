@@ -1,67 +1,29 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Diagnostics;
 using Microsoft.Boogie;
 using Microsoft.Basetypes;
 
 namespace Real2Float
 {
-  class Translator
-  {
-    static void Main(string[] args)
-    {
-      
-      CommandLineOptions.Install(new CommandLineOptions());
-
-      var filename = args[0];
-
-      Program prog = ExecutionEngine.ParseBoogieProgram(
-        new List<string> { filename }, false);
-      if (prog == null)
-        Environment.Exit(1);
-
-      LinearTypeChecker UnusedLinearTypeChecker;
-      MoverTypeChecker UnusedMoverTypeChecker;
-
-      ExecutionEngine.ResolveAndTypecheck(prog, filename, out UnusedLinearTypeChecker, out UnusedMoverTypeChecker);
-
-      var Converter = new FloatConverter(prog);
-      Converter.ApplyTransformation();
-
-      using (TokenTextWriter writer = new TokenTextWriter("output.bpl", false)) {
-        prog.Emit(writer);
-      }
-
-    }
-
-
-  }
-
   class FloatConverter : Duplicator {
 
     private Program Prog;
     private Implementation Impl;
     private int EpsilonCounter = 0;
+    private int Bits;
+    private BigDec ResultPrecision;
 
-    private List<Constant> Precisions = new List<Constant>();
-
-    public List<Axiom> Axioms = new List<Axiom>();
-
-    public List<Constant> GetPrecisions() {
-      return Precisions;
-    }
-    public List<Axiom> GetAxioms() {
-      return Axioms;
-    }
-
-    public FloatConverter(Program Prog) {
+    public FloatConverter(Program Prog, int Bits, BigDec UserPrecision) {
       this.Prog = Prog;
       // For now, assume that the input has a single implementation
       Debug.Assert(Prog.Implementations.Count() == 1);
       this.Impl = Prog.Implementations.ToList()[0];
+      this.Bits = Bits;
+      this.ResultPrecision = UserPrecision;
     }
 
     public void ApplyTransformation()
@@ -79,19 +41,9 @@ namespace Real2Float
 
       InitialiseFloatParameterVariables(BigBlock);
 
-      SpecifyResultBound(3);
+      SpecifyResultBound();
 
-      AddPrecision(3);
-
-
-
-      /*prog.AddTopLevelDeclarations(Converter.GetPrecisions());
-      Converter.GetAxiomPrecision(3);
-      //Converter.GetEpsilonBounds(Converter.GetEpsilons());
-      foreach (Axiom axiom in Converter.GetAxioms())
-      {
-        prog.AddTopLevelDeclaration(axiom);
-      }*/
+      AddPrecision();
 
     }
 
@@ -110,8 +62,7 @@ namespace Real2Float
 
         var FloatLhs = new SimpleAssignLhs(Token.NoToken,
           Expr.Ident(ConvertToFloatName(Lhs.AssignedVariable.Name), Lhs.AssignedVariable.Type));
-        var FloatRhs = (Expr)Rhs.Clone();
-        FloatRhs = VisitExpr(FloatRhs);
+        var FloatRhs = VisitExpr(Rhs);
 
         NewCmds.Add(new AssignCmd(Token.NoToken,
           new List<AssignLhs> { Lhs, FloatLhs }, new List<Expr> { Rhs, FloatRhs }));
@@ -194,11 +145,6 @@ namespace Real2Float
       return base.VisitNAryExpr(node);
     }
 
-    private int Count1 (List<Constant> l)
-    {
-      return l.Count() + 1;
-    }
-
     private Expr GetFreshEpsilon ()
     {
       var Epsilon = new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
@@ -213,51 +159,26 @@ namespace Real2Float
       return Expr.Ident(Epsilon);
     }
 
-    public void AddPrecision (int bits) {
+    public void AddPrecision () {
       var Delta = new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
           "delta", Microsoft.Boogie.Type.Real), false);
       Prog.AddTopLevelDeclaration(Delta);
-      Expr prec = Expr.Literal(BigDec.FromString("2e-"+bits));
+      Expr prec = Expr.Literal(BigDec.FromString("2e-" + Bits));
       Prog.AddTopLevelDeclaration(new Axiom(Token.NoToken, Expr.Eq (Expr.Ident(Delta), prec)));
     }
-
-    public void GetEpsilonBounds(List<Constant> terms)
-    {
-        Expr axiomExpr = BinaryTreeAnd(terms, 0, terms.Count - 1);
-        Axioms.Add(new Axiom(Token.NoToken, axiomExpr));
-    }
     
-    public void SpecifyResultBound(int precision) {
-      // Expr rhs = Expr.Literal(BigDec.FromString("2e-"+precision));
+    public void SpecifyResultBound() {
+      Expr AllowedDifference = Expr.Literal(ResultPrecision);
       foreach(var r in Impl.OutParams) {
         if(!IsFloatName(r.Name)) {
+          var rFloat = Expr.Ident(ConvertToFloatName(r.Name), r.TypedIdent.Type);
+          Expr Difference = Expr.Sub(Expr.Ident(r), rFloat);
           Impl.Proc.Ensures.Add(new Ensures(false,
-            Expr.Ge(Expr.Ident(r), Expr.Ident(ConvertToFloatName(r.Name), r.TypedIdent.Type))));
+            Expr.And(Expr.Le(Expr.Neg(AllowedDifference), Difference),
+                     Expr.Le(Difference, AllowedDifference))));
         }
       }
     }
 
-    private Expr BinaryTreeAnd(List<Constant> terms, int start, int end)
-    {
-      Expr eps = Expr.Ident(terms[start]);
-      Expr delta = Expr.Ident(Precisions.Last());
-      Expr ineq = Expr.Ge(Expr.Mul(delta,delta),Expr.Mul(eps,eps));
-      Expr eps1 = Expr.Ident(terms[end]);
-      Expr ineq1 = Expr.Ge(Expr.Mul(delta,delta),Expr.Mul(eps1,eps1));
-
-        if (start > end)
-            return Expr.True;
-        if (start == end)
-            return ineq;
-        if (start + 1 == end) {
-            return Expr.And(ineq, ineq1);
-        }
-        var mid = (start + end) / 2;
-        return Expr.And(BinaryTreeAnd(terms, start, mid), BinaryTreeAnd(terms, mid + 1, end));
-    }
-
-    
-
   }
-
 }

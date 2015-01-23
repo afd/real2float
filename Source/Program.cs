@@ -39,23 +39,6 @@ namespace Real2Float
 
 
   }
-  class OldBackup : StandardVisitor {
-
-    private Expr[] OldRhss = new Expr[1];
-
-    public Expr[] GetOldRhss() {
-      return OldRhss;
-    }
-
-    public override Cmd VisitAssignCmd(AssignCmd node)
-    {
-      if (node.Lhss.Count == 1) {
-        Expr e = node.Rhss[0];
-        OldRhss[0] = e; 
-      }
-      return base.VisitAssignCmd(node);
-    }    
-  }
 
   class FloatConverter : Duplicator {
 
@@ -98,7 +81,9 @@ namespace Real2Float
 
       SpecifyResultBound(3);
 
-      GetFreshPrecision();
+      AddPrecision(3);
+
+
 
       /*prog.AddTopLevelDeclarations(Converter.GetPrecisions());
       Converter.GetAxiomPrecision(3);
@@ -219,19 +204,21 @@ namespace Real2Float
       var Epsilon = new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
           "_eps" + EpsilonCounter, Microsoft.Boogie.Type.Real), false);
       Prog.AddTopLevelDeclaration(Epsilon);
+
+      Prog.AddTopLevelDeclaration(new Axiom(Token.NoToken,
+        Expr.Le(Expr.Mul(Expr.Ident(Epsilon), Expr.Ident(Epsilon)),
+          Expr.Mul(Expr.Ident("delta", Microsoft.Boogie.Type.Real),
+                   Expr.Ident("delta", Microsoft.Boogie.Type.Real)))));
       EpsilonCounter++;
       return Expr.Ident(Epsilon);
     }
 
-    public void GetFreshPrecision () {
-      Precisions.Add(new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
-          "delta", Microsoft.Boogie.Type.Real), false));
-    }
-
-    public void GetAxiomPrecision (int precision) {
-      Expr prec = Expr.Literal(BigDec.FromString("2e-"+precision));
-      Expr axiomExpr = Expr.Eq (Expr.Ident(Precisions.Last()),prec);
-      Axioms.Add(new Axiom(Token.NoToken, axiomExpr));
+    public void AddPrecision (int bits) {
+      var Delta = new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
+          "delta", Microsoft.Boogie.Type.Real), false);
+      Prog.AddTopLevelDeclaration(Delta);
+      Expr prec = Expr.Literal(BigDec.FromString("2e-"+bits));
+      Prog.AddTopLevelDeclaration(new Axiom(Token.NoToken, Expr.Eq (Expr.Ident(Delta), prec)));
     }
 
     public void GetEpsilonBounds(List<Constant> terms)

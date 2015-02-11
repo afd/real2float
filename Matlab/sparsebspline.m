@@ -1,0 +1,15 @@
+clear all;
+close all;
+p = 40;
+delta = 2^(-p);
+m = 4;
+epsbnd = m * delta/(1 - m * delta);
+n = 2;
+x = sdpvar(n,1);
+u = x(1); eps = x(2);
+c1 = [1 2]; c2 = [1 2];
+xcliques = [c1; c2];
+p = eps*u^3;
+g = [1 - u; u; epsbnd- eps; eps - epsbnd];
+gcliques = [c1; c2; c1; c1];
+m2 = sparseminsos (x, xcliques, -p, g, gcliques, 2);

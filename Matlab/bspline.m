@@ -1,0 +1,13 @@
+clear all;
+close all;
+p = 40;
+delta = 2^(-p);
+m = 4;
+epsbnd = m * delta/(1 - m * delta);
+n = 2;
+x = sdpvar(n,1);
+u = x(1); eps = x(2);
+p = -eps*u^3/6;
+g = [u*(1 - u); epsbnd^2 - eps^2];
+m2 = minsos (x, p, g, 3);
+M2 = maxsos (x, p, g, 3);

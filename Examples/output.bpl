@@ -1,9 +1,12 @@
-procedure mytriangle(x1: real, x2: real, x3: real) returns (r: real, r$float: real);
-  ensures -1e-12 <= r - r$float && r - r$float <= 1e-12;
+procedure rigidbody1(x1: real, x2: real, x3: real) returns (f: real, f$float: real);
+  requires -15e0 <= x1 && x1 <= 15e0;
+  requires -15e0 <= x2 && x2 <= 15e0;
+  requires -15e0 <= x3 && x3 <= 15e0;
+  ensures -1e-12 <= f - f$float && f - f$float <= 1e-12;
 
 
 
-implementation mytriangle(x1: real, x2: real, x3: real) returns (r: real, r$float: real)
+implementation rigidbody1(x1: real, x2: real, x3: real) returns (f: real, f$float: real)
 {
   var x1$float: real;
   var x2$float: real;
@@ -12,30 +15,34 @@ implementation mytriangle(x1: real, x2: real, x3: real) returns (r: real, r$floa
     x1$float := x1;
     x2$float := x2;
     x3$float := x3;
-    r, r$float := (x1 + x2 + x3) * x1 * x2 * x3, ((x1 + x2) * (1e0 + eps(1)) + x3) * (1e0 + eps(2)) * x1 * (1e0 + eps(3)) * x2 * (1e0 + eps(4)) * x3 * (1e0 + eps(5));
+    f, f$float := -x1 * x2 - 2e0 * x2 * x3 - x1 - x3, (((-x1 * x2 * (1e0 + _eps0) - 2e0 * x2 * (1e0 + _eps1) * x3 * (1e0 + _eps2)) * (1e0 + _eps3) - x1) * (1e0 + _eps4) - x3) * (1e0 + _eps5);
 }
 
 
 
-const eps(1): real;
+const _eps0: real;
 
-axiom eps(1) * eps(1) <= delta * delta;
+axiom _eps0 * _eps0 <= delta * delta;
 
-const eps(2): real;
+const _eps1: real;
 
-axiom eps(2) * eps(2) <= delta * delta;
+axiom _eps1 * _eps1 <= delta * delta;
 
-const eps(3): real;
+const _eps2: real;
 
-axiom eps(3) * eps(3) <= delta * delta;
+axiom _eps2 * _eps2 <= delta * delta;
 
-const eps(4): real;
+const _eps3: real;
 
-axiom eps(4) * eps(4) <= delta * delta;
+axiom _eps3 * _eps3 <= delta * delta;
 
-const eps(5): real;
+const _eps4: real;
 
-axiom eps(5) * eps(5) <= delta * delta;
+axiom _eps4 * _eps4 <= delta * delta;
+
+const _eps5: real;
+
+axiom _eps5 * _eps5 <= delta * delta;
 
 const delta: real;
 

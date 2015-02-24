@@ -55,6 +55,7 @@ To perform this error analysis, one first executes the following command:
 This generates a second Boogie program `output.bpl`, whose purpose is to verify whether the absolute error (on the result computation) is less than `1e-12` for double precision (64 bits with 53 bits of significand precision).
 
 The file `output.bpl` displays the floating-point result `f_float` associated to the exact result:
+
 `f_float := (((-x1 * x2 * (1e0 + eps0) - 2 * x2 * (1e0 + eps1) * x3 * (1e0 + eps3)) * (1e0 + eps4) - x1) * (1e0 + eps2) - x3) * (1e0 + eps5);`.
 
 Note that error variables `eps0,...,eps5` have been freshly generated for each operation `*, +, -` used to define `f` and is absolutely bounded by `2^(-53)` (double precision).

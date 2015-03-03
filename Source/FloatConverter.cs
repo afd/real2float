@@ -30,16 +30,9 @@ namespace Real2Float
     {
       DuplicateLocalVariablesAndParameters();
 
-      // For now assume that there is a single block of statements,
-      // with no stuctured statements (i.e., no if or while)
-      Debug.Assert(Impl.StructuredStmts.BigBlocks.Count() == 1);
-      var BigBlock = Impl.StructuredStmts.BigBlocks.ToList()[0];
-      // This asserts that there is no if or while
-      Debug.Assert(BigBlock.ec == null);
+      Impl.StructuredStmts = DuplicateStmtList(Impl.StructuredStmts);
 
-      DuplicateAssignments(BigBlock);
-
-      InitialiseFloatParameterVariables(BigBlock);
+      InitialiseFloatParameterVariables(Impl.StructuredStmts.BigBlocks[0]);
 
       SpecifyResultBound();
 
@@ -47,27 +40,72 @@ namespace Real2Float
 
     }
 
-    private void DuplicateAssignments(BigBlock bb)
+    private StmtList DuplicateStmtList(StmtList SL)
     {
-      List<Cmd> NewCmds = new List<Cmd>();
-      foreach(Cmd c in bb.simpleCmds) {
-        var Assign = c as AssignCmd;
-        Debug.Assert(Assign != null);
+        IList<BigBlock> NewBigBlocks = new List<BigBlock>();
+        foreach (var BB in SL.BigBlocks)
+        {
+            NewBigBlocks.Add(BB);
+        }
+        foreach(var NewBB in SL.BigBlocks.Select
+            (Item => ConvertBigBlock(Item))) {
+            NewBigBlocks.Add(NewBB);
+        }
+        return new StmtList(NewBigBlocks, SL.EndCurly);
+    }
 
-        Debug.Assert(Assign.Lhss.Count() == 1);
-        Debug.Assert(Assign.Rhss.Count() == 1);
+    private BigBlock ConvertBigBlock(BigBlock bb)
+    {
+        List<Cmd> NewCmds = new List<Cmd>();
+        foreach (Cmd c in bb.simpleCmds)
+        {
+            var Assign = c as AssignCmd;
+            Debug.Assert(Assign != null);
 
-        var Lhs = (SimpleAssignLhs)Assign.Lhss[0];
-        var Rhs = Assign.Rhss[0];
+            Debug.Assert(Assign.Lhss.Count() == 1);
+            Debug.Assert(Assign.Rhss.Count() == 1);
 
-        var FloatLhs = new SimpleAssignLhs(Token.NoToken,
-          Expr.Ident(ConvertToFloatName(Lhs.AssignedVariable.Name), Lhs.AssignedVariable.Type));
-        var FloatRhs = VisitExpr(Rhs);
+            var Lhs = (SimpleAssignLhs)Assign.Lhss[0];
+            var Rhs = Assign.Rhss[0];
 
-        NewCmds.Add(new AssignCmd(Token.NoToken,
-          new List<AssignLhs> { Lhs, FloatLhs }, new List<Expr> { Rhs, FloatRhs }));
-      }
-      bb.simpleCmds = NewCmds;
+            var FloatLhs = new SimpleAssignLhs(Token.NoToken,
+              Expr.Ident(ConvertToFloatName(Lhs.AssignedVariable.Name), Lhs.AssignedVariable.Type));
+            var FloatRhs = VisitExpr(Rhs);
+
+            NewCmds.Add(new AssignCmd(Token.NoToken,
+              new List<AssignLhs> { FloatLhs }, new List<Expr> { FloatRhs }));
+        }
+
+        StructuredCmd NewEC = null;
+        if (bb.ec is IfCmd)
+        {
+            IfCmd IfCmd = bb.ec as IfCmd;
+            Debug.Assert(IfCmd.elseIf == null);
+            NewEC = new IfCmd(Token.NoToken, VisitExpr(IfCmd.Guard),
+                ConvertStmtList(IfCmd.thn), null, ConvertStmtList(IfCmd.elseBlock));
+        }
+        else
+        {
+            Debug.Assert(bb.ec == null);
+        }
+
+        Debug.Assert(bb.tc == null);
+        return new BigBlock(Token.NoToken, null, NewCmds, NewEC, null);
+    }
+
+    private StmtList ConvertStmtList(StmtList SL)
+    {
+        if (SL == null)
+        {
+            return null;
+        }
+        IList<BigBlock> NewBigBlocks = new List<BigBlock>();
+        foreach (var NewBB in SL.BigBlocks.Select
+            (Item => ConvertBigBlock(Item)))
+        {
+            NewBigBlocks.Add(NewBB);
+        }
+        return new StmtList(NewBigBlocks, SL.EndCurly);
     }
 
     private void DuplicateLocalVariablesAndParameters()
@@ -123,6 +161,10 @@ namespace Real2Float
       return name.Substring(0, name.Count() - "$float".Count());
     }
 
+    public override Expr VisitIdentifierExpr(IdentifierExpr node)
+    {
+      return Expr.Ident(ConvertToFloatName(node.Decl.Name), node.Decl.TypedIdent.Type);
+    }
 
     public override Expr VisitNAryExpr(NAryExpr node)
     {
@@ -179,6 +221,83 @@ namespace Real2Float
         }
       }
     }
+
+    internal void DumpMatlab()
+    {
+      Debug.Assert(Prog.Implementations.Count() == 1);
+      Implementation Impl = Prog.Implementations.ToList()[0];
+
+      Console.WriteLine("clear all;");
+      Console.WriteLine("close all;");
+      Console.WriteLine("");
+      Console.WriteLine("delta = 2^(-" + Bits + ")");
+
+      Console.Write("sdpvar");
+      foreach (var InParam in Impl.InParams)
+      {
+        Console.Write(" " + InParam.Name + "_scale");
+      }
+      Console.WriteLine(";");
+
+      Console.Write("sdpvar");
+      foreach (var Epsilon in Prog.TopLevelDeclarations.OfType<Constant>().Where(Item => Item.Name.StartsWith("_eps")))
+      {
+        Console.Write(" " + Epsilon.Name);
+      }
+      Console.WriteLine(";");
+
+      // Output code to relate x to x_scale for each parameter
+      foreach (Requires r in Impl.Proc.Requires)
+      {
+        Variable Var;
+        Expr Lower;
+        Expr Upper;
+        GetVariableAndBounds(r.Condition, out Var, out Lower, out Upper);
+        Console.Out.WriteLine(Var.Name + " = ((" + Upper + " - " + Lower + ") / 2)) * " + Var.Name + "_scale" + " + (" + Upper + " + " + Lower + ")/2;");
+      }
+
+      foreach (var bb in Impl.StructuredStmts.BigBlocks)
+      {
+        foreach (var c in bb.simpleCmds)
+        {
+          Console.WriteLine(c);
+        }
+      }
+
+    }
+
+    private void GetVariableAndBounds(Expr Condition, out Variable Var, out Expr Lower, out Expr Upper)
+    {
+      NAryExpr Conjunction = Condition as NAryExpr;
+      Debug.Assert(Conjunction != null);
+      Debug.Assert(Conjunction.Args.Count() == 2);
+      Debug.Assert(Conjunction.Fun is BinaryOperator);
+      Debug.Assert((Conjunction.Fun as BinaryOperator).Op == BinaryOperator.Opcode.And);
+
+      {
+        NAryExpr LHS = Conjunction.Args[0] as NAryExpr;
+        Debug.Assert(LHS != null);
+        Debug.Assert(LHS.Args.Count() == 2);
+        Debug.Assert(LHS.Fun is BinaryOperator);
+        Debug.Assert((LHS.Fun as BinaryOperator).Op == BinaryOperator.Opcode.Le);
+        IdentifierExpr Identifier = LHS.Args[1] as IdentifierExpr;
+        Debug.Assert(Identifier != null);
+        Var = Identifier.Decl;
+        Lower = LHS.Args[0];
+      }
+
+      {
+        NAryExpr RHS = Conjunction.Args[1] as NAryExpr;
+        Debug.Assert(RHS != null);
+        Debug.Assert(RHS.Args.Count() == 2);
+        Debug.Assert(RHS.Fun is BinaryOperator);
+        Debug.Assert((RHS.Fun as BinaryOperator).Op == BinaryOperator.Opcode.Le);
+        IdentifierExpr OtherIdentifier = RHS.Args[0] as IdentifierExpr;
+        Debug.Assert(Var == OtherIdentifier.Decl);
+        Upper = RHS.Args[1];
+      }
+    }
+
 
   }
 }

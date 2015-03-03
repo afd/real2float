@@ -53,12 +53,18 @@ namespace Real2Float
       var Converter = new FloatConverter(prog, Clo.Bits, ResultPrecision);
       Converter.ApplyTransformation();
 
+      // At this point, prog contains the float encoding
+
       using (TokenTextWriter writer = new TokenTextWriter("output.bpl", false)) {
         prog.Emit(writer);
       }
 
-    }
+      // Next step: generate Matlab
+      Converter.DumpMatlab();
 
+
+
+    }
 
   }
 

@@ -111,7 +111,7 @@ namespace Real2Float
     private void DuplicateLocalVariablesAndParameters()
     {
 
-      // Make a $float local variable to duplicate each local variable
+      // Make a _float local variable to duplicate each local variable
       // and input parameter.
       foreach(var v in Impl.LocVars.ToList().Union(Impl.InParams.ToList())) {
         Impl.LocVars.Add(
@@ -120,7 +120,7 @@ namespace Real2Float
       }
 
       // Also duplicate each output parameter
-      // to have a $float counterpart
+      // to have a _float counterpart
       foreach(var v in Impl.OutParams.ToList()) {
         Variable NewOutParam = new LocalVariable(Token.NoToken, new TypedIdent(Token.NoToken,
             ConvertToFloatName(v.Name), v.TypedIdent.Type));
@@ -133,7 +133,7 @@ namespace Real2Float
     private void InitialiseFloatParameterVariables(BigBlock BigBlock)
     {
       // If p is a parameter, we want initially to set
-      // p$float := p
+      // p_float := p
       var ReversedParams = Impl.InParams.ToList();
       ReversedParams.Reverse();
       foreach(var p in ReversedParams) {
@@ -148,17 +148,17 @@ namespace Real2Float
 
     private static string ConvertToFloatName(string name)
     {
-      return name + "$float";
+      return name + "_float";
     }
 
     private static bool IsFloatName(string name) {
-      return name.EndsWith("$float");
+      return name.EndsWith("_float");
     }
 
     private static string ConvertFromFloatName(string name)
     {
       Debug.Assert(IsFloatName(name));
-      return name.Substring(0, name.Count() - "$float".Count());
+      return name.Substring(0, name.Count() - "_float".Count());
     }
 
     public override Expr VisitIdentifierExpr(IdentifierExpr node)
@@ -190,7 +190,7 @@ namespace Real2Float
     private Expr GetFreshEpsilon ()
     {
       var Epsilon = new Constant(Token.NoToken, new TypedIdent(Token.NoToken,
-          "_eps" + EpsilonCounter, Microsoft.Boogie.Type.Real), false);
+          "eps" + EpsilonCounter, Microsoft.Boogie.Type.Real), false);
       Prog.AddTopLevelDeclaration(Epsilon);
 
       Prog.AddTopLevelDeclaration(new Axiom(Token.NoToken,
@@ -230,7 +230,7 @@ namespace Real2Float
       Console.WriteLine("clear all;");
       Console.WriteLine("close all;");
       Console.WriteLine("");
-      Console.WriteLine("delta = 2^(-" + Bits + ")");
+      Console.WriteLine("delta = 2^(-" + Bits + ");");
 
       Console.Write("sdpvar");
       foreach (var InParam in Impl.InParams)
@@ -240,7 +240,7 @@ namespace Real2Float
       Console.WriteLine(";");
 
       Console.Write("sdpvar");
-      foreach (var Epsilon in Prog.TopLevelDeclarations.OfType<Constant>().Where(Item => Item.Name.StartsWith("_eps")))
+      foreach (var Epsilon in Prog.TopLevelDeclarations.OfType<Constant>().Where(Item => Item.Name.StartsWith("eps")))
       {
         Console.Write(" " + Epsilon.Name);
       }
@@ -256,12 +256,45 @@ namespace Real2Float
         Console.Out.WriteLine(Var.Name + " = ((" + Upper + " - " + Lower + ") / 2)) * " + Var.Name + "_scale" + " + (" + Upper + " + " + Lower + ")/2;");
       }
 
+      // Output MatLab code for the program statements
       foreach (var bb in Impl.StructuredStmts.BigBlocks)
       {
         foreach (var c in bb.simpleCmds)
         {
-          Console.WriteLine(c);
+          MatLabPrinter MLP = new MatLabPrinter();
+          MLP.Visit(c);
         }
+      }
+
+      // Output the optimization problem in terms of result variables
+      IEnumerable<string> NonFloatOutputs = Impl.OutParams.Where(Item => !(Item.Name.EndsWith("_float"))).Select(Item => Item.Name);
+      Debug.Assert(Impl.OutParams.Count() == 2*NonFloatOutputs.Count());
+      foreach (var result in NonFloatOutputs) {
+        Console.Write("[ ");
+        Console.Write("lower_real_" + result + ", ");
+        Console.Write("upper_real_" + result + ", ");
+        Console.Write("lower_error_" + result + ", ");
+        Console.Write("upper_error_" + result + " ");
+        Console.Write("] = boundfperror (delta, [ ");
+        bool first = true;
+        foreach(var scaled in Impl.InParams.Select(Item => Item.Name + "_scale")) {
+          if(!first) {
+            Console.Write("; ");
+          }
+          first = false;
+          Console.Write(scaled);
+        }
+        Console.Write("], [ ");
+        first = true;
+        foreach (var Epsilon in Prog.TopLevelDeclarations.OfType<Constant>().
+          Where(Item => Item.Name.StartsWith("eps"))) {
+          if(!first) {
+            Console.Write("; ");
+          }
+          first = false;
+          Console.Write(Epsilon.Name);
+        }
+        Console.WriteLine(" ], " + result + ", " + result + "_float);");
       }
 
     }

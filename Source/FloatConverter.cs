@@ -253,7 +253,7 @@ namespace Real2Float
         Expr Lower;
         Expr Upper;
         GetVariableAndBounds(r.Condition, out Var, out Lower, out Upper);
-        Console.Out.WriteLine(Var.Name + " = ((" + Upper + " - " + Lower + ") / 2)) * " + Var.Name + "_scale" + " + (" + Upper + " + " + Lower + ")/2;");
+        Console.Out.WriteLine(Var.Name + " = ((" + Upper + " - " + Lower + ") / 2) * " + Var.Name + "_scale" + " + (" + Upper + " + " + Lower + ")/2;");
       }
 
       // Output MatLab code for the program statements

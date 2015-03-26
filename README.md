@@ -50,7 +50,7 @@ This program returns the result `-x1 * x2 - 2.0 * x2 * x3 - x1 - x3`, assuming t
 
 To perform this error analysis, one first executes the following command:
 
-`$ ../Source/bin/Debug/Real2Float.exe /bits:53 /resultPrecision:1e-12 rigidbody1.bpl`
+`$ ../Source/bin/Debug/Real2Float.exe /bits:53 /resultPrecision:1e-12 rigidbody1.bpl >> ../Matlab/rigidbody1out.m`
 
 This generates a second Boogie program `output.bpl`, whose purpose is to verify whether the absolute error (on the result computation) is less than `1e-12` for double precision (64 bits with 53 bits of significand precision).
 
@@ -60,9 +60,9 @@ The file `output.bpl` displays the floating-point result `f_float` associated to
 
 Note that error variables `eps0,...,eps5` have been freshly generated for each operation `*, +, -` used to define `f` and is absolutely bounded by `2^(-53)` (double precision).
 
-In the `Matlab/` directory, the script file `rigidbody1.m` details how to analyze the error `f - f_float` using sparse sums of squares and semidefinite programming. Executing this script allows to generate certifates that the bound is less than `1e-12`. 
+In the `Matlab/` directory, the script file `rigidbody1out.m` details how to analyze the error `f - f_float` using sparse sums of squares and semidefinite programming. Executing this script allows to generate certifates that the bound is less than `1e-12`. 
 
-Further developments include automatic Matlab script generation.
+Further developments include automatic Matlab script generation and execution.
 
 
 Warning

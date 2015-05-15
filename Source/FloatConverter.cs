@@ -169,18 +169,29 @@ namespace Real2Float
     public override Expr VisitNAryExpr(NAryExpr node)
     {
       var Binop = node.Fun as BinaryOperator;
-      if (Binop == null) {
+      var Unop = node.Fun as UnaryOperator;
+      if (Binop == null && Unop == null) {
         return base.VisitNAryExpr(node);
       }
-
+      if (Unop == null) { 
       switch (Binop.Op) {
         case BinaryOperator.Opcode.Add:
         case BinaryOperator.Opcode.Mul:
         case BinaryOperator.Opcode.Sub:
-        case BinaryOperator.Opcode.Div:
+        case BinaryOperator.Opcode.RealDiv:
           NAryExpr TransformedExpr =
             new NAryExpr(Token.NoToken, new BinaryOperator(Token.NoToken, Binop.Op),
               new List<Expr> { VisitExpr(node.Args[0]), VisitExpr(node.Args[1]) });
+          return Expr.Mul(TransformedExpr, Expr.Add(Expr.Literal(
+            BigDec.FromString("1.0")), GetFreshEpsilon()));
+      }
+      return base.VisitNAryExpr(node);
+      }
+      switch (Unop.Op) {
+        case UnaryOperator.Opcode.Neg:
+          NAryExpr TransformedExpr =
+            new NAryExpr(Token.NoToken, new UnaryOperator(Token.NoToken, Unop.Op),
+              new List<Expr> { VisitExpr(node.Args[0])});
           return Expr.Mul(TransformedExpr, Expr.Add(Expr.Literal(
             BigDec.FromString("1.0")), GetFreshEpsilon()));
       }

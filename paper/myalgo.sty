@@ -1,0 +1,37 @@
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{myalgo}[2009/05/05 Standard LaTeX package]
+
+\RequirePackage{algorithm}
+\RequirePackage{algpseudocode}
+
+\algrenewcommand{\algorithmicrequire}{\textbf{Input:}}
+\algrenewcommand{\algorithmicensure}{\textbf{Output:}}
+\algnewcommand\algorithmicdone{\textbf{done}}
+
+\algrenewcommand\algorithmicindent{1.2em}
+\algrenewcommand\Call[2]{\textproc{#1}\ifthenelse{\equal{#2}{}}{}{{\textnormal(}#2{\textnormal)}}}
+\algrenewtext{EndWhile}{\algorithmicdone}
+\algrenewtext{EndFor}{\algorithmicdone}
+\algrenewtext{EndIf}{\algorithmicend}
+\algrenewtext{EndProcedure}{\algorithmicend}
+\algrenewtext{EndFunction}{\algorithmicend}
+\renewcommand{\gets}{:=}
+
+\algdef{SL}{sForAll}{0}[1]{\algorithmicforall\ #1\ \algorithmicdo}
+\algdef{SL}[SIF]{sIf}{0}[1]{\algorithmicif\ #1\ \algorithmicthen}
+\algdef{SL}{sElsIf}{0}[1]{\algorithmicelse\ \algorithmicif\ #1\ \algorithmicthen}
+\algdef{SL}{sElse}{0}[0]{\algorithmicelse\ }
+\algdef{SE}{fElse}{EndIf}[0]{\algorithmicelse}{\algorithmicend}
+%\algdef{Ce}]{SIF}{fElse}{EndIf}{\algorithmicelse}
+
+\newcommand{\lineref}[1]{{\footnotesize\ref{#1}}}
+
+%\algloopdefx{sIf}[2]{\algorithmicif\ #1\ \algorithmicthen\ #2}
+
+\newcommand{\False}{\mathit{false}}
+\newcommand{\True}{\mathit{true}}
+%\renewcommand{\And}{\mathbin{\&\!\&}}
+\newcommand{\Nil}{\mathit{undef}}
+
+\algnewcommand\algorithmiclcomment[1]{\(\quad \triangleright\) {\itshape #1}}
+\def\Lcomment{\algorithmiclcomment}

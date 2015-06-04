@@ -4,3 +4,10 @@ Source/Real2Float.v11.suo
 Source/Real2Float.v12.suo
 *.swp
 *~
+*.log
+*.out
+*.aux
+*.bbl
+*.blg
+*.pdf
+*.synctex.gz

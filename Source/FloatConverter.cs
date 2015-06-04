@@ -310,6 +310,35 @@ namespace Real2Float
 
     }
 
+    internal void DumpNLCertify()
+    {
+      Debug.Assert(Prog.Implementations.Count() == 1);
+      Implementation Impl = Prog.Implementations.ToList()[0];
+
+      Console.Write("let obj_"); 
+      Console.Write("doppler ");
+      foreach (var InParam in Impl.InParams) {Console.Write(InParam.Name + " ");}
+      foreach (var Epsilon in Prog.TopLevelDeclarations.OfType<Constant>().Where(Item => Item.Name.StartsWith("eps")))
+      {
+        Console.Write(Epsilon.Name + " ");
+      }
+      Console.Write("[(");
+      
+
+      Console.WriteLine(")];;");
+
+
+      // Output MatLab code for the program statements
+      foreach (var bb in Impl.StructuredStmts.BigBlocks)
+      {
+        foreach (var c in bb.simpleCmds)
+        {
+          MatLabPrinter MLP = new MatLabPrinter();
+          MLP.Visit(c);
+        }
+      }
+
+    }
     private void GetVariableAndBounds(Expr Condition, out Variable Var, out Expr Lower, out Expr Upper)
     {
       NAryExpr Conjunction = Condition as NAryExpr;

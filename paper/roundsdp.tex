@@ -1,0 +1,612 @@
+\documentclass[a4paper,10pt]{article}
+
+\textheight235mm
+\textwidth160mm
+\voffset-10mm
+\hoffset-10mm
+\parindent0cm
+\parskip2mm
+\usepackage{listings}
+\def\lstlanguagefiles{defManOcaml.tex}
+\lstset{language = Ocaml}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}  % for pdf, bitmapped graphics files
+\usepackage{amsmath} % assumes amsmath package installed
+\usepackage{amssymb}  % assumes amsmath package installed
+\usepackage{color}
+\usepackage{myalgo}
+\let\proof\relax
+\let\endproof\relax
+\usepackage{amsthm}
+\usepackage{hyperref}
+\usepackage{subfigure}
+\usepackage{enumerate}
+\usepackage{caption}
+\usepackage{multirow}
+%\usepackage{natbib} %for bibliography via bibtex
+%\usepackage{enumitem}
+
+\newcommand{\add}[1]{#1}
+\newcommand{\del}[1]{\textcolor{gray}{#1}}
+
+%\newcommand{\P}{\mathbb{P}}
+%\newcommand{\Q}{\mathbb{Q}}
+%\newcommand{\E}{\mathbb{E}}
+\def\sizefig{0.35}
+\def\sizesmallfig{0.30}
+\def\sizetinyfig{0.24}
+\newcommand{\suppf}[1]{\text{supp}(#1)}
+\newcommand{\mons}[2]{\N_{#1}^{#2}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\Pcal}{\mathcal{P}}
+\newcommand{\Pcalp}{\Pcal^{(p)}}
+\newcommand{\Scal}{\mathcal{S}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\z}{\mathbf{z}}
+\newcommand{\alphab}{\boldsymbol{\alpha}}
+\newcommand{\epsilonb}{\boldsymbol{\epsilon}}
+\newcommand{\deltab}{\boldsymbol{\delta}}
+\renewcommand{\b}{\mathbf{b}}
+\newcommand{\f}{\mathbf{f}} 
+\newcommand{\Plam}{\P_{\lambda}}
+\newcommand{\Plamp}{\P_{\lambda}^{(p)}}
+\def\P{\mathbf{P}}
+\def\Q{\mathbf{Q}}
+\def\q{\mathbf{q}}
+\newcommand{\M}{\mathbf{M}}
+\def\m{\mathbf{m}}
+\def\H{\mathbf{H}}
+\def\h{\mathbf{h}}
+\def\f{f}
+\def\a{\mathbf{a}}
+\def\p{\mathbf{p}}
+\def\S{\mathbf{S}}
+\def\B{\mathbf{B}}
+\def\K{\mathbf{K}}
+\def\X{\mathbf{X}}
+\def\Y{\mathbf{Y}}
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\Shat}{\hat{\S}}
+\newcommand{\Bb}{\mathbf{B}}
+\newcommand{\flam}{{f}_{{\lambda}}}
+\newcommand{\flamfun}[1]{f_{\lambda}(#1)}
+\newcommand{\flamfunp}[2]{f^{(#2)}_{\lambda}(#1)}
+\newcommand{\flamx}{\flamfun{\x}}
+\newcommand{\flampx}{\flamfunp{\x}{p}}
+\newcommand{\flamstar}{f^*({\lambda})}
+\newcommand{\flamstarj}[1]{f_{#1}^*({\lambda})}
+\newcommand{\Mcal}{\mathcal{M}}
+\newcommand{\nsdp}{n_{\text{sdp}}}
+\newcommand{\nan}{\text{NaN}}
+\newcommand{\nlift}{n_{\text{lift}}}
+\newcommand{\Slift}{\S_{\text{lift}}}
+\newcommand{\mlift}{m_{\text{lift}}}
+\newcommand{\dlift}{r_{\text{lift}}}
+\newcommand{\msdp}{m_{\text{sdp}}}
+\newcommand{\xlamstar}{{\x}^*({\lambda})}
+\newcommand{\transpose}{\top}%\newcommand{\transpose}{\mathbf{\intercal}}
+\DeclareMathOperator{\vol}{vol}
+\DeclareMathOperator{\op}{op}
+\DeclareMathOperator{\conv}{conv}
+\newcommand{\red}[1]{\textbf{{\color{red}#1}}}
+%\newcommand{\brev}{\color{red}}
+%\newcommand{\erev}{\color{black}}
+\newcommand{\sthreefp}{\mathtt{s3fp}}
+\newcommand{\realtofloat}{\mathtt{Real2Float}}
+\newcommand{\ocaml}{\mathtt{OCaml}}
+\newcommand{\coq}{\mathtt{Coq}}
+\newcommand{\rosa}{\mathtt{rosa}}
+\newcommand{\fptaylor}{\mathtt{fptaylor}}
+\newcommand{\nlcertify}{\mathtt{NLCertify}}
+%\newcommand{\II}{\mathbb{I}}
+\theoremstyle{plain}
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{definition}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{hypothesis}[theorem]{Assumption}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{example}{Example}
+
+\theoremstyle{remark}
+\newtheorem*{remark}{Remark}
+%\newtheorem*{note}{Note}
+\newtheorem{case}{Case}
+
+\title{\bf Automated Precision Tuning using Semidefinite Programming}
+\begin{document}
+\author{Victor Magron$^{1}$ \and George Constantinides$^{1}$ \and Alastair Donaldson$^{2}$}
+
+\footnotetext[1]{Circuits and Systems Group, Department of Electrical and Electronic Engineering,
+Imperial College London, South Kensington Campus, London SW7 2AZ, UK.}
+\footnotetext[2]{Multicore Programming Group, Department of Computing,
+Imperial College London, South Kensington Campus, London SW7 2AZ, UK.}
+%\date{Draft of \today}
+
+\maketitle
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{abstract}
+
+
+
+\end{abstract}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+\paragraph{Keywords}
+hardware precision tuning; round-off error; numerical accuracy; floating-point arithmetic; fixed-precision arithmetic; semidefinite programming; sums of squares; correlation sparsity pattern
+\section{Introduction} %3p
+%
+Constructing numerical programs which output accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce rounding errors, whose range knowledge is required to fulfil safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers.
+
+To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximations tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain tight upper bounds over the error. This problem boils down to finding tight abstractions of programs while being able to approximate them efficiently. 
+%computing tight over-approximations in an efficient way. 
+The aim of this work is to provide an efficient framework to perform automated precision analysis of computer programs consisting of nonlinear operations. 
+%
+This framework can be applied in general for developing accurate numerical software, but appears to be particularly relevant while considering algorithms migration onto reconfigurable hardware (e.g. FPGAs). The advantage of architectures based on FPGAs is that they allow more flexible choices, rather than choosing either for IEEE standard single or double precision. Indeed, in this case, one benefits from a more flexible number representation while ensuring guaranteed bounds on the program output. 
+
+For computer programs consisting of linear operations, automatic error analysis can be obtained with well-studied techniques based on SMT solvers~\cite{hgbk2012fmcad}, interval or affine arithmetic~\cite{fluctuat} and simplex-based algorithms~\cite{}. 
+These techniques can also be applied in the nonlinear setting but do not fully take into account the correlations between program variables. Thus they usually output coarse error bounds or perform analysis within a large amount of time.
+
+For computer programs with nonlinear operations, such guarantees can be provided with certified programming techniques.
+Semidefinite programming (SDP) is relevant to a wide range of mathematical fields, including combinatorial optimization, control theory, matrix completion. In 2001, Lasserre introduced a hierarchy of SDP relaxations~\cite{Lasserre01moments} for approximating polynomial infima. Our method to bound the error is a decision procedure based on an specialized variant of Lasserre hierarchy. The procedure relies on SDP to provide sparse sum-of-squares decompositions of positive polynomials. This framework handles polynomial program analysis (involving the operations $+,\times,-$) and can be extended to the more general class of semialgebraic or transcendental programs (involving $\sqrtsign, /, \min, \max, \arctan, \exp$).
+
+
+
+
+\subsection{Illustration of our Method}
+Consider the following polynomial $f$:
+\[ f(\x) := x_1 ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) 
++ x_2 x_5 + x_3 x_6 - x_2 x_3  - x_5 x_6\enspace. \]
+
+For instance, given a four variable vector $\x := (x_1, x_2, x_3, x_4)$, consider the  determinant computation of the $2 \times 2$ matrix  $\begin{pmatrix}
+x_1 & x_2 \\
+x_3 & x_4 \\
+\end{pmatrix}$.
+%
+Then, the polynomial $f$ which represents the absolute floating-point error is given by $f(\x, \epsilonb) := [x_1 x_4 (1 + \epsilon_1) - x_3 x_2 (1 + \epsilon_2)] (1 + \epsilon_3) - x_1 x_4 + x_3 x_2$.
+This polynomial $f$ is already of degree 3 and involves 7 variables.
+
+%Semidefinite programming can provide precise information to automatically tune reconfigurable hardware (e.g. FPGA) to algorithm specifications.
+Our implementation tool is built in top of the $\nlcertify$ verification system~\cite{icms14} and allows the user to write programs with real-valued semialgebraic programs. % and specification language. %Our implementation tool is freely available from \url{https://github.com/afd/real2float}.
+Precision and efficiency of the tool are evaluated on several benchmarks coming from the existing literature in control systems, physics and biology. Numerical experiments demonstrate that our method outperforms recent approaches~\cite{Darulova14Popl,fptaylor15} relying on Taylor models and interval analysis or affine arithmetic.
+
+
+\subsection{Contributions}
+Our key contributions can be summarized as follows:
+\begin{itemize}
+\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming. By comparison with other methods, our algorithm allows to obtain tighter upper bounds, while overcoming scalibility and numerical issues inherent to SDP solvers.
+\item We also propose some extensions of our algorithm to programs involving non-polynomial programs, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditionals.
+\item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available from 
+\begin{center}
+\url{https://github.com/afd/real2float}.
+\end{center}
+\end{itemize}
+
+The paper is organized as follows.
+%
+In Section~\ref{sec:background}, we first recall mandatory background on rounding errors due to finite precision arithmetic (Section~\ref{sec:fpbackground}). Then we explain how to perform certified nonlinear optimization based on semidefinite programming (Section~\ref{sec:sdpbackground}) and finally how to obtain formal bounds while checking the certificates inside the $\coq$ proof assistant (Section~\ref{sec:coqbackground}).
+%
+Section~\ref{sec:fpsdp} contains the main contribution of the paper, namely how to compute tight over-approximations for rounding errors of nonlinear programs with sparse semidefinite relaxations.
+%
+Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear verification tool $\realtofloat$ on several benchmarks coming from the existing literature in control systems, optimization, physics and biology.
+
+%Verifying simple linear algebra algorithms can be troublesome from the  computational point of view.
+\section{Preliminaries}
+\label{sec:background}
+
+\subsection{Finite Precision Arithmetic}
+\label{sec:fpbackground}
+%\subsection{Floating-point and fixed-point Arithmetic}
+
+\paragraph{Simplification of error term products}
+We first need the following lemma.
+\begin{lemma}
+\label{th:redproduct}
+Let $\Delta < \frac{1}{p}$ and define $\gamma_p := \frac{p \Delta}{1 - p \Delta}$. Then, for all $\epsilon_1, \dots, \epsilon_p \in [-\Delta, \Delta]$, there exists $\theta_p$ such that ${\displaystyle \prod_{i=1}^p (1 + \epsilon_i) = 1 + \theta_p}$ and $\mid \theta_p \mid \leq \gamma_p$.
+\end{lemma}
+\begin{proof}
+The proof follows directly from~\cite[Lemma 3.3]{higham2002accuracy}.
+\end{proof}
+
+%One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.
+\subsection{Sparse semidefinite relaxations for nonlinear optimization}
+\label{sec:sdpbackground}
+Let define the cone of sums of squares of polynomials in $\R_{2 d}[\x]$:
+\begin{equation}
+\label{eq:cone_sos}
+\Sigma [\x, \N_{2d}] := \Bigl\{\sum_i q_i^2, \, \text{ with } q_i \in \R_{2 d}[\x] \Bigr\}\enspace.
+\end{equation}
+
+To solve the following polynomial optimization problem:
+\begin{equation}
+\label{eq:densesos}
+f^*  :=  \inf_{\x \in \K} f (\x)\enspace,
+\end{equation}
+where the semialgebraic set $\K$ is given by
+\[\K := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_m (\x) \geq 0\}\enspace,\]
+for polynomial functions $g_1, \dots, g_m$. Define $g_0 := 1$.
+%
+The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $f^*$. These bounds are obtained by solving the following programs $(\P_k)$:
+\[
+(\P_k):\left\{			
+\begin{array}{ll}
+\sup_{\mu, \sigma_j} & \mu\enspace, \\			 
+\text{s.t.} & f (\x) - \mu = \sum\limits_{j = 0}^{m} \sigma_j(\x) g_j(\x)\enspace, \\
+& \mu\in \R,\qquad \sigma_j \in \Sigma[\x, \N_{k - \lceil \omega_j / 2 \rceil }], \quad j = 0,\dots,m \enspace.\\
+\end{array} \right.
+\]
+%
+The size of the truncated SDP variables
+grows polynomially with the SDP-relaxation order $k$.
+Indeed, at fixed $n$, the relaxation $\P_k$ involves $O((2k)^{n})$ SDP
+variables and $(m + 1)$ linear matrix inequalities (LMIs) of size
+$O(k^{n})$. When  $k$ increases, then more accurate lower bounds of $f^*$ can be obtained, 
+at an increasing computational cost, even though the theoretical convergence 
+of the sequence $(\sup (\P_k))_{k}$ holds. At fixed $k$,  the relaxation $\P_k$ involves $O(n^{2k})$ SDP
+moment variables and $(m + 1)$ linear matrix inequalities (LMIs) of size
+$O(n^{k})$.
+
+There are several ways to decrease the size of these matrices. 
+First, symmetries in SDP relaxations for polynomial optimization problems can be exploited to replace one SDP problem $\P_k$ by
+several smaller SDPs~\cite{Riener2013SymmetricSDP}. Notice that it is possible only if the multivariate polynomials of the initial problem are invariant under the action of a finite subgroup $G$ of the group $GL_{n}(\R)$. 
+%
+Here we describe how to exploit the structured sparsity of the
+problem to replace one SDP problem $\P_k$ by an SDP problem of
+size $O (\kappa^ {2 k})$ where $\kappa$ is the average size
+of the maximal cliques correlation pattern of the polynomial
+variables (see~\cite{Waki06SparseSOS}). 
+%These techniques have been successfully implemented in our tool (see Section ?).
+
+
+Let $F_k$ be the index set of variables which are involved in the polynomial $g_k$. 
+ 
+The correlative sparsity is represented by the 
+$n \times n$ correlative sparsity matrix (csp matrix) $\mathbf{R}$ defined by:
+\begin{equation}
+\label{eq:csp}
+\mathbf{R}(i, j) = \left \{
+\begin{array}{ll}
+  1 & \text{ if }  i = j \enspace, \\
+  1 & \text{ if }  \exists \alphab \in \suppf{f} \text{ such that } \alpha_i \geq 1 \text{ and } \alpha_j \geq 1\enspace, \\
+  1 & \text{ if }  \exists k \in \{1, \dots, m\} \text{ such that } i \in F_k \text{ and } j \in F_k \enspace,\\
+  0 & \text{otherwise .} 
+\end{array} \right.
+\end{equation}
+
+We define the undirected csp graph $G(N, E)$ with:
+ \[ N = \{1, \dots, n\} \text{ and } E = \{ \{i, j\} : i, j \in N, i < j, \mathbf{R}(i, j) = 1 \} \enspace. \]
+Then, let $C_1,\dots, C_l \subset N$ denote the maximal cliques of $G(N, E)$ and define the sets of supports: 
+\[\mons{d}{C_q} := \{ \alphab \in  \mons{d}{n} : \alpha_i = 0 \text{ if } i \notin C_q \}, \ (q=1 ,\dots,l)\enspace. \]
+Define $n_q := \#C_q \ (q=1 ,\dots,l)$.
+
+We assume that the module $QM(\K)$ is archimedean and that there is some $M > 0$ such that $M - \sum_{i = 1}^{n} {x_i^2} \geq 0$. Hence, we can add the $q$ redundant additional constraints:
+\begin{equation}
+\label{eq:assum_sos_sparse}
+g_{m + q} := n_q M^2 - \sum_{i \in C_q} {x_i^2} \geq 0, \enspace q=1 ,\dots, l\enspace,
+\end{equation}
+set $m' = m + q$, define the compact semialgebraic set:
+\[\K' := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_m' (\x) \geq 0\}\enspace,\]
+and modify Problem~\eqref{eq:densesos} into the following optimization problem:
+\begin{equation}
+\label{eq:cons_pop_sparse}
+f^*  :=  \inf_{\x \in \K'} f (\x)\enspace,
+\end{equation}
+
+For each $q=1 ,\dots,l$, we also define the cone of sums of squares of polynomials in $\R_d[\x, \mons{d}{C_q}], (q=1 ,\dots,l)$:
+\begin{equation}
+\label{eq:cone_sos_sparse}
+\Sigma [\x, \mons{d}{C_q}] := \Bigl\{\sum_i q_i^2, \, \text{ with } q_i \in \R_d[\x, \mons{d}{C_q}] \Bigr\}\enspace.
+\end{equation}
+
+Notice that the sums of squares of polynomials that belong to $\Sigma [\x, \mons{d}{C_q}]$ only involve variables $x_i (i \in C_q)$. 
+
+The following program is the sparse variant of the semidefinite program $(\P_k)$:
+\[
+(\P^{\text{sparse}}_k):\left\{			
+\begin{array}{ll}
+\sup_{\mu, \sigma_j} & \mu\enspace, \\			 
+\text{s.t.} & f (\x) - \mu = \sum\limits_{j = 0}^{m'} \sigma_j(\x) g_j(\x)\enspace, \\
+& \mu\in \R,\qquad \sigma_j \in \Sigma[\x, \mons{k - \lceil \omega_j / 2 \rceil }{F_j}], j = 1,\dots,m' \enspace,\\
+& \sigma_0 \in \sum\limits_{q = 1}^l \Sigma [\x, \mons{k}{C_q}]\enspace.
+\end{array} \right.
+\]
+
+The interested reader can find more details about the properties of these semidefinite relaxations in~\cite{Waki06SparseSOS}. Since the cliques $C_1, \dots, C_l$ satisfy the running intersection property (see Definition~\ref{def:rip} below), the optimal values of $\P_k^{\text{sparse}}$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
+
+\begin{definition}[Running Intersection Property]
+\label{def:rip}
+Let $q \in \N_0, I_1, \dots, I_q \subset \{1, \dots, n\}$. We say that $I_1, \dots, I_q$ satisfy the running intersection property if: 
+\[ \forall i = 2, \dots, r, (\exists k < i, (I_i \cap \bigcup\limits_{j < i} I_j) \subset I_k)\enspace. \]
+\end{definition}
+
+We illustrate the benefits of these sparse semidefinite relaxations with the following example:
+\begin{example}
+\label{ex:sparse}
+Consider the following polynomial $f$:
+\[ f(\x) := x_1 ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) 
++ x_2 x_5 + x_3 x_6 - x_2 x_3  - x_5 x_6\enspace. \] 
+Here, $n = 6, d = 2, N = \{1,\dots, 6 \}$. The $6 \times 6$ correlative sparsity matrix $\mathbf{R}$ is:
+\[
+\mathbf{R} = 
+\begin{pmatrix}
+  1 & 1 & 1 & 1 & 1 & 1 \\
+  1 & 1 & 1 & 0 & 1 & 0 \\
+  1 & 1 & 1 & 0 & 1 & 1 \\
+  1 & 0 & 0 & 1 & 0 & 0 \\
+  1 & 1 & 1 & 0 & 1 & 1 \\
+  1 & 0 & 1 & 0 & 1 & 1 
+ \end{pmatrix}
+\]
+The csp graph $G$ associated to $\mathbf{R}$ is depicted in Figure~\ref{fig:csp_deltax}. The maximal cliques of $G$ are:
+\[ C_1 := \{1, 4\}, C_2 := \{1, 2, 3, 5\}, C_3 := \{1, 3, 5, 6\}\enspace. \]
+
+For instance, the set of supports associated with the maximal clique $C_1$ for monomials of degree at most 2 is:
+\begin{align*}
+\mons{2}{C_1} := & \{ (0, 0, 0, 0, 0, 0), (1, 0, 0, 0, 0, 0),  (0, 0, 0, 1, 0, 0)\enspace, \\
+                &(2, 0, 0, 0, 0, 0), (1, 0, 0, 1, 0, 0), (0, 0, 0, 2, 0, 0) \}\enspace. 
+\end{align*}
+
+Now consider the second order semidefinite relaxation. In the case of the dense semidefinite relaxation, the number of SDP variables is $\#\mons{4}{6} = \binom{6 + 4}{4} = 210$ since we are considering sums of squares of degree at most 4.
+Conversely, in the case of the sparse relaxation, this number is $\#( \mons{4}{C_1} \cup \mons{4}{C_2} \cup \mons{4}{C_3}) = 115 $. The dense moment matrix is a single block diagonal matrix of size 28, while the sparse moment matrix is a block diagonal matrix with a $6 \times 6$ block and two $15 \times 15$ blocks.
+
+
+\begin{figure}[!ht]	
+\begin{center}
+\includegraphics[scale=0.7]{csp_deltax.pdf}
+\caption{Correlative sparsity pattern graph for the variables of $f$}
+\label{fig:csp_deltax}
+\end{center}
+\end{figure}
+\end{example}
+
+
+\subsection{Computer assisted proofs for polynomial optimization}
+\label{sec:coqbackground}
+The aim of this section is to briefly recall some fundamental notions
+about the mechanisms of theorem proving within the $\coq$ proof
+assistant. For more details on the $\coq$ system, we recommend the
+documentation available in~\cite{bertot2004interactive}.
+
+
+\begin{figure}[!ht]
+\centering
+\includegraphics{reflexion.pdf}
+\caption{An illustration of computational reflection}	
+\label{fig:reflexion}
+\end{figure}
+
+\section{Guaranteed Round-off Error Bounds using SDP Relaxations}
+\label{sec:fpsdp}
+
+\subsection{Polynomial programs}
+
+\begin{figure}[!ht]
+\begin{algorithmic}[1]                    
+\Require real polynomial result $f(\x)$, floating-point polynomial result $\hat{f}(\x, \epsilonb)$, set of constraints $\X$ on $\x$, set of constraints $\B$ on $\epsilonb$, relaxation order $k$
+\Ensure upper bound $r_k^*$ for the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \B$
+\State Define the error polynomial $r(\x, \epsilonb) := \hat{f}(\x) - f(\x, \epsilonb) = \displaystyle\sum_{\alphab} r_{\alphab}(\epsilonb) \x^{\alphab}$
+%\State For each $\alphab$, compute a lower (resp. upper) degree 1 polynomial bound $\underline{r_{\alphab}}(\epsilonb)$ (resp. $\overline{r_{\alphab}}(\epsilonb)$) of $r_{\alphab}(\epsilonb)$ over $\B$ 
+\For {each $\alphab$}
+\State Write $r_{\alphab}(\epsilonb) = l_{\alphab}(\epsilonb) + h_{\alphab}(\epsilonb)$, with $\deg l_{\alphab} = 1$ and $\deg h_{\alphab} > 1$
+%\State compute a degree 1 under-approximation $\underline{r_{\alphab}}(\epsilonb)$ of $r_{\alphab}(\epsilonb)$ over $\B$
+%\State compute a degree 1 over-approximation $\overline{r_{\alphab}}(\epsilonb)$ of $r_{\alphab}(\epsilonb)$ over $\B$
+\EndFor
+\State Define $h(\x, \epsilonb) := \displaystyle\sum_{\alphab} h_{\alphab}(\epsilonb) \x^{\alphab}$ and $l(\x,\epsilonb):= \displaystyle\sum_{\alphab} l_{\alphab}(\epsilonb) \x^{\alphab}$
+\State Compute an upper bound $h^*$ of $h$ over $\K$ with interval arithmetic
+\State Compute an upper bound $l_k^*$ of $l$ over $\K$ with sparse SOS optimization at relaxation order $k$ \label{line:boundq}
+%\State For each $\alphab$, compute an interval enclosure $[\underline{r_{\alphab}}, \overline{r_{\alphab}}]$ of $r_{\alphab}(\epsilonb)$ over $\B$
+%\State Define the product of closed intervals $\Y := \prod_{\alphab} [\underline{r_{\alphab}}, \overline{r_{\alphab}}]$
+%\State Compute a lower (resp. upper) bound $\underline{q}$ (resp. $\overline{q}$) of $q(\x,\y):= \sum_{\alphab} \y_{\alphab} \x^{\alphab}$ over $\X \times \Y$ \label{line:boundq}
+%\State Compute an interval enclosure $I := [\underline{q}, \overline{q}]$ of $q(\x,\y):= \sum_{\alphab} \y_{\alphab} \x^{\alphab}$ over $\X \times \Y$ \label{line:boundq}
+\State \Return $r_k^* := h^* + l_k^*$
+\end{algorithmic}
+\caption{$\realtofloat$}
+\label{alg:realtofloat}
+\end{figure}
+%Let define $h_{\alphab} (y_{\alphab}) := (\overline{r_{\alphab}} - y_{\alphab}) (y_{\alphab} - \underline{r_{\alphab}})$, for each $\alphab$.
+To compute an upper bound of the polynomial $l$, one writes
+\[ 
+l(\x,\epsilonb):= \sum_{\alphab} l_{\alphab}(\epsilonb) \x^{\alphab} = \sum_{i=1}^{n^\B} \epsilon_i \, l_i(\x) \,.
+\]
+Then one uses the results of Section~\ref{sec:sdpbackground}, namely one solves the following optimization problem:
+%
+\begin{align}
+\label{eq:primalexists}
+l^*_k := \inf\limits_{\sigma_j, \sigma_{0 i}, \sigma_{i}} \quad & \mu \\			
+\text{s.t.} \quad & \mu - l(\x, \epsilonb) = 
+\sum_{j=0}^m \sigma_j(\x) g_j(\x) + 
+\sum_{i=1}^{n^{\B}}\sigma_{0 i}(\x,\epsilon_i) +  \sum_{i=1}^{n^{\B}}\sigma_i(\x,\epsilon_i) g_i^{\B}(\epsilon_i)  \,, \
+\forall \x, \forall \epsilonb \,, \notag\\
+\quad & 
+\deg \sigma_j g_j \leq 2 k \,, \ 
+\deg \sigma_{0 i} \leq 2 k \,, \ 
+\deg \sigma_i g_j \leq 2 k \,, \ 
+\forall i = 1,\dots,n^{\B} \,, \ 
+\forall j = 0,\dots,m \,. \notag
+\end{align}
+
+\paragraph{Convergence of the SDP hierarchy of error bounds}
+
+\subsection{Semialgebraic programs}
+
+Let $f : \S_f \to \R$ defined by $f(\x) := x_1 + \frac{x_2}{1 + x_3}$, for all $\x \in \S_f$. \\
+To perform semialgebraic optimization via sums of squares, one usually introduces a lifting variable  $z$ to represent the division. Let $\S_g := \{(\x,z) : \x \in \S_f\,, \ z (1 + x_3) = 1  \}$.
+%One can compute an interval enclosure $I_z$ of $z := 1 + x_3$ over $\S_f$.
+%Let $\S_g := \S_f \times I_z$.
+Then, one has $f(\x) = g(\x,z) := x_1 + x_2 z$, for all $(\x,z) \in \S_g$. \\
+Here things are slightly different as we need to take into account the floating point representation of the denominator.\\
+The floating point representation of $f$ is $\hat{f}(\x,\epsilonb) := [x_1 + \frac{x_2}{(1 + x_3)(1 + \epsilon_3)}(1 + \epsilon_2)](1 + \epsilon_1)$, for all $\x \in \S_f, \epsilonb \in \B$.
+Then, one introduces a second lifting variable $\hat{z}$ and 
+\[\K_f := \{(\x, \epsilonb, \hat{z}) : \x \in \S_f \,, \ \epsilonb \in \B \,, \ \hat{z} (1 + x_3) (1 + \epsilon_3) = 1  \} \,. \]
+One has $\hat{f}(\x,\epsilonb) = \hat{g}(\x,\epsilonb,\hat{z}) := [x_1 + x_2 \hat{z}(1+\epsilon_2) ](1+\epsilon_1)$, for all $(\x, \epsilonb, \hat{z}) \in \K_f$. 
+To bound the error $\hat{f} -f$, one optimizes the function $\hat{g} - g$ over the set 
+\[\K_g := \{(\x, z, \epsilonb, \hat{z}) : (\x,z) \in \S_g \,, \ \epsilonb \in \B \,, \ \hat{z} (1 + x_3) (1 + \epsilon_3) = 1  \} \,. \]
+\\
+Here, one can actually reduce the number of variables of the problem, noticing that $z = \hat{z} (1 + \epsilon_3)$. However, in general one can not write $z$ as a polynomial of $\hat{z}$, $\x$ and $\epsilonb$ and one needs to consider two lifting variables for each non-polynomial operation involved in $f$.
+%
+\subsection{Transcendental programs}
+
+\section{Implementation Benchmarks} %4p
+\label{sec:benchs}
+\begin{table}[!ht]
+%\small
+\begin{center}
+\caption{Comparison of error bounds $r_k^*$ obtained with different methods}
+\begin{tabular}{p{2.3cm}lccccc}
+\hline
+\multirow{2}{*}{Benchmark} & \multirow{2}{*}{precision} & \multirow{2}{*}{$\realtofloat$} & $\rosa$  & $\fptaylor$  &\multirow{2}{*}{IA} & \multirow{2}{*}{Simulated error}
+\\
+& & & \cite{Darulova14Popl} & \cite{fptaylor15} & & \\
+\hline            
+%\multirow{2}{*}{Method 1} & $n^{(1)}$/$m^{(1)}$ &  $40/30$ & $212/111$ & $1039/350 $ & $4211/915$ & $130768/1991$ & $40251/3822$ \\
+\multirow{1}{*}{doppler1$\star$}
+& (double) & $5.05\text{e--}05$ & $2.36\text{e--}06$ & $6.40\text{e--}07$ & $3.95\text{e+}02$ & $5.97\text{e--}07$\\
+\multirow{1}{*}{doppler1}
+& (double) & $3.47\text{e--}13$ & $4.97\text{e--}13$ & $1.57\text{e--}13$ & $3.95\text{e+}02$ & $7.11\text{e--}14$\\
+\multirow{1}{*}{doppler2}
+& (double) & $1.02\text{e--}12$ & $1.29\text{e--}12$ & $2.87\text{e--}13$ & $\nan$ & $1.14\text{e--}13$\\
+\multirow{1}{*}{doppler3}
+& (double) & $1.45\text{e--}13$ & $2.03\text{e--}13$ & $8.16\text{e--}14$ & $1.09\text{e+}02$ & $4.27\text{e--}14$\\
+\multirow{1}{*}{rigidBody1}
+& (double) & $3.55\text{e--}13$ & $5.08\text{e--}13$ & $3.87\text{e--}13$ & $3.55\text{e--}13$ & $2.28\text{e--}13$\\
+\multirow{1}{*}{rigidBody2}
+& (double) & $3.98\text{e--}11$ & $6.48\text{e--}11$ & $5.24\text{e--}11$ & $3.98\text{e--}11$ & $2.19\text{e--}11$\\
+\multirow{1}{*}{verhulst}
+& (double) & $3.40\text{e--}16$ & $6.82\text{e--}16$ & $3.50\text{e--}16$ & $7.86\text{e--}01$ & $2.23\text{e--}16$\\
+\multirow{1}{*}{kepler1}
+& (double) & $2.96\text{e--}13$ & ? & $4.49\text{e--}13$ & $1.67\text{e--}12$ & $5.\text{e--}14$\\
+\hline
+\multirow{2}{*}{sineTaylor}
+& (double) & $5.08\text{e--}16$ & $9.57\text{e--}16$ & $6.71\text{e--}16$ & $9.39\text{e--}16$ & $4.45\text{e--}16$\\
+& (float) & $2.73\text{e--}07$ & $1.03\text{e--}06$ & $3.51\text{e--}07$ & $5.07\text{e--}07$ & $1.79\text{e--}07$\\
+%& (16bit) & $2.24\text{e--}3$ & $2.87\text{e--}4$ & ? & $1.55\text{e--}4$\\
+\hline
+\multirow{2}{*}{sineOrder3}
+& (double) & $6.53\text{e--}16$ & $1.11\text{e--}15$ & $9.96\text{e--}16$ & $8.82\text{e--}16$ & $3.34\text{e--}16$\\
+& (float) & $3.51\text{e--}07$ & $1.19\text{e--}06$ & $5.35\text{e--}07$ & $4.74\text{e--}07$ & $2.12\text{e--}07$\\
+\hline
+\multirow{2}{*}{sqroot}
+& (double) & $7.56\text{e--}16$ & $8.41\text{e--}16$ & $7.87\text{e--}16$ & $8.48\text{e--}16$ & $4.45\text{e--}16$\\
+& (float) & $4.06\text{e--}07$ & $9.03\text{e--}07$ & $4.23\text{e--}07$ & $4.56\text{e--}07$ & $2.45\text{e--}07$\\
+%& (16bit) & $3.33\text{e--}3$ & $5.97\text{e--}4$ & ? & $1.58\text{e--}4$\\
+\hline
+\end{tabular}
+\label{table:error}
+\end{center}
+\end{table}
+
+
+However, $\fptaylor$ implements special cases to eliminate some error terms, for instance when $\op$ is the multiplication and one of the operands is a nonnegative power of two, then the error $e$ is set to zero. 
+
+{\scriptsize
+\begin{lstlisting}
+procedure doppler1(u : real, v : real, T : real) returns (r : real) {
+ assume (-100.0 <= u && u <= 100.0 && 20.0 <= v && v <= 20000.0 && -30.0 <= T && T <= 50.0);
+  var t1 := 331.4 + 0.6 * T;
+  r := -t1*v/((t1 + u)*(t1 + u));
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure doppler2(u : real, v : real, T : real) returns (r : real) {
+ assume (-125.0 <= u && u <= 125.0 && 15.0 <= v && v <= 25000.0 && -40.0 <= T && T <= 60.0);
+  var t1 := 331.4 + 0.6 * T;
+  r := -t1*v/((t1 + u)*(t1 + u));
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure doppler3(u : real, v : real, T : real) returns (r : real) {
+ assume (-30.0 <= u && u <= 120.0 && 320.0 <= v && v <= 20300.0 && -50.0 <= T && T <= 30.0);
+  var t1 := 331.4 + 0.6 * T;
+  r := -t1*v/((t1 + u)*(t1 + u));
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure rigidBody1(x1 : real, x2 : real, x3 : real) returns (r : real) {
+ assume (-15.0 <= x1 && x1 <= 15.0 && -15.0 <= x2 && x2 <= 15.0 && -15.0 <= x3 && x3 <= 15.0);
+  r := -x1*x2 - 2.0 * x2 * x3 - x1 - x3;
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure rigidBody2(x1 : real, x2 : real, x3 : real) returns (r : real) {
+ assume (-15.0 <= x1 && x1 <= 15.0 && -15.0 <= x2 && x2 <= 15.0 && -15.0 <= x3 && x3 <= 15.0);
+  r := 2.0*x1*x2*x3 + 3.0*x3*x3 - x2*x1*x2*x3 + 3.0*x3*x3 - x2;
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure sineTaylor(x : real) returns (r : real) {
+ assume (-1.57079632679  <= x && x <= 1.57079632679);
+    r := x - (x*x*x)/6.0 + (x*x*x*x*x)/120.0 - (x*x*x*x*x*x*x)/5040.0 ;
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure sineOrder3(x : real) returns (r : real) {
+ assume (-2  <= x && x <= 2);
+  r := 0.954929658551372 * x - 0.12900613773279798*x*x*x ;
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure sqroot(x : real) returns (r : real) {
+ assume (0  <= x && x <= 1);
+  r := 1.0 + 0.5*x - 0.125*x*x + 0.0625*x*x*x - 0.0390625*x*x*x*x;
+}
+\end{lstlisting}
+}
+\section{Related Works} % 1.5p
+%
+SMT solvers allow to analyze programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetics. When SAT/SMT solvers output proof witnesses, they can be formally rechecked inside the $\coq$ proof assistant~\cite{smtcoq}. While ensuring soundness, the efficiency of the procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
+
+\section{Conclusion and Prospectives} %0.5p
+%
+We have presented a verification framework to over-approximate round-off errors occurring while executing nonlinear programs implemented with finite precision.
+The framework relies on semidefinite optimization, ensuring tight and certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables.
+
+\if{
+In this work, we have proposed a methods to approximate polynomial images of basic compact semialgebraic sets, a numerical approximation alternative to exact methods in case where the latter are too computationally demanding. In its present form, this methodology is applicable to problems of modest size, except if some sparsity can be taken into account, as explained earlier. 
+Therefore, to handle larger size problems, the methodology needs to be adapted. 
+A topic of further investigation is to search for alternative positivity certificates, less demanding than the SOS certificates used in this paper but more efficient than the LP based certificates as defined in~\cite{Handelman1988,Vasilescu}. On the one hand, the latter are really appealing since they yield a hierarchy of LP relaxations (as opposed to semidefinite relaxations as in this paper). Moreover, today's LP solvers can handle huge size LP problems, which is far from being the case for semidefinite solvers. But, on the other hand, it has been shown in~\cite{lasserre2009moments} that generically finite convergence cannot occur for convex problems, except for the linear case.
+}\fi
+\if{
+\section*{Acknowledgments}
+This work was partly funded by the Engineering and Physical Sciences Research Council (EPSRC) Challenging Engineering Grant (EP/I020457/1).
+% Thank Jean-Michel Muller and Nathalie Revol for suggestions using simplified formulas involving power of x
+% Thank Tillmann Weisser and Cordian Riener for suggesting the use of Newton sums to break problem symmetries
+% Thank Johan Löfberg for his help concerning Yalmip scripts tuning
+}\fi
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\addtolength{\textheight}{-3cm}   % This command serves to balance the column lengths
+
+                                  % on the last page of the document manually. It shortens
+                                  % the textheight of the last page by a suitable amount.
+                                  % This command does not take effect until the next page
+                                  % so it should come on the page before the last. Make
+                                  % sure that you do not shorten the textheight too much.
+                                  
+
+%                       
+\bibliographystyle{alpha}
+\bibliography{roundsdp}%2.5p
+
+\end{document}

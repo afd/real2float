@@ -60,7 +60,7 @@ namespace Real2Float
       }
 
       // Next step: generate Matlab
-      Converter.DumpMatlab();
+      Converter.DumpNLCertify();
 
 
 

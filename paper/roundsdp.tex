@@ -102,6 +102,7 @@
 \newcommand{\ocaml}{\mathtt{OCaml}}
 \newcommand{\coq}{\mathtt{Coq}}
 \newcommand{\rosa}{\mathtt{rosa}}
+\newcommand{\sdpa}{\text{\sc sdpa}}
 \newcommand{\fptaylor}{\mathtt{fptaylor}}
 \newcommand{\nlcertify}{\mathtt{NLCertify}}
 %\newcommand{\II}{\mathbb{I}}
@@ -164,19 +165,21 @@ Consider the program computing the following polynomial expression $f$:
 \[ f(\x) := x_2 \times x_5 + x_3 \times x_6 - x_2 \times x_3  - x_5 \times x_6 + x_1 \times ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) \enspace, \]
 where the six variable vector $\x :=  (x_1, x_2, x_3, x_4, x_5, x_6)$ is the input of the program. Here, the set $\X$ of possible input values is taken as a product of closed intervals: $\X = [4.00, 6.36]^6$ but could be defined in general with a set of inequality constraints among the variables $x_1, \dots, x_6$. 
 
-The polynomial expression $f$ is obtained by performing 15 basic operations (1 negation, 1 subtraction, 8 additions and 5 multiplications). 
+The polynomial expression $f$ is obtained by performing 15 basic operations (1 negation, 3 subtractions, 6 additions and 5 multiplications). 
 When executing this program with a set of floating-point numbers $\hat{\x} :=  (\hat{x}_1, \hat{x}_2, \hat{x}_3, \hat{x}_4, \hat{x}_5, \hat{x}_6) \in \X$, one actually computes a floating-point result $\hat{f}$, where all operations $+, -, \times$ are replaced by the respectively associated floating-point operations $\oplus, \ominus, \otimes$. 
-The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$. The bound $\epsilon$ is the machine precision (e.g. $2^{-24}$ for single precision). One would like to bound the absolute rounding error $r(\x, \e) := | \hat{f}(\x, \e) - f (\x) |$, for all possible input $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$.
-
-Then note that this problem can be cast as a polynomial optimization problem
-%, with $E := [-\epsilon, \epsilon]^{15}$.
-
-%This follows from the fact that the floating-point result of each operation 
-Then the initial problem can be cast as a polynomial optimization problem and solved directly with SDP relaxations (see~\cite{Lasserre01moments}). 
-While attempting to solve this problem, will yield run out of memory.
-Using our sparse semidefinite optimization algorithm (derived from~\cite{Las06SparseSOS}), one can compute (in less than one second on a modern computer) an upper bound of $1099 \epsilon$ for $l$ over $\X \times \E$. Using basic interval arithmetic, one obtains more quickly (about 17 times less CPU) a bound of $2630 \epsilon$. Symbolic Taylor expansions provide an intermediate bound $1262 \epsilon$ but it takes about 16.3 times more CPU than our method. Finally, our bound is also obtained with the $\rosa$ tool but it takes about 4.6 times more CPU.
-
-%the absolute rounding error $r(x) := | \hat{f}(x) - f (x) |$, where $\hat{f}(x)$ is the result of floating-point 
+The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$. The bound $\epsilon$ is the machine precision (e.g.~$2^{-24}$ for single precision). One would like to bound the absolute rounding error $r(\x, \e) := | \hat{f}(\x, \e) - f (\x) |$, for all possible input $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$. Let define $\E := [-\epsilon, \epsilon]^{15}$, then note that our bound problem can be cast as a polynomial optimization problem:
+%
+\[ r^\star := \max_{\x \in \X, \e \in \E} r(\x, \e) \enspace \]
+%
+As in~\cite{fptaylor15}
+% over $\X \times \E$
+\begin{itemize}
+\item A direct attempt to solve the problem with classical SDP relaxations (~\cite{Lasserre01moments}) fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory.
+\item Using our sparse semidefinite optimization algorithm (derived from~\cite{Las06SparseSOS}), one can compute (in less than one second on a modern computer) an upper bound of $789 \epsilon$ for $l$. 
+\item Using basic interval arithmetic, one obtains more quickly (about 17 times less CPU) a bound of $2023 \epsilon$. 
+\item Symbolic Taylor expansions~\cite{fptaylor15} provide an intermediate bound $936 \epsilon$ but it takes about 16.3 times more CPU than our method. 
+\item Finally, our bound is also obtained with the $\rosa$ tool~\cite{Darulova14Popl} but it takes about 4.6 times more CPU.
+\end{itemize}
 
 \if{
 For instance, given a four variable vector $\x := (x_1, x_2, x_3, x_4)$, consider the  determinant computation of the $2 \times 2$ matrix  $\begin{pmatrix}

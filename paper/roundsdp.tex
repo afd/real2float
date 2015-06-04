@@ -186,7 +186,7 @@ It follows that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x_5 + x_3 x_6) e_3
 % over $\X \times \E$
 \begin{itemize}
 \item A direct attempt to solve the two polynomial problems occurring in~\eqref{eq:roptim} fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory.
-\item Using sparse semidefinite optimization (derived from~\cite{Las06SparseSOS}) to bound $l$ and basic interval arithmetic to bound $h$, one obtains upper bound of $789 \epsilon$ for $|l| + |h|$ over $\K$. This computation is performed in less than one second on a modern computer.
+\item Using sparse semidefinite optimization (derived from~\cite{Las06SparseSOS}) to bound $l$ and basic interval arithmetic to bound $h$, one obtains an upper bound of $789 \epsilon$ for $|l| + |h|$ over $\K$. This computation is performed in less than one second on a modern computer.
 \item Using basic interval arithmetic, one obtains more quickly (about 17 times less CPU) a coarser bound of $2023 \epsilon$. 
 \item Symbolic Taylor expansions provide an intermediate bound of $936 \epsilon$ but it takes about 16.3 times more CPU than our method. 
 \item Finally, our bound is also obtained with the $\rosa$ tool~\cite{Darulova14Popl} but it takes about 4.6 times more CPU.

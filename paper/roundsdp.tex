@@ -45,6 +45,7 @@
 \newcommand{\Scal}{\mathcal{S}}
 \newcommand{\N}{\mathbb{N}}
 \newcommand{\x}{\mathbf{x}}
+\newcommand{\e}{\mathbf{e}}
 \newcommand{\y}{\mathbf{y}}
 \newcommand{\z}{\mathbf{z}}
 \newcommand{\alphab}{\boldsymbol{\alpha}}
@@ -66,6 +67,7 @@
 \def\p{\mathbf{p}}
 \def\S{\mathbf{S}}
 \def\B{\mathbf{B}}
+\def\E{\mathbf{E}}
 \def\K{\mathbf{K}}
 \def\X{\mathbf{X}}
 \def\Y{\mathbf{Y}}
@@ -135,9 +137,8 @@ Imperial College London, South Kensington Campus, London SW7 2AZ, UK.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
-
-
-
+%real2float allows the user to write programs with real-valued semialgebraic programs.
+%Semidefinite programming can provide precise information to automatically tune reconfigurable hardware (e.g. FPGA) to algorithm specifications.
 \end{abstract}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \paragraph{Keywords}
@@ -145,27 +146,39 @@ hardware precision tuning; round-off error; numerical accuracy; floating-point a
 \section{Introduction} %3p
 %
 Constructing numerical programs which output accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce rounding errors, whose range knowledge is required to fulfil safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers.
-
-To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximations tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain tight upper bounds over the error. This problem boils down to finding tight abstractions of programs while being able to approximate them efficiently. 
-%computing tight over-approximations in an efficient way. 
-The aim of this work is to provide an efficient framework to perform automated precision analysis of computer programs consisting of nonlinear operations. 
+To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximations tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain tight upper bounds over the error. This problem boils down to finding tight abstractions of non-linearities while being able to bound the resulting approximations in a efficient way.  
 %
+
+The aim of this work is to provide such a framework to perform automated precision analysis of computer programs consisting of nonlinear operations. 
 This framework can be applied in general for developing accurate numerical software, but appears to be particularly relevant while considering algorithms migration onto reconfigurable hardware (e.g. FPGAs). The advantage of architectures based on FPGAs is that they allow more flexible choices, rather than choosing either for IEEE standard single or double precision. Indeed, in this case, one benefits from a more flexible number representation while ensuring guaranteed bounds on the program output. 
 
-For computer programs consisting of linear operations, automatic error analysis can be obtained with well-studied techniques based on SMT solvers~\cite{hgbk2012fmcad}, interval or affine arithmetic~\cite{fluctuat} and simplex-based algorithms~\cite{}. 
-These techniques can also be applied in the nonlinear setting but do not fully take into account the correlations between program variables. Thus they usually output coarse error bounds or perform analysis within a large amount of time.
+For computer programs consisting of linear operations, automatic error analysis can be obtained with well-studied optimization techniques based on SAT/SMT solvers~\cite{Darulova14Popl,hgbk2012fmcad}, Taylor-interval methods~\cite{fptaylor15}, affine arithmetic~\cite{fluctuat} and linear programming relaxations~\cite{Boland10HGR}.
+These techniques can also be applied in the nonlinear setting but do not fully take into account the correlations between program variables. Thus they may output coarse error bounds or perform analysis within a large amount of time.  Another drawback of these tools is that they usually provide no formal guarantees. At best, they can produce proof certificates but the formal verification of these certificates is computationally expensive. It follows from the fact that most of computation performed in the informal optimization procedure are redone inside the proof assistant.
 
-For computer programs with nonlinear operations, such guarantees can be provided with certified programming techniques.
-Semidefinite programming (SDP) is relevant to a wide range of mathematical fields, including combinatorial optimization, control theory, matrix completion. In 2001, Lasserre introduced a hierarchy of SDP relaxations~\cite{Lasserre01moments} for approximating polynomial infima. Our method to bound the error is a decision procedure based on an specialized variant of Lasserre hierarchy. The procedure relies on SDP to provide sparse sum-of-squares decompositions of positive polynomials. This framework handles polynomial program analysis (involving the operations $+,\times,-$) and can be extended to the more general class of semialgebraic or transcendental programs (involving $\sqrtsign, /, \min, \max, \arctan, \exp$).
+For computer programs with nonlinear operations, guarantees can be provided with certified programming techniques.
+Semidefinite programming (SDP) is relevant to a wide range of mathematical fields, including combinatorial optimization, control theory, matrix completion. In 2001, Lasserre introduced a hierarchy of SDP relaxations~\cite{Lasserre01moments} for approximating polynomial infima. Our method to bound the error is a decision procedure based on an specialized variant of Lasserre hierarchy. The procedure relies on SDP to provide sparse sum-of-squares decompositions of positive polynomials. This framework handles polynomial program analysis (involving the operations $+,\times,-$) but can be extended to the more general class of semialgebraic or transcendental programs (involving $\sqrtsign, /, \min, \max, \arctan, \exp$), following the approximation scheme described in~\cite{Magron15sdp}.
 
+\subsection{Overview of our Method}
+%
+Consider the program computing the following polynomial expression $f$:
+\[ f(\x) := x_2 \times x_5 + x_3 \times x_6 - x_2 \times x_3  - x_5 \times x_6 + x_1 \times ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) \enspace, \]
+where the six variable vector $\x :=  (x_1, x_2, x_3, x_4, x_5, x_6)$ is the input of the program. Here, the set $\X$ of possible input values is taken as a product of closed intervals: $\X = [4.00, 6.36]^6$ but could be defined in general with a set of inequality constraints among the variables $x_1, \dots, x_6$. 
 
+The polynomial expression $f$ is obtained by performing 15 basic operations (1 negation, 1 subtraction, 8 additions and 5 multiplications). 
+When executing this program with a set of floating-point numbers $\hat{\x} :=  (\hat{x}_1, \hat{x}_2, \hat{x}_3, \hat{x}_4, \hat{x}_5, \hat{x}_6) \in \X$, one actually computes a floating-point result $\hat{f}$, where all operations $+, -, \times$ are replaced by the respectively associated floating-point operations $\oplus, \ominus, \otimes$. 
+The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$. The bound $\epsilon$ is the machine precision (e.g. $2^{-24}$ for single precision). One would like to bound the absolute rounding error $r(\x, \e) := | \hat{f}(\x, \e) - f (\x) |$, for all possible input $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$.
 
+Then note that this problem can be cast as a polynomial optimization problem
+%, with $E := [-\epsilon, \epsilon]^{15}$.
 
-\subsection{Illustration of our Method}
-Consider the following polynomial $f$:
-\[ f(\x) := x_1 ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) 
-+ x_2 x_5 + x_3 x_6 - x_2 x_3  - x_5 x_6\enspace. \]
+%This follows from the fact that the floating-point result of each operation 
+Then the initial problem can be cast as a polynomial optimization problem and solved directly with SDP relaxations (see~\cite{Lasserre01moments}). 
+While attempting to solve this problem, will yield run out of memory.
+Using our sparse semidefinite optimization algorithm (derived from~\cite{Las06SparseSOS}), one can compute (in less than one second on a modern computer) an upper bound of $1099 \epsilon$ for $l$ over $\X \times \E$. Using basic interval arithmetic, one obtains more quickly (about 17 times less CPU) a bound of $2630 \epsilon$. Symbolic Taylor expansions provide an intermediate bound $1262 \epsilon$ but it takes about 16.3 times more CPU than our method. Finally, our bound is also obtained with the $\rosa$ tool but it takes about 4.6 times more CPU.
 
+%the absolute rounding error $r(x) := | \hat{f}(x) - f (x) |$, where $\hat{f}(x)$ is the result of floating-point 
+
+\if{
 For instance, given a four variable vector $\x := (x_1, x_2, x_3, x_4)$, consider the  determinant computation of the $2 \times 2$ matrix  $\begin{pmatrix}
 x_1 & x_2 \\
 x_3 & x_4 \\
@@ -173,22 +186,25 @@ x_3 & x_4 \\
 %
 Then, the polynomial $f$ which represents the absolute floating-point error is given by $f(\x, \epsilonb) := [x_1 x_4 (1 + \epsilon_1) - x_3 x_2 (1 + \epsilon_2)] (1 + \epsilon_3) - x_1 x_4 + x_3 x_2$.
 This polynomial $f$ is already of degree 3 and involves 7 variables.
+}\fi
 
-%Semidefinite programming can provide precise information to automatically tune reconfigurable hardware (e.g. FPGA) to algorithm specifications.
-Our implementation tool is built in top of the $\nlcertify$ verification system~\cite{icms14} and allows the user to write programs with real-valued semialgebraic programs. % and specification language. %Our implementation tool is freely available from \url{https://github.com/afd/real2float}.
-Precision and efficiency of the tool are evaluated on several benchmarks coming from the existing literature in control systems, physics and biology. Numerical experiments demonstrate that our method outperforms recent approaches~\cite{Darulova14Popl,fptaylor15} relying on Taylor models and interval analysis or affine arithmetic.
+
 
 
 \subsection{Contributions}
 Our key contributions can be summarized as follows:
 \begin{itemize}
-\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming. By comparison with other methods, our algorithm allows to obtain tighter upper bounds, while overcoming scalibility and numerical issues inherent to SDP solvers.
-\item We also propose some extensions of our algorithm to programs involving non-polynomial programs, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditionals.
+\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming. By comparison with other methods, our algorithm allows to obtain tighter upper bounds, while overcoming scalibility and numerical issues inherent to SDP solvers. We also propose some extensions of our algorithm to programs involving non-polynomial programs, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditionals.
+%\item 
 \item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available from 
 \begin{center}
 \url{https://github.com/afd/real2float}.
 \end{center}
+%
+Our implementation tool is built in top of the $\nlcertify$ verification system~\cite{icms14}. Precision and efficiency of the tool are evaluated on several benchmarks coming from the existing literature. Numerical experiments demonstrate that our method competes well with recent approaches relying on Taylor-interval approximations~\cite{Darulova14Popl} or combining SMT solvers with affine arithmetic~\cite{Darulova14Popl}.
 \end{itemize}
+%
+
 
 The paper is organized as follows.
 %
@@ -196,7 +212,7 @@ In Section~\ref{sec:background}, we first recall mandatory background on roundin
 %
 Section~\ref{sec:fpsdp} contains the main contribution of the paper, namely how to compute tight over-approximations for rounding errors of nonlinear programs with sparse semidefinite relaxations.
 %
-Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear verification tool $\realtofloat$ on several benchmarks coming from the existing literature in control systems, optimization, physics and biology.
+Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear verification tool $\realtofloat$ on benchmarks arising from control systems, optimization, physics and biology.
 
 %Verifying simple linear algebra algorithms can be troublesome from the  computational point of view.
 \section{Preliminaries}
@@ -386,7 +402,7 @@ documentation available in~\cite{bertot2004interactive}.
 \section{Guaranteed Round-off Error Bounds using SDP Relaxations}
 \label{sec:fpsdp}
 
-\subsection{Polynomial programs}
+\subsection{Polynomial Programs}
 
 \begin{figure}[!ht]
 \begin{algorithmic}[1]                    
@@ -435,7 +451,7 @@ l^*_k := \inf\limits_{\sigma_j, \sigma_{0 i}, \sigma_{i}} \quad & \mu \\
 
 \paragraph{Convergence of the SDP hierarchy of error bounds}
 
-\subsection{Semialgebraic programs}
+\subsection{Non-polynomial Programs}
 
 Let $f : \S_f \to \R$ defined by $f(\x) := x_1 + \frac{x_2}{1 + x_3}$, for all $\x \in \S_f$. \\
 To perform semialgebraic optimization via sums of squares, one usually introduces a lifting variable  $z$ to represent the division. Let $\S_g := \{(\x,z) : \x \in \S_f\,, \ z (1 + x_3) = 1  \}$.
@@ -452,7 +468,7 @@ To bound the error $\hat{f} -f$, one optimizes the function $\hat{g} - g$ over t
 \\
 Here, one can actually reduce the number of variables of the problem, noticing that $z = \hat{z} (1 + \epsilon_3)$. However, in general one can not write $z$ as a polynomial of $\hat{z}$, $\x$ and $\epsilonb$ and one needs to consider two lifting variables for each non-polynomial operation involved in $f$.
 %
-\subsection{Transcendental programs}
+%\subsection{Transcendental programs}
 
 \section{Implementation Benchmarks} %4p
 \label{sec:benchs}

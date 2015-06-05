@@ -235,10 +235,11 @@ Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear 
 \subsection{Program Semantics and Floating-point Arithmetic}
 \label{sec:fpbackground}
 %\subsection{Floating-point and fixed-point Arithmetic}
-We adopt the standard practice~\cite{higham2002accuracy} to approximate a real float $x$ with its closest floating-point representation $\hat{x} = x (1 + e) $, with $|e|$ being less than the machine precision $\epsilon$. 
-%TODO scientific notation with sign, mantissa and exponent 
-This precision actually gives the upper bound of the relative floating-point error and is equal to $2^{-m}$, where $m$ refers to the number of mantissa bits used.
-Here, we neglect both overflow and denormal values. 
+We adopt the standard practice~\cite{higham2002accuracy} to approximate a real float $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ being less than the machine precision $\epsilon$. This model is only valid when neglecting both overflow and denormal range values.
+The operator $\hat{\cdot}$ is called the rounding operator and can be selected among rounding to nearest, rounding toward zero (resp.~$\infty$).
+The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig$ and an {\em exponent} $exp$, so that its numerical evaluation yields $(-1)^{s} \times sig \times 2^{exp}$ (resp.~$(-1)^{s} \times sig \times 10^{exp}$).
+
+The value of $\epsilon$ actually gives the upper bound of the relative floating-point error and is equal to $2^{-m}$, where $m$ is called the {\em precision}, referring to the number of significand bits used. For single floating-point precision, one has $m = 24$. For double (resp.~quadruple) precision, one has $m = 53$ (resp.~$m=113$).
 
 \paragraph{Simplification of error term products}
 We first need the following lemma.
@@ -639,8 +640,9 @@ This work was partly funded by the Engineering and Physical Sciences Research Co
                                   % sure that you do not shorten the textheight too much.
                                   
 
-%                       
-\bibliographystyle{alpha}
+%
+\bibliographystyle{alpha}                       
+%\bibliographystyle{alpha}
 \bibliography{roundsdp}%2.5p
 
 \end{document}

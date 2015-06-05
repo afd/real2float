@@ -161,7 +161,7 @@ Semidefinite programming (SDP) is relevant to a wide range of mathematical field
 
 \subsection{Overview of our Method}
 %
-Consider the program computing the following polynomial expression $f$:
+Consider the program implementing the following polynomial expression $f$:
 \[ f(\x) := x_2 \times x_5 + x_3 \times x_6 - x_2 \times x_3  - x_5 \times x_6 + x_1 \times ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) \enspace, \]
 where the six variable vector $\x :=  (x_1, x_2, x_3, x_4, x_5, x_6)$ is the input of the program. Here, the set $\X$ of possible input values is taken as a product of closed intervals: $\X = [4.00, 6.36]^6$ but could be defined in general with a set of inequality constraints among the variables $x_1, \dots, x_6$. 
 
@@ -185,7 +185,7 @@ r^\star \leq \max_{(\x, \e) \in \K} |l(\x, \e)| + \max_{(\x, \e) \in \K} |h(\x, 
 It follows that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x_5 + x_3 x_6) e_3 + \dots + f(\x) e_{15} = \sum_{i=1}^{15} s_i(\x) e_i$. The {\em Symbolic Taylor expansions} method~\cite{fptaylor15} consists in using Taylor-interval optimization to compute a rigorous interval enclosure of each polynomial $s_i$, $i = 1,\dots,15$, over $\X$ and finally obtain an upper bound of $|l| + |h|$ over $\K$.
 % over $\X \times \E$
 \begin{itemize}
-\item A direct attempt to solve the two polynomial problems occurring in~\eqref{eq:roptim} fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory.
+\item A direct attempt to solve the two polynomial problems occurring in~\eqref{eq:roptim} fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory. 
 \item Using sparse semidefinite optimization (derived from~\cite{Las06SparseSOS}) to bound $l$ and basic interval arithmetic to bound $h$, one obtains an upper bound of $789 \epsilon$ for $|l| + |h|$ over $\K$. This computation is performed in less than one second on a modern computer.
 \item Using basic interval arithmetic, one obtains more quickly (about 17 times less CPU) a coarser bound of $2023 \epsilon$. 
 \item Symbolic Taylor expansions provide an intermediate bound of $936 \epsilon$ but it takes about 16.3 times more CPU than our method. 
@@ -208,7 +208,7 @@ This polynomial $f$ is already of degree 3 and involves 7 variables.
 \subsection{Contributions}
 Our key contributions can be summarized as follows:
 \begin{itemize}
-\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming. By comparison with other methods, our algorithm allows to obtain tighter upper bounds, while overcoming scalibility and numerical issues inherent to SDP solvers. We also propose some extensions of our algorithm to programs involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditionals.
+\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming. By comparison with other methods, our algorithm allows to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent to SDP solvers. We also propose some extensions of our algorithm to programs involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditionals.
 %\item 
 \item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available from 
 \begin{center}
@@ -232,9 +232,13 @@ Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear 
 \section{Preliminaries}
 \label{sec:background}
 
-\subsection{Finite Precision Arithmetic}
+\subsection{Program Semantics and Floating-point Arithmetic}
 \label{sec:fpbackground}
 %\subsection{Floating-point and fixed-point Arithmetic}
+We adopt the standard practice~\cite{higham2002accuracy} to approximate a real float $x$ with its closest floating-point representation $\hat{x} = x (1 + e) $, with $|e|$ being less than the machine precision $\epsilon$. 
+%TODO scientific notation with sign, mantissa and exponent 
+This precision actually gives the upper bound of the relative floating-point error and is equal to $2^{-m}$, where $m$ refers to the number of mantissa bits used.
+Here, we neglect both overflow and denormal values. 
 
 \paragraph{Simplification of error term products}
 We first need the following lemma.

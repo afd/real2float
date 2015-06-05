@@ -152,10 +152,12 @@ Imperial College London, South Kensington Campus, London SW7 2AZ, UK.}
 \paragraph{Keywords}
 hardware precision tuning; round-off error; numerical accuracy; floating-point arithmetic; fixed-precision arithmetic; semidefinite programming; sums of squares; correlation sparsity pattern
 \section{Introduction} %3p
+\label{sec:intro}
 %
 Constructing numerical programs which output accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce rounding errors, whose range knowledge is required to fulfil safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers.
 To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximations tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain tight upper bounds over the error. This problem boils down to finding tight abstractions of non-linearities while being able to bound the resulting approximations in a efficient way.  
 %
+
 
 The aim of this work is to provide such a framework to perform automated precision analysis of computer programs consisting of nonlinear operations. 
 This framework can be applied in general for developing accurate numerical software, but appears to be particularly relevant while considering algorithms migration onto reconfigurable hardware (e.g. FPGAs). The advantage of architectures based on FPGAs is that they allow more flexible choices, rather than choosing either for IEEE standard single or double precision. Indeed, in this case, one benefits from a more flexible number representation while ensuring guaranteed bounds on the program output. 
@@ -383,7 +385,7 @@ Let $q \in \N_0, I_1, \dots, I_q \subset \{1, \dots, n\}$. We say that $I_1, \do
 We illustrate the benefits of these sparse semidefinite relaxations with the following example:
 \begin{example}
 \label{ex:sparse}
-Consider the following polynomial $f$:
+Consider the polynomial $f$ mentioned in Section~\ref{sec:intro}:
 \[ f(\x) := x_1 ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) 
 + x_2 x_5 + x_3 x_6 - x_2 x_3  - x_5 x_6\enspace. \] 
 Here, $n = 6, d = 2, N = \{1,\dots, 6 \}$. The $6 \times 6$ correlative sparsity matrix $\mathbf{R}$ is:

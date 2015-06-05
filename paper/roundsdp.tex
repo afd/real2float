@@ -37,9 +37,13 @@
 \def\sizefig{0.35}
 \def\sizesmallfig{0.30}
 \def\sizetinyfig{0.24}
+\newcommand{\setA}{\mathcal{A}} % Semialgebraic functions
+\newcommand{\setD}{\mathcal{D}} % Dictionnary of Univariate transcendental functions
+\newcommand{\setU}{\mathcal{U}} % Univariate functions := \setT \cup {sqrt, abs, power functions}
 \newcommand{\suppf}[1]{\text{supp}(#1)}
 \newcommand{\mons}[2]{\N_{#1}^{#2}}
 \newcommand{\R}{\mathbb{R}}
+\newcommand{\F}{\mathbb{F}}
 \newcommand{\Pcal}{\mathcal{P}}
 \newcommand{\Pcalp}{\Pcal^{(p)}}
 \newcommand{\Scal}{\mathcal{S}}
@@ -92,14 +96,17 @@
 \newcommand{\xlamstar}{{\x}^*({\lambda})}
 \newcommand{\transpose}{\top}%\newcommand{\transpose}{\mathbf{\intercal}}
 \DeclareMathOperator{\vol}{vol}
-\DeclareMathOperator{\op}{op}
+%\DeclareMathOperator{\op}{op}
 \DeclareMathOperator{\conv}{conv}
 \newcommand{\red}[1]{\textbf{{\color{red}#1}}}
 %\newcommand{\brev}{\color{red}}
 %\newcommand{\erev}{\color{black}}
 \newcommand{\sthreefp}{\mathtt{s3fp}}
 \newcommand{\realtofloat}{\mathtt{Real2Float}}
+\newcommand{\hol}{\text{\sc Hol-light}}
 \newcommand{\ocaml}{\mathtt{OCaml}}
+\newcommand{\op}{\mathtt{op}}
+\newcommand{\bop}{\mathtt{bop}}
 \newcommand{\coq}{\mathtt{Coq}}
 \newcommand{\rosa}{\mathtt{rosa}}
 \newcommand{\sdpa}{\text{\sc sdpa}}
@@ -237,22 +244,33 @@ Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear 
 %\subsection{Floating-point and fixed-point Arithmetic}
 We adopt the standard practice~\cite{higham2002accuracy} to approximate a real float $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ being less than the machine precision $\epsilon$. This model is only valid when neglecting both overflow and denormal range values.
 The operator $\hat{\cdot}$ is called the rounding operator and can be selected among rounding to nearest, rounding toward zero (resp.~$\infty$).
-The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig$ and an {\em exponent} $exp$, so that its numerical evaluation yields $(-1)^{s} \times sig \times 2^{exp}$ (resp.~$(-1)^{s} \times sig \times 10^{exp}$).
+The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig$ and an {\em exponent} $exp$, so that its numerical evaluation yields $(-1)^{s} \times sig \times 2^{exp}$ (resp.~$(-1)^{s} \times sig \times 10^{exp}$). 
 
-The value of $\epsilon$ actually gives the upper bound of the relative floating-point error and is equal to $2^{-m}$, where $m$ is called the {\em precision}, referring to the number of significand bits used. For single floating-point precision, one has $m = 24$. For double (resp.~quadruple) precision, one has $m = 53$ (resp.~$m=113$).
+The value of $\epsilon$ actually gives the upper bound of the relative floating-point error and is equal to $2^{-m}$, where $m$ is called the {\em precision}, referring to the number of significand bits used. For single floating-point precision, one has $m = 24$. For double (resp.~quadruple) precision, one has $m = 53$ (resp.~$m=113$). Let define $\R$ the set of real numbers and $\F$ the set of binary floating-point numbers.
+For each real-valued operation $\bop_\R \in \{+, -, \times, \slash \}$ complying with IEEE 754 standard arithmetic~\cite{IEEE}, the result of the corresponding floating-point operation $\bop_\F \in \{\oplus, \ominus, \otimes, \oslash \}$ satisfies the following:
+\begin{equation}
+\label{eq:roundbop}
+\bop_\F \, (\hat{x}, \hat{y}) = \bop_\R \, (x, y) \, (1 + e) \enspace, \quad |e| \leq \epsilon = 2^{-m} \enspace.
+\end{equation}
+%
+Other operations include special functions taken from a {\em dictionary} $\setD$, containing the unary functions
+$\tan$, $\arctan$, $\cos$, $\arccos$, $\sin$, $\arcsin$, $\exp$, $\log$, $(\cdot)^{r}$ with $r\in \R\setminus\{0\}$. For each $f_\R \in \setD$, the corresponding floating-point evaluation satisfies $f_\F (\hat{x}) = f_\R (x) (1 + e)$, with $|e| \leq \epsilon (f_\R)$. The value of the relative error bound $\epsilon (f_\R)$ differs from the machine precision $\epsilon$ in Equation~\eqref{eq:roundbop} and has to be properly adjusted. We refer the interested reader to~\cite{VerifCADTransc} for relative error bound verification of transcendental functions (see also~\cite{VerifHOLTransc} for formalization in $\hol$).
 
 \paragraph{Simplification of error term products}
 We first need the following lemma.
 \begin{lemma}
 \label{th:redproduct}
-Let $\Delta < \frac{1}{p}$ and define $\gamma_p := \frac{p \Delta}{1 - p \Delta}$. Then, for all $\epsilon_1, \dots, \epsilon_p \in [-\Delta, \Delta]$, there exists $\theta_p$ such that ${\displaystyle \prod_{i=1}^p (1 + \epsilon_i) = 1 + \theta_p}$ and $\mid \theta_p \mid \leq \gamma_p$.
+Let $\epsilon < \frac{1}{k}$ and define $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\displaystyle \prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
 \end{lemma}
 \begin{proof}
-The proof follows directly from~\cite[Lemma 3.3]{higham2002accuracy}.
+The result is a direct consequence of~\cite[Lemma 3.3]{higham2002accuracy}.
 \end{proof}
+Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Hence, one can derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
+
+%to when solving optimization problems involving maximal absolute rounding errors. allowing to consider a single error variable bounded using $(k + 1) \epsilon$, thus saving $(k - 1)$ error variables.
 
 %One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.
-\subsection{Sparse semidefinite relaxations for nonlinear optimization}
+\subsection{Sparse semidefinite relaxations for polynomial optimization}
 \label{sec:sdpbackground}
 Let define the cone of sums of squares of polynomials in $\R_{2 d}[\x]$:
 \begin{equation}
@@ -354,7 +372,7 @@ The following program is the sparse variant of the semidefinite program $(\P_k)$
 \end{array} \right.
 \]
 
-The interested reader can find more details about the properties of these semidefinite relaxations in~\cite{Waki06SparseSOS}. Since the cliques $C_1, \dots, C_l$ satisfy the running intersection property (see Definition~\ref{def:rip} below), the optimal values of $\P_k^{\text{sparse}}$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
+The interested reader can find more details about the properties of these semidefinite relaxations in \cite{Waki06SparseSOS}. Since the cliques $C_1, \dots, C_l$ satisfy the running intersection property (see Definition~\ref{def:rip} below), the optimal values of $\P_k^{\text{sparse}}$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
 
 \begin{definition}[Running Intersection Property]
 \label{def:rip}

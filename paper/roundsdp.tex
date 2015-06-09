@@ -300,13 +300,13 @@ type nlexpr = | Pol of polC | Neg of nlexpr
 | Let of positive * nlexpr * nlexpr
 \end{lstlisting}
 %
-The type \code{transc} corresponds to the dictionary $\setD$ of special functions. For instance, the term~\lstinline|Transc ($\exp$, $f(\x)$)| represents the program $\exp(f(\x)$.
-Given a polynomial expression $p$ and two nonlinear expressions $f$ and $g$, the term ~\lstinline|IfThenElse($p(\x)$, $f(\x)$, $g(\x)$)| represents the conditional program~\lstinline|if ($p(\x) \leq 0$) $f (\x)$ else $g (\x)$|. The constructor \code{Let} allows to define local variables in ML fashion, e.g.~\lstinline|let $t_1 = 331.4 + 0.6 T$ in $-t_1 v /(t_1 + u)^2$| (part of the Doppler program considered in Section~\ref{sec:benchs}).
+The type \code{transc} corresponds to the dictionary $\setD$ of special functions. For instance, the term~\lstinline|Transc ($\exp$, $f(\x)$)| represents the program implementing $\exp(f(\x)$.
+Given a polynomial expression $p$ and two nonlinear expressions $f$ and $g$, the term ~\lstinline|IfThenElse($p(\x)$, $f(\x)$, $g(\x)$)| represents the conditional program implementing~\lstinline|if ($p(\x) \leq 0$) $f (\x)$ else $g (\x)$|. The constructor \code{Let} allows to define local variables in ML fashion, e.g.~\lstinline|let $t_1 = 331.4 + 0.6 T$ in $-t_1 v /(t_1 + u)^2$| (part of the Doppler program considered in Section~\ref{sec:benchs}).
 %
 %\end{lstlisting}
 %
 
-Finally, one defines the inductive procedure~\lstinline|rounding : nlexpr $\to$ nlexpr| to obtain rounded nonlinear expressions, according to Equation~\eqref{eq:roundbop} and Equation~\eqref{eq:roundtransc}. When an uncertainty $u_i$ is specified for an input variable $x_i$, the corresponding rounded expression is given by $x_i \, (1 + e)$, with $\mid e \mid \, \leq u_i$.
+Finally, one obtains rounded nonlinear expressions using an inductive procedure~\lstinline|rounding : nlexpr $\to$ nlexpr|, defined accordingly to Equation~\eqref{eq:roundbop} and Equation~\eqref{eq:roundtransc}. When an uncertainty $u_i$ is specified for an input variable $x_i$, the corresponding rounded expression is given by $x_i \, (1 + e)$, with $\mid e \mid \, \leq u_i$.
 %to when solving optimization problems involving maximal absolute rounding errors. allowing to consider a single error variable bounded using $(k + 1) \epsilon$, thus saving $(k - 1)$ error variables.
 
 %One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.

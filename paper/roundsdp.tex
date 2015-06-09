@@ -243,7 +243,6 @@ Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear 
 
 \subsection{Program Semantics and Floating-point Arithmetic}
 \label{sec:fpbackground}
-%\subsection{Floating-point and fixed-point Arithmetic}
 We adopt the standard practice~\cite{higham2002accuracy} to approximate a real float $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ being less than the machine precision $\epsilon$. This model is only valid when neglecting both overflow and denormal range values.
 The operator $\hat{\cdot}$ is called the rounding operator and can be selected among rounding to nearest, rounding toward zero (resp.~$\infty$).
 The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig$ and an {\em exponent} $exp$, so that its numerical evaluation yields $(-1)^{s} \times sig \times 2^{exp}$ (resp.~$(-1)^{s} \times sig \times 10^{exp}$). 
@@ -257,6 +256,36 @@ For each real-valued operation $\bop_\R \in \{+, -, \times, \slash \}$ complying
 %
 Other operations include special functions taken from a {\em dictionary} $\setD$, containing the unary functions
 $\tan$, $\arctan$, $\cos$, $\arccos$, $\sin$, $\arcsin$, $\exp$, $\log$, $(\cdot)^{r}$ with $r\in \R\setminus\{0\}$. For each $f_\R \in \setD$, the corresponding floating-point evaluation satisfies $f_\F (\hat{x}) = f_\R (x) (1 + e)$, with $|e| \leq \epsilon (f_\R)$. The value of the relative error bound $\epsilon (f_\R)$ differs from the machine precision $\epsilon$ in Equation~\eqref{eq:roundbop} and has to be properly adjusted. We refer the interested reader to~\cite{VerifCADTransc} for relative error bound verification of transcendental functions (see also~\cite{VerifHOLTransc} for formalization in $\hol$).
+
+\paragraph{Program semantics}
+
+We consider generic programs encoded in an ML-like language:
+\begin{lstlisting}
+let box_prog       $x_1 \dots x_n = [(a_1, b_1); \dots ; (a_n, b_n)]$;;
+let obj_prog       $x_1 \dots x_n = [(f(\x), \epsilon_{\text{total}})]$;;
+let cstr_prog      $x_1 \dots x_n = [g_1 (\x), \dots, g_k(\x)]$;;
+let uncertain_prog $x_1 \dots x_n = [u_1, \dots, u_n]$;;
+\end{lstlisting}
+Here, the first line encodes interval constraints for input variables, namely $\x := (x_1, \dots, x_n) \in [a_1, b_1]\times \dots \times [a_n, b_n]$.
+The second line provides the function $f(\x)$ as well as the total rounding error bound $\epsilon_{\text{total}}$.
+Then, one encodes polynomial constraints over the input variables $g_1(\x) \geq 0, \dots, g_k(\x) \geq 0$. Finally, the last line allows the user to specify a numerical constant $u_i$ to associate a given uncertainty to the variable $x_i$, for each $i= 1, \dots, n$.
+
+The type of numerical constants is denoted by $C$. In our current implementation, the user can choose either 64 bits floating-point or arbitrary-size rational numbers. This type $C$ is used for the terms $\epsilon_{\text{total}}$, $u_1, \dots, u_n$, $a_1, \dots, a_n$, $b_1, \dots, b_n$.
+
+We note $polC$ the corresponding type of polynomials with coefficients in $C$. 
+This type $polC$ is used for the terms $g_1(\x), \dots, g_k(\x)$.
+The inductive type $tree$ of $f(\x)$ is defined as follows:
+\begin{lstlisting}
+type tree = 
+| Pol of polC
+| IfThenElse of polC * tree * tree
+| Let of local_index * tree * tree
+| Add of tree * tree | Mul of tree * tree | Sub of tree * tree 
+| Div of tree * tree | Sqrt of tree 
+| Transc of transc * tree
+\end{lstlisting}
+The type $transc$ is used for the functions which belong to the dictionary $\setD$ of special functions. 
+The constructor $IfThenElse$ allows to represent conditional programs $if (p(\x) \geq 0) then $
 
 %to when solving optimization problems involving maximal absolute rounding errors. allowing to consider a single error variable bounded using $(k + 1) \epsilon$, thus saving $(k - 1)$ error variables.
 

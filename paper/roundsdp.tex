@@ -258,17 +258,6 @@ For each real-valued operation $\bop_\R \in \{+, -, \times, \slash \}$ complying
 Other operations include special functions taken from a {\em dictionary} $\setD$, containing the unary functions
 $\tan$, $\arctan$, $\cos$, $\arccos$, $\sin$, $\arcsin$, $\exp$, $\log$, $(\cdot)^{r}$ with $r\in \R\setminus\{0\}$. For each $f_\R \in \setD$, the corresponding floating-point evaluation satisfies $f_\F (\hat{x}) = f_\R (x) (1 + e)$, with $|e| \leq \epsilon (f_\R)$. The value of the relative error bound $\epsilon (f_\R)$ differs from the machine precision $\epsilon$ in Equation~\eqref{eq:roundbop} and has to be properly adjusted. We refer the interested reader to~\cite{VerifCADTransc} for relative error bound verification of transcendental functions (see also~\cite{VerifHOLTransc} for formalization in $\hol$).
 
-\paragraph{Simplification of error term products}
-We first need the following lemma.
-\begin{lemma}
-\label{th:redproduct}
-Let $\epsilon < \frac{1}{k}$ and define $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\displaystyle \prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
-\end{lemma}
-\begin{proof}
-The result is a direct consequence of~\cite[Lemma 3.3]{higham2002accuracy}.
-\end{proof}
-Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Hence, one can derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
-
 %to when solving optimization problems involving maximal absolute rounding errors. allowing to consider a single error variable bounded using $(k + 1) \epsilon$, thus saving $(k - 1)$ error variables.
 
 %One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.
@@ -441,6 +430,17 @@ documentation available in~\cite{bertot2004interactive}.
 \section{Guaranteed Round-off Error Bounds using SDP Relaxations}
 \label{sec:fpsdp}
 
+\paragraph{Simplification of error term products}
+We first need the following lemma.
+\begin{lemma}
+\label{th:redproduct}
+Let $\epsilon < \frac{1}{k}$ and define $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\displaystyle \prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
+\end{lemma}
+\begin{proof}
+The result is a direct consequence of~\cite[Lemma 3.3]{higham2002accuracy}.
+\end{proof}
+Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Hence, one can derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
+
 \subsection{Polynomial Programs}
 
 \begin{figure}[!ht]
@@ -525,7 +525,7 @@ Here, one can actually reduce the number of variables of the problem, noticing t
 \multirow{1}{*}{doppler1$\star$}
 & (double) & $5.05\text{e--}05$ & $2.36\text{e--}06$ & $6.40\text{e--}07$ & $3.95\text{e+}02$ & $5.97\text{e--}07$\\
 \multirow{1}{*}{doppler1}
-& (double) & $3.47\text{e--}13$ & $4.97\text{e--}13$ & $1.57\text{e--}13$ & $3.95\text{e+}02$ & $7.11\text{e--}14$\\
+& (double) & $2.85\text{e--}13$ & $4.97\text{e--}13$ & $1.57\text{e--}13$ & $3.95\text{e+}02$ & $7.11\text{e--}14$\\
 \multirow{1}{*}{doppler2}
 & (double) & $1.02\text{e--}12$ & $1.29\text{e--}12$ & $2.87\text{e--}13$ & $\nan$ & $1.14\text{e--}13$\\
 \multirow{1}{*}{doppler3}

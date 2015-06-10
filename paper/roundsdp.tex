@@ -312,40 +312,47 @@ Finally, one obtains rounded nonlinear expressions using an inductive procedure~
 %One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.
 \subsection{Sparse semidefinite relaxations for polynomial optimization}
 \label{sec:sdpbackground}
-Let define the cone of sums of squares of polynomials in $\R_{2 d}[\x]$:
+Here, we explain the basic background about the method to solve the optimization problem of Equation~\eqref{eq:roptim}.
+
+First, we remind basic facts about generation of sums-of-squares certificates for polynomial optimization, using semidefinite programming.
+Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the restriction of $\R[\x]$ to polynomials of degree at most $2 d$. Let define the cone of sums of squares:
 \begin{equation}
 \label{eq:cone_sos}
-\Sigma [\x, \N_{2d}] := \Bigl\{\sum_i q_i^2, \, \text{ with } q_i \in \R_{2 d}[\x] \Bigr\}\enspace.
+\Sigma[\x] := \Bigl\{\sum_i q_i^2, \, \text{ with } q_i \in \R[\x] \Bigr\}\enspace,
 \end{equation}
+%
+as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \cap \R_{2 d}[\x]$ to polynomials of degree at most $2 d$. For instance, the following bivariate polynomial  $\sigma (\x) = 1 + (x_1 - x_2)^2$ lies in $\Sigma_2[\x]$.
 
-To solve the following polynomial optimization problem:
+At some point, optimization methods based on sums of squares use the well-known fact that for all $r \in \Sigma[\x]$, then $r(\x)\geq 0$ for all $\x \in \R^d$, i.e. $\Sigma[\x]$ is a restriction of the set of the nonnegative polynomials.
+
+Given $r \in \R[\x]$, one considers the following polynomial optimization problem:
 \begin{equation}
-\label{eq:densesos}
-f^*  :=  \inf_{\x \in \K} f (\x)\enspace,
+\label{eq:pop}
+r^*  :=  \inf_{\x \in \K} r (\x)\enspace,
 \end{equation}
 where the semialgebraic set $\K$ is given by
-\[\K := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_m (\x) \geq 0\}\enspace,\]
-for polynomial functions $g_1, \dots, g_m$. Define $g_0 := 1$.
+\[\K := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_k (\x) \geq 0\}\enspace,\]
+for polynomial functions $g_1, \dots, g_k$. Define $g_0 := 1$.
+Note that one can rewrite Problem~\eqref{eq:pop} as a maximization problem 
 %
-The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $f^*$. These bounds are obtained by solving the following programs $(\P_k)$:
+The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $r^*$. These bounds are obtained by solving the following programs $(\P_d)$:
 \[
-(\P_k):\left\{			
-\begin{array}{ll}
-\sup_{\mu, \sigma_j} & \mu\enspace, \\			 
-\text{s.t.} & f (\x) - \mu = \sum\limits_{j = 0}^{m} \sigma_j(\x) g_j(\x)\enspace, \\
-& \mu\in \R,\qquad \sigma_j \in \Sigma[\x, \N_{k - \lceil \omega_j / 2 \rceil }], \quad j = 0,\dots,m \enspace.\\
+(\P_d):\left\{			
+\begin{array}{lll}
+r_d^\star := & \sup_{\mu, \sigma_j} & \mu\enspace, \\			 
+& \text{s.t.} & f (\x) - \mu = \sum\limits_{j = 0}^{k} \sigma_j(\x) g_j(\x)\enspace, \\
+& & \mu\in \R \,, \quad \sigma_j \in \Sigma[\x] \,, \quad \deg \sigma_j g_j \leq  2 d, \quad j = 0,\dots,k \enspace.\\
 \end{array} \right.
 \]
 %
 The size of the truncated SDP variables
-grows polynomially with the SDP-relaxation order $k$.
-Indeed, at fixed $n$, the relaxation $\P_k$ involves $O((2k)^{n})$ SDP
-variables and $(m + 1)$ linear matrix inequalities (LMIs) of size
-$O(k^{n})$. When  $k$ increases, then more accurate lower bounds of $f^*$ can be obtained, 
-at an increasing computational cost, even though the theoretical convergence 
-of the sequence $(\sup (\P_k))_{k}$ holds. At fixed $k$,  the relaxation $\P_k$ involves $O(n^{2k})$ SDP
-moment variables and $(m + 1)$ linear matrix inequalities (LMIs) of size
-$O(n^{k})$.
+grows polynomially with the SDP-relaxation order $d$.
+Indeed, at fixed $n$, the relaxation $\P_d$ involves $O((2 d)^{n})$ SDP
+variables and $(k + 1)$ linear matrix inequalities (LMIs) of size
+$O(d^n)$. When $d$ increases, then more accurate lower bounds of $r^\star$ can be obtained, at an increasing computational cost, even though the theoretical convergence of the sequence $(\sup (\P_d))_{d}$ holds. 
+%At fixed $d$,  the relaxation $\P_d$ involves $O(n^{2d})$ SDP
+%moment variables and $(m + 1)$ linear matrix inequalities (LMIs) of size
+%$O(n^{k})$.
 
 There are several ways to decrease the size of these matrices. 
 First, symmetries in SDP relaxations for polynomial optimization problems can be exploited to replace one SDP problem $\P_k$ by

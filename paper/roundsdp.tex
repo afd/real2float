@@ -301,7 +301,7 @@ type nlexpr = | Pol of polC | Neg of nlexpr
 \end{lstlisting}
 %
 The type \code{transc} corresponds to the dictionary $\setD$ of special functions. For instance, the term~\lstinline|Transc ($\exp$, $f(\x)$)| represents the program implementing $\exp(f(\x)$.
-Given a polynomial expression $p$ and two nonlinear expressions $f$ and $g$, the term ~\lstinline|IfThenElse($p(\x)$, $f(\x)$, $g(\x)$)| represents the conditional program implementing~\lstinline|if ($p(\x) \leq 0$) $f (\x)$ else $g (\x)$|. The constructor \code{Let} allows to define local variables in ML fashion, e.g.~\lstinline|let $t_1 = 331.4 + 0.6 T$ in $-t_1 v /(t_1 + u)^2$| (part of the Doppler program considered in Section~\ref{sec:benchs}).
+Given a polynomial expression $p$ and two nonlinear expressions $f$ and $g$, the term ~\lstinline|IfThenElse($p(\x)$, $f(\x)$, $g(\x)$)| represents the conditional program implementing~\lstinline|if ($p(\x) \leq 0$) $f (\x)$ else $g (\x)$|. The constructor \code{Let} allows to define local variables in an ML fashion, e.g.~\lstinline|let $t_1 = 331.4 + 0.6 T$ in $-t_1 v /(t_1 + u)^2$| (part of the Doppler program considered in Section~\ref{sec:benchs}).
 %
 %\end{lstlisting}
 %
@@ -325,15 +325,21 @@ as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \cap \R_{2 d}[\x]$ to
 
 At some point, optimization methods based on sums of squares use the well-known fact that for all $r \in \Sigma[\x]$, then $r(\x)\geq 0$ for all $\x \in \R^d$, i.e. $\Sigma[\x]$ is a restriction of the set of the nonnegative polynomials.
 
-Given $r \in \R[\x]$, one considers the following polynomial optimization problem:
+Given $r \in \R[\x]$, one considers the following polynomial minimization problem:
 \begin{equation}
-\label{eq:pop}
-r^*  :=  \inf_{\x \in \K} r (\x)\enspace,
+\label{eq:minpop}
+r^*  :=  \inf_{\x \in \R^n} \, \{ r (\x) \, : \, \x \in \K \, \} \enspace,
 \end{equation}
-where the semialgebraic set $\K$ is given by
+%
+where the set of constraints $\K \subseteq \R^n$ is defined by
+%
 \[\K := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_k (\x) \geq 0\}\enspace,\]
-for polynomial functions $g_1, \dots, g_k$. Define $g_0 := 1$.
-Note that one can rewrite Problem~\eqref{eq:pop} as a maximization problem 
+for polynomial functions $g_1, \dots, g_k$. Such a set $\K$ is called a {\em basic semialgebraic} set. Membership to $\K$ is ensured by satisfying a conjunction of polynomial nonnegativity constraints. Define $g_0 := 1$.
+Note that one can rewrite Problem~\eqref{eq:maxpop} as the following maximization problem:
+\begin{equation}
+\label{eq:maxpop}
+r^*  :=  \sup_{\x \in \R^n, \mu \in \R} \{ \, \mu \, : \, r (\x) - \mu \geq 0 \,, \ \x \in \K \, \} \,.
+\end{equation}
 %
 The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $r^*$. These bounds are obtained by solving the following programs $(\P_d)$:
 \[

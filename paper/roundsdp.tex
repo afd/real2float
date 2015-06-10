@@ -134,7 +134,7 @@
 \newtheorem{example}{Example}
 
 \theoremstyle{remark}
-\newtheorem*{remark}{Remark}
+\newtheorem{remark}{Remark}
 %\newtheorem*{note}{Note}
 \newtheorem{case}{Case}
 
@@ -318,7 +318,8 @@ Finally, one obtains rounded nonlinear expressions using an inductive procedure~
 \label{sec:sdpbackground}
 Here, we recall mandatory background about the method that we use to handle the optimization problem of Equation~\eqref{eq:roptim}, when the nonlinear function $r$ is a polynomial expression.
 
-First, we remind basic facts about generation of sums-of-squares certificates for polynomial optimization, using semidefinite programming.
+\paragraph{Sums of squares certificates and semidefinite programming}
+We remind basic facts about generation of sums of squares certificates for polynomial optimization, using semidefinite programming.
 Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the restriction of $\R[\x]$ to polynomials of degree at most $2 d$. Let define the cone of sums of squares:
 \begin{equation}
 \label{eq:cone_sos}
@@ -339,6 +340,13 @@ where the set of constraints $\K \subseteq \R^n$ is defined by
 %
 \[\K := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_k (\x) \geq 0\}\enspace,\]
 for polynomial functions $g_1, \dots, g_k$. The set $\K$ is called a {\em basic semialgebraic} set. Membership to semialgebraic sets is ensured by satisfying conjunctions of polynomial nonnegativity constraints. 
+%
+\begin{remark}
+\label{rk:arch}
+ When the input variables satisfy interval constraints $\x \in [a_1, b_1] \times \dots \times [a_n, b_n]$ then one can easily show that there exists some integer $M > 0$ such that $M - \sum_{i=0}^n x_i^2 \geq 0$. 
+In the sequel, one assumes that this nonnegativity constraint appears explicitly in the definition of $\K$. Such an assumption is mandatory to prove the convergence of semidefinite relaxations stated in Theorem~\ref{th:densesdp}.
+\end{remark}
+%
 In general, the objective function $r$ and the set of constraints $\K$ can be nonconvex, which makes the resolution of Problem~\eqref{eq:minpop} difficult to solve in practice. 
 Note that one can rewrite Problem~\eqref{eq:maxpop} as the equivalent maximization problem:
 \begin{equation}
@@ -347,36 +355,21 @@ r^*  :=  \sup_{\x \in \R^n, \mu \in \R} \{ \, \mu \, : \, r (\x) - \mu \geq 0 \,
 \end{equation}
 %
 The existence of a sums of squares decomposition $p = \sum_i q_i^2$ valid
-over $\R^n$ is ensured by the existence of a symmetric real matrix $Q$, solution of the following matrix linear feasibility problem:
+over $\R^n$ is ensured by the existence of a symmetric real matrix $Q$, solution of the following linear matrix feasibility problem:
 \begin{align}
 \label{eq:sdp}
 p(\x) = \m_d(\x)^\intercal \, \Q \, \m_d(\x) \,, \quad \forall \x \in \R^n, \,
 \end{align}
 %
-where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the matrix $\Q$ has only nonnegative eigenvalues. Such a matrix $\Q$ is called {\em semidefinite positive}. The vector $\m_d$ and matrix $\Q$ have both a size equal to ${n + d \choose d}$. Problem~\eqref{eq:sdp} can be handled with semidefinite programming (SDP) solvers, such as {\sc Mosek}~\cite{mosek} or {\sc SDPA}~\cite{sdpa7} (see~\cite{Vandenberghe94SDP} for specific background about SDP).
+where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the matrix $\Q$ has only nonnegative eigenvalues. Such a matrix $\Q$ is called {\em semidefinite positive}. The vector $\m_d$ and matrix $\Q$ have both a size equal to $s_n^d := {n + d \choose d}$. Problem~\eqref{eq:sdp} can be handled with semidefinite programming (SDP) solvers, such as {\sc Mosek}~\cite{mosek} or {\sc SDPA}~\cite{sdpa7} (see~\cite{Vandenberghe94SDP} for specific background about SDP). Then, one computes the ``LDL'' decomposition $\Q = \L^\intercal \D \L$ (variant of the classical Cholesky decomposition), where $\L$ is a lower triangular matrix and $\D$ is a diagonal matrix. Finally, one obtains $p(\x) =  (\L \,
+\m_d(\x))^\intercal \, \D \, (\L \, \m_d(\x)) = \sum_{i=0}^{s_n^d} q_i(\x)^2$. Such a decomposition is called a sums of squares (SOS) {\em certificate}.
 %
 \begin{example}
-Let define $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(1,0,0,2,0,0)$, yielding the following sums of squares decomposition: $p(\x) =  (\L \,
-\m_2(\x))^\intercal \, \D \, (\L \, \m_2(\x)) = 1 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
+Let define $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(1,0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = 1 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
 \end{example}
-\if{
-The matrix \[\Q = 
-\begin{pmatrix}
-1 & 0 & 0\\
-0 & 1 & -1\\
-0 & -1 & 1
-\end{pmatrix}\] satisfies this equality and has three nonnegative eigenvalues,
-which are 0, 1, and 2, respectively associated to the three eigenvectors $e_0 :=
-(0, 1, 1)^\intercal $, $e_1 := (1, 0, 0)^\intercal $ and $e_2 := (0, 1, -1)^\intercal$. Defining the matrices $L
-:= (e_1 \, e_2 \, e_0)=\begin{psmallmatrix}1 & 0 & 0\\ 0 & 1 & 1\\0 & -1 & 1 \end{psmallmatrix}$ and $D = \begin{psmallmatrix} 1 & 0 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 0 \end{psmallmatrix}$, one obtains the decomposition $Q = L^\intercal \, D \, L$ and the equality $q(x) = (L \,
-b_1(x))^T \, D \, (L \, b_1(x)) = \sigma (x) = 1 + (x_1 - x_2)^2$, for all $x
-\in \rr^2$. The polynomial $\sigma$ is called a {\em SOS certificate} and
-guarantees that $q$ is nonnegative.
-\end{example}
-}\fi
 %
-
-Now we explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the following programs $(\P_d)$:
+\paragraph{Dense SDP relaxations for polynomial optimization}
+We first explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the following programs $(\P_d)$:
 \[
 (\P_d):\left\{			
 \begin{array}{lll}
@@ -386,11 +379,17 @@ r_d^\star := & \sup_{\mu, \sigma_j} & \mu\enspace, \\
 \end{array} \right.
 \]
 %
+The next theorem is a consequence of the assumption mentioned in Remark~\ref{rk:arch}.
+\begin{theorem}[Lasserre~\cite{Lasserre01moments}]
+\label{th:densesdp}
+The sequence $(r_d^\star)_d$ is nondecreasing and converges to $r^\star$.
+\end{theorem}
+%
 The size of the truncated SDP variables
 grows polynomially with the SDP-relaxation order $d$.
 Indeed, at fixed $n$, the relaxation $\P_d$ involves $O((2 d)^{n})$ SDP
 variables and $(k + 1)$ linear matrix inequalities (LMIs) of size
-$O(d^n)$. When $d$ increases, then more accurate lower bounds of $r^\star$ can be obtained, at an increasing computational cost. even though the theoretical convergence of the sequence $(\sup (\P_d))_{d}$ holds. 
+$O(d^n)$. When $d$ increases, then more accurate lower bounds of $r^\star$ can be obtained, at an increasing computational cost.
 At fixed $d$,  the relaxation $\P_d$ involves $O(n^{2d})$ SDP variables and $(d + 1)$ linear matrix inequalities (LMIs) of size
 $O(n^{d})$.
 
@@ -398,19 +397,21 @@ There are several ways to decrease the size of the SDP problems.
 First, symmetries in SDP relaxations for polynomial optimization problems can be exploited to replace one SDP problem $\P_d$ by
 several smaller SDPs~\cite{Riener2013SymmetricSDP}. Notice that it is possible only if the multivariate polynomials of the initial problem are invariant under the action of a finite subgroup $G$ of the group $GL_{n}(\R)$. 
 %
-Here we describe how to exploit the structured sparsity of the
+
+\paragraph{Exploiting sparsity} Here we describe how to exploit the structured sparsity of the
 problem to replace one SDP problem $\P_d$ by an SDP problem of
 size $O (\kappa^ {2 d})$ where $\kappa$ is the average size
 of the maximal cliques correlation pattern of the polynomial
 variables (see~\cite{Waki06SparseSOS}). 
 
-Let $F_j$ be the index set of variables which are involved in the polynomial $g_j$. 
- 
+We note $\N^n$ the set of $n$-tuple of nonnegative integers. The support of a polynomial $r(\x) := \sum_{\alphab \in \N^n} r_{\alphab} \x^{\alphab}$ is defined as $\suppf{r} := \{ \, \alphab \in \N^n \, : \, r_{\alphab} \neq 0 \, \}$. For instance the support of $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ is $\suppf{p} = \{ \, (0,0), (4, 0), (2,2), (0,4) \, \}$.
+
+Let $F_j$ be the index set of variables which are involved in the polynomial $g_j$, for each $j=1, \dots, k$.
 The correlative sparsity is represented by the 
 $n \times n$ correlative sparsity matrix (csp matrix) $\mathbf{R}$ defined by:
 \begin{equation}
 \label{eq:csp}
-\mathbf{R}(i, j) = \left \{
+\mathbf{R}(i, j) := \left \{
 \begin{array}{ll}
   1 & \text{ if }  i = j \enspace, \\
   1 & \text{ if }  \exists \alphab \in \suppf{f} \text{ such that } \alpha_i \geq 1 \text{ and } \alpha_j \geq 1\enspace, \\
@@ -420,12 +421,14 @@ $n \times n$ correlative sparsity matrix (csp matrix) $\mathbf{R}$ defined by:
 \end{equation}
 
 We define the undirected csp graph $G(N, E)$ with:
- \[ N = \{1, \dots, n\} \text{ and } E = \{ \{i, j\} : i, j \in N, i < j, \mathbf{R}(i, j) = 1 \} \enspace. \]
-Then, let $C_1,\dots, C_l \subset N$ denote the maximal cliques of $G(N, E)$ and define the sets of supports: 
-\[\mons{d}{C_q} := \{ \alphab \in  \mons{d}{n} : \alpha_i = 0 \text{ if } i \notin C_q \}, \ (q=1 ,\dots,l)\enspace. \]
-Define $n_q := \#C_q \ (q=1 ,\dots,l)$.
+ \[ N = \{\, 1, \dots, n \,\} \text{ and } E = \{ \, \{i, j\} : i, j \in N \,, \ i < j \,, \mathbf{R}(i, j) = 1 \, \} \enspace. \]
+Then, let $C_1,\dots, C_l \subset N$ denote the maximal cliques of $G(N, E)$ and 
+%and define the sets of supports: 
+%\[\mons{d}{C_q} := \{ \alphab \in  \mons{d}{n} : \alpha_i = 0 \text{ if } i %\notin C_q \}, \ (q=1 ,\dots,l)\enspace. \]
+ define $n_j := \#C_j$, for each $j=1 ,\dots,l$.
 
-We assume that the module $QM(\K)$ is archimedean and that there is some $M > 0$ such that $M - \sum_{i = 1}^{n} {x_i^2} \geq 0$. Hence, we can add the $q$ redundant additional constraints:
+%We assume that the module $QM(\K)$ is archimedean and that there is some $M > 0$ such that $M - \sum_{i = 1}^{n} {x_i^2} \geq 0$. 
+From the assumption of Remark~\ref{rk:arch}, one can add the $q$ redundant additional constraints:
 \begin{equation}
 \label{eq:assum_sos_sparse}
 g_{m + q} := n_q M^2 - \sum_{i \in C_q} {x_i^2} \geq 0, \enspace q=1 ,\dots, l\enspace,

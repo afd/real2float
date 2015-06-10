@@ -71,11 +71,13 @@
 \def\h{\mathbf{h}}
 \def\f{f}
 \def\a{\mathbf{a}}
+\def\m{\mathbf{m}}
 \def\p{\mathbf{p}}
 \def\S{\mathbf{S}}
 \def\B{\mathbf{B}}
 \def\E{\mathbf{E}}
 \def\K{\mathbf{K}}
+\def\Q{\mathbf{Q}}
 \def\X{\mathbf{X}}
 \def\Y{\mathbf{Y}}
 \newcommand{\A}{\mathbf{A}}
@@ -312,7 +314,7 @@ Finally, one obtains rounded nonlinear expressions using an inductive procedure~
 %One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.
 \subsection{Sparse semidefinite relaxations for polynomial optimization}
 \label{sec:sdpbackground}
-Here, we explain the basic background about the method to solve the optimization problem of Equation~\eqref{eq:roptim}.
+Here, we recall mandatory background about the method that we use to handle the optimization problem of Equation~\eqref{eq:roptim}, when the nonlinear function $r$ is a polynomial expression.
 
 First, we remind basic facts about generation of sums-of-squares certificates for polynomial optimization, using semidefinite programming.
 Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the restriction of $\R[\x]$ to polynomials of degree at most $2 d$. Let define the cone of sums of squares:
@@ -321,9 +323,9 @@ Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the res
 \Sigma[\x] := \Bigl\{\sum_i q_i^2, \, \text{ with } q_i \in \R[\x] \Bigr\}\enspace,
 \end{equation}
 %
-as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \cap \R_{2 d}[\x]$ to polynomials of degree at most $2 d$. For instance, the following bivariate polynomial  $\sigma (\x) = 1 + (x_1 - x_2)^2$ lies in $\Sigma_2[\x]$.
+as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \cap \R_{2 d}[\x]$ to polynomials of degree at most $2 d$. For instance, the following bivariate polynomial  $\sigma (\x) := 1 + (x_1^2 - x_2^2)^2$ lies in $\Sigma_4[\x] \subseteq \R_4[\x]$.
 
-At some point, optimization methods based on sums of squares use the well-known fact that for all $r \in \Sigma[\x]$, then $r(\x)\geq 0$ for all $\x \in \R^d$, i.e. $\Sigma[\x]$ is a restriction of the set of the nonnegative polynomials.
+At some point, optimization methods based on sums of squares use the well-known fact that for all $p \in \Sigma[\x]$, then $p(\x)\geq 0$ for all $\x \in \R^n$, i.e. $\Sigma[\x]$ is a restriction of the set of the nonnegative polynomials.
 
 Given $r \in \R[\x]$, one considers the following polynomial minimization problem:
 \begin{equation}
@@ -334,14 +336,46 @@ r^*  :=  \inf_{\x \in \R^n} \, \{ r (\x) \, : \, \x \in \K \, \} \enspace,
 where the set of constraints $\K \subseteq \R^n$ is defined by
 %
 \[\K := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_k (\x) \geq 0\}\enspace,\]
-for polynomial functions $g_1, \dots, g_k$. Such a set $\K$ is called a {\em basic semialgebraic} set. Membership to $\K$ is ensured by satisfying a conjunction of polynomial nonnegativity constraints. Define $g_0 := 1$.
-Note that one can rewrite Problem~\eqref{eq:maxpop} as the following maximization problem:
+for polynomial functions $g_1, \dots, g_k$. The set $\K$ is called a {\em basic semialgebraic} set. Membership to semialgebraic sets is ensured by satisfying conjunctions of polynomial nonnegativity constraints. 
+In general, the objective function $r$ and the set of constraints $\K$ can be nonconvex, which makes the resolution of Problem~\eqref{eq:minpop} difficult to solve in practice. 
+Note that one can rewrite Problem~\eqref{eq:maxpop} as the equivalent maximization problem:
 \begin{equation}
 \label{eq:maxpop}
 r^*  :=  \sup_{\x \in \R^n, \mu \in \R} \{ \, \mu \, : \, r (\x) - \mu \geq 0 \,, \ \x \in \K \, \} \,.
 \end{equation}
 %
-The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $r^*$. These bounds are obtained by solving the following programs $(\P_d)$:
+The existence of a sums of squares decomposition $p = \sum_i q_i^2$ valid
+over $\R^n$ is ensured by the existence of a symmetric real matrix $Q$, solution of the following matrix linear feasibility problem:
+\begin{align}
+\label{eq:sdp}
+p(\x) = \m_d(\x)^T \, \Q \, \m_d(\x) \,, \quad \forall \x \in \R^n, \,
+\end{align}
+%
+where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the matrix $\Q$ has only nonnegative eigenvalues. Such a matrix $\Q$ is called {\em semidefinite positive}. The vector $\m_d$ and matrix $\Q$ have both a size equal to ${n + d \choose d}$. Problem~\eqref{eq:sdp} can be handled with semidefinite programming (SDP) solvers, such as {\sc Mosek}~\cite{mosek} or {\sc SDPA}~\cite{sdpa7} (see ~\cite{Vandenberghe94SDP} for specific background about SDP).
+%
+\begin{example}
+Let define $q(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $q(\x) = \m_2 (\x)^T \, \Q \, \m_2(\x)$.
+\end{example}
+\if{
+one looks for a semidefinite positive matrix $Q$ such that the polynomial equality $q(x) = b_1(x)^T \, \Q \, b_1(x)$ holds for all $x \in \rr^2$. 
+The matrix \[\Q = 
+\begin{pmatrix}
+1 & 0 & 0\\
+0 & 1 & -1\\
+0 & -1 & 1
+\end{pmatrix}\] satisfies this equality and has three nonnegative eigenvalues,
+which are 0, 1, and 2, respectively associated to the three eigenvectors $e_0 :=
+(0, 1, 1)^\intercal $, $e_1 := (1, 0, 0)^\intercal $ and $e_2 := (0, 1, -1)^\intercal$. Defining the matrices $L
+:= (e_1 \, e_2 \, e_0)=\begin{psmallmatrix}1 & 0 & 0\\ 0 & 1 & 1\\0 & -1 & 1 \end{psmallmatrix}$ and $D = \begin{psmallmatrix} 1 & 0 & 0 \\ 0 & 2 & 0 \\ 0 & 0 & 0 \end{psmallmatrix}$, one obtains the decomposition $Q = L^\intercal \, D \, L$ and the equality $q(x) = (L \,
+b_1(x))^T \, D \, (L \, b_1(x)) = \sigma (x) = 1 + (x_1 - x_2)^2$, for all $x
+\in \rr^2$. The polynomial $\sigma$ is called a {\em SOS certificate} and
+guarantees that $q$ is nonnegative.
+\end{example}
+In practice, one can solve the general problem~\eqref{eq:sdp} by using semidefinite programming (SDP) solvers (e.g. {\sc Mosek}~\cite{mosek}, SDPA~\cite{Yamashita10SDPA}). For more details about SDP, we refer the interested reader to~\cite{Vandenberghe94semidefiniteprogramming}.
+}\fi
+%
+
+Now we explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the following programs $(\P_d)$:
 \[
 (\P_d):\left\{			
 \begin{array}{lll}
@@ -355,24 +389,21 @@ The size of the truncated SDP variables
 grows polynomially with the SDP-relaxation order $d$.
 Indeed, at fixed $n$, the relaxation $\P_d$ involves $O((2 d)^{n})$ SDP
 variables and $(k + 1)$ linear matrix inequalities (LMIs) of size
-$O(d^n)$. When $d$ increases, then more accurate lower bounds of $r^\star$ can be obtained, at an increasing computational cost, even though the theoretical convergence of the sequence $(\sup (\P_d))_{d}$ holds. 
-%At fixed $d$,  the relaxation $\P_d$ involves $O(n^{2d})$ SDP
-%moment variables and $(m + 1)$ linear matrix inequalities (LMIs) of size
-%$O(n^{k})$.
+$O(d^n)$. When $d$ increases, then more accurate lower bounds of $r^\star$ can be obtained, at an increasing computational cost. even though the theoretical convergence of the sequence $(\sup (\P_d))_{d}$ holds. 
+At fixed $d$,  the relaxation $\P_d$ involves $O(n^{2d})$ SDP variables and $(d + 1)$ linear matrix inequalities (LMIs) of size
+$O(n^{d})$.
 
-There are several ways to decrease the size of these matrices. 
-First, symmetries in SDP relaxations for polynomial optimization problems can be exploited to replace one SDP problem $\P_k$ by
+There are several ways to decrease the size of the SDP problems. 
+First, symmetries in SDP relaxations for polynomial optimization problems can be exploited to replace one SDP problem $\P_d$ by
 several smaller SDPs~\cite{Riener2013SymmetricSDP}. Notice that it is possible only if the multivariate polynomials of the initial problem are invariant under the action of a finite subgroup $G$ of the group $GL_{n}(\R)$. 
 %
 Here we describe how to exploit the structured sparsity of the
-problem to replace one SDP problem $\P_k$ by an SDP problem of
-size $O (\kappa^ {2 k})$ where $\kappa$ is the average size
+problem to replace one SDP problem $\P_d$ by an SDP problem of
+size $O (\kappa^ {2 d})$ where $\kappa$ is the average size
 of the maximal cliques correlation pattern of the polynomial
 variables (see~\cite{Waki06SparseSOS}). 
-%These techniques have been successfully implemented in our tool (see Section ?).
 
-
-Let $F_k$ be the index set of variables which are involved in the polynomial $g_k$. 
+Let $F_j$ be the index set of variables which are involved in the polynomial $g_j$. 
  
 The correlative sparsity is represented by the 
 $n \times n$ correlative sparsity matrix (csp matrix) $\mathbf{R}$ defined by:
@@ -400,7 +431,7 @@ g_{m + q} := n_q M^2 - \sum_{i \in C_q} {x_i^2} \geq 0, \enspace q=1 ,\dots, l\e
 \end{equation}
 set $m' = m + q$, define the compact semialgebraic set:
 \[\K' := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_m' (\x) \geq 0\}\enspace,\]
-and modify Problem~\eqref{eq:densesos} into the following optimization problem:
+and modify Problem~\eqref{eq:minpop} into the following optimization problem:
 \begin{equation}
 \label{eq:cons_pop_sparse}
 f^*  :=  \inf_{\x \in \K'} f (\x)\enspace,
@@ -425,7 +456,7 @@ The following program is the sparse variant of the semidefinite program $(\P_k)$
 \end{array} \right.
 \]
 
-The interested reader can find more details about the properties of these semidefinite relaxations in \cite{Waki06SparseSOS}. Since the cliques $C_1, \dots, C_l$ satisfy the running intersection property (see Definition~\ref{def:rip} below), the optimal values of $\P_k^{\text{sparse}}$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
+The interested reader can find more details about the properties of these semidefinite relaxations in \cite{Waki06SparseSOS}. Since the cliques $C_1, \dots, C_l$ satisfy the running intersection property (see Definition~\ref{def:rip} below), the optimal values of $\P_d^{\text{sparse}}$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
 
 \begin{definition}[Running Intersection Property]
 \label{def:rip}

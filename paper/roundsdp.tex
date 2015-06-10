@@ -22,7 +22,8 @@
 \usepackage{myalgo}
 \let\proof\relax
 \let\endproof\relax
-\usepackage{amsthm}
+%\usepackage{amsthm}
+\usepackage{ntheorem}
 \usepackage{hyperref}
 \usepackage{subfigure}
 \usepackage{enumerate}
@@ -120,20 +121,21 @@
 \newcommand{\fptaylor}{\mathtt{FPTaylor}}
 \newcommand{\nlcertify}{\mathtt{NLCertify}}
 %\newcommand{\II}{\mathbb{I}}
-\theoremstyle{plain}
+%\theoremstyle{plain}
+\newtheorem{thm}{Theorem}[section]
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
 \newtheorem{corollary}[theorem]{Corollary}
 
-\theoremstyle{definition}
+\theoremstyle{plain}
 \newtheorem{definition}[theorem]{Definition}
 \newtheorem{hypothesis}[theorem]{Assumption}
 \newtheorem{conjecture}[theorem]{Conjecture}
 \newtheorem{assumption}[theorem]{Assumption}
 \newtheorem{example}{Example}
 
-\theoremstyle{remark}
+%\theoremstyle{remark}
 \newtheorem{remark}{Remark}
 %\newtheorem*{note}{Note}
 \newtheorem{case}{Case}
@@ -326,14 +328,14 @@ Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the res
 \Sigma[\x] := \Bigl\{\sum_i q_i^2, \, \text{ with } q_i \in \R[\x] \Bigr\}\enspace,
 \end{equation}
 %
-as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \cap \R_{2 d}[\x]$ to polynomials of degree at most $2 d$. For instance, the following bivariate polynomial  $\sigma (\x) := 1 + (x_1^2 - x_2^2)^2$ lies in $\Sigma_4[\x] \subseteq \R_4[\x]$.
+as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \bigcap \R_{2 d}[\x]$ to polynomials of degree at most $2 d$. For instance, the following bivariate polynomial  $\sigma (\x) := 1 + (x_1^2 - x_2^2)^2$ lies in $\Sigma_4[\x] \subseteq \R_4[\x]$.
 
 At some point, optimization methods based on sums of squares use the implication $p \in \Sigma[\x] \implies \forall \x \in \R^n, \, p(\x) \geq 0$, i.e. the inclusion of $\Sigma[\x]$ in the cone of nonnegative polynomials.
 
 Given $r \in \R[\x]$, one considers the following polynomial minimization problem:
 \begin{equation}
 \label{eq:minpop}
-r^*  :=  \inf_{\x \in \R^n} \, \{ r (\x) \, : \, \x \in \K \, \} \enspace,
+r^*  :=  \inf_{\x \in \R^n} \, \{ \, r (\x) \, : \, \x \in \K \, \} \enspace,
 \end{equation}
 %
 where the set of constraints $\K \subseteq \R^n$ is defined by
@@ -369,12 +371,12 @@ Let define $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x
 \end{example}
 %
 \paragraph{Dense SDP relaxations for polynomial optimization}
-We first explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of semidefinite relaxations developed by Lasserre~\cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the following programs $(\P_d)$:
+We first explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the following programs $(\P_d)$:
 \[
 (\P_d):\left\{			
 \begin{array}{lll}
 r_d^\star := & \sup_{\mu, \sigma_j} & \mu\enspace, \\			 
-& \text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k} \sigma_j(\x) g_j(\x)\enspace, \\
+& \text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
 & & \mu\in \R \,, \quad \sigma_j \in \Sigma[\x] \,, \quad \deg \sigma_j g_j \leq  2 d, \quad j = 0,\dots,k \enspace.\\
 \end{array} \right.
 \]
@@ -399,10 +401,10 @@ several smaller SDPs~\cite{Riener2013SymmetricSDP}. Notice that it is possible o
 %
 
 \paragraph{Exploiting sparsity} Here we describe how to exploit the structured sparsity of the
-problem to replace one SDP problem $\P_d$ by an SDP problem of
+problem to replace one SDP problem $\P_d$ by an SDP problem $\P_d^{\text{sparse}}$ of
 size $O (\kappa^ {2 d})$ where $\kappa$ is the average size
-of the maximal cliques correlation pattern of the polynomial
-variables (see~\cite{Waki06SparseSOS}). 
+of the maximal cliques of the correlation pattern of the polynomial
+variables (see~\cite{Waki06SparseSOS}). We now present these notions as well as the formulation of sparse SDP relaxations $\P_d^{\text{sparse}}$.
 
 We note $\N^n$ the set of $n$-tuple of nonnegative integers. The support of a polynomial $r(\x) := \sum_{\alphab \in \N^n} r_{\alphab} \x^{\alphab}$ is defined as $\suppf{r} := \{ \, \alphab \in \N^n \, : \, r_{\alphab} \neq 0 \, \}$. For instance the support of $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ is $\suppf{p} = \{ \, (0,0), (4, 0), (2,2), (0,4) \, \}$.
 
@@ -427,53 +429,57 @@ Then, let $C_1,\dots, C_l \subset N$ denote the maximal cliques of $G(N, E)$ and
 %\[\mons{d}{C_q} := \{ \alphab \in  \mons{d}{n} : \alpha_i = 0 \text{ if } i %\notin C_q \}, \ (q=1 ,\dots,l)\enspace. \]
  define $n_j := \#C_j$, for each $j=1 ,\dots,l$.
 
-%We assume that the module $QM(\K)$ is archimedean and that there is some $M > 0$ such that $M - \sum_{i = 1}^{n} {x_i^2} \geq 0$. 
-From the assumption of Remark~\ref{rk:arch}, one can add the $q$ redundant additional constraints:
+\begin{remark}
+\label{rk:sparsearch}
+From the assumption of Remark~\ref{rk:arch}, one can add the $l$ redundant additional constraints:
 \begin{equation}
 \label{eq:assum_sos_sparse}
-g_{m + q} := n_q M^2 - \sum_{i \in C_q} {x_i^2} \geq 0, \enspace q=1 ,\dots, l\enspace,
+g_{k + j} := n_j M^2 - \sum_{i \in C_j} {x_i^2} \geq 0\,, \  j=1 ,\dots, l \,,
 \end{equation}
-set $m' = m + q$, define the compact semialgebraic set:
-\[\K' := \{ \x \in \R^{n} : g_1 (\x) \geq 0, \dots, g_m' (\x) \geq 0\}\enspace,\]
+set $k' = k + l$, define the compact semialgebraic set:
+\[\K' := \{\, \x \in \R^n \, : \, g_1 (\x) \geq 0, \dots, g_k' (\x) \geq 0 \,\} \,,\]
 and modify Problem~\eqref{eq:minpop} into the following optimization problem:
 \begin{equation}
-\label{eq:cons_pop_sparse}
-f^*  :=  \inf_{\x \in \K'} f (\x)\enspace,
+\label{eq:sparseminpop}
+r^*  :=  \inf_{\x \in \R^n} \, \{ \, r (\x) \, : \, \x \in \K' \, \} \,.
 \end{equation}
+\end{remark}
+%Notice that the sums of squares of polynomials that belong to $\Sigma [\x, \mons{d}{C_q}]$ only involve variables $x_i (i \in C_q)$.
+For each $j=1 ,\dots,l$, we note $\R_{2 d}[\x, C_j]$ the set of polynomials of $\R_{2 d}[\x]$ which involve the variables $(x_i)_{i \in C_j}$. We note $\Sigma [\x, C_j] := \Sigma [\x] \bigcap \R_{2 d}[\x, C_j]$. Similarly, we define $\Sigma [\x, F_j]$, for each $j=1, \dots, k$.
 
-For each $q=1 ,\dots,l$, we also define the cone of sums of squares of polynomials in $\R_d[\x, \mons{d}{C_q}], (q=1 ,\dots,l)$:
-\begin{equation}
-\label{eq:cone_sos_sparse}
-\Sigma [\x, \mons{d}{C_q}] := \Bigl\{\sum_i q_i^2, \, \text{ with } q_i \in \R_d[\x, \mons{d}{C_q}] \Bigr\}\enspace.
-\end{equation}
-
-Notice that the sums of squares of polynomials that belong to $\Sigma [\x, \mons{d}{C_q}]$ only involve variables $x_i (i \in C_q)$. 
-
-The following program is the sparse variant of the semidefinite program $(\P_k)$:
+The following program is the sparse variant of the SDP program $(\P_d)$:
 \[
-(\P^{\text{sparse}}_k):\left\{			
-\begin{array}{ll}
-\sup_{\mu, \sigma_j} & \mu\enspace, \\			 
-\text{s.t.} & f (\x) - \mu = \sum\limits_{j = 0}^{m'} \sigma_j(\x) g_j(\x)\enspace, \\
-& \mu\in \R,\qquad \sigma_j \in \Sigma[\x, \mons{k - \lceil \omega_j / 2 \rceil }{F_j}], j = 1,\dots,m' \enspace,\\
-& \sigma_0 \in \sum\limits_{q = 1}^l \Sigma [\x, \mons{k}{C_q}]\enspace.
+(\P^{\text{sparse}}_d):\left\{			
+\begin{array}{lll}
+r_d^{\text{sparse}, \, \star} := & \sup_{\mu, \sigma_j} & \mu\enspace, \\			 
+& \text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k'} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
+& & \mu\in \R \,, \ \sigma_j \in \Sigma[\x, F_j] \,, \ \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k' \enspace,\\
+& & \sigma_0 \in \sum\limits_{j = 1}^l \Sigma [\x, C_k] \,.
 \end{array} \right.
 \]
-
-The interested reader can find more details about the properties of these semidefinite relaxations in \cite{Waki06SparseSOS}. Since the cliques $C_1, \dots, C_l$ satisfy the running intersection property (see Definition~\ref{def:rip} below), the optimal values of $\P_d^{\text{sparse}}$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
-
+%
+The number of SDP variables of Problem~$(\P^{\text{sparse}}_d)$ is $\sum_{j=1}^l {n_j + 2 d \choose 2 d}$. Let $\kappa := \frac{1}{l} \sum{j=1}^l n_j$ be the average size of the cliques $C_1, \dots, c_l$. Then, at fixed $d$ it yields an SDP problem with $O(\kappa^{2d})$ variables.
+%
+Moreover, the cliques $C_1, \dots, C_l$ satisfy the running intersection property (see Definition~\ref{def:rip} below): 
+%
 \begin{definition}[Running Intersection Property]
 \label{def:rip}
-Let $q \in \N_0, I_1, \dots, I_q \subset \{1, \dots, n\}$. We say that $I_1, \dots, I_q$ satisfy the running intersection property if: 
-\[ \forall i = 2, \dots, r, (\exists k < i, (I_i \cap \bigcup\limits_{j < i} I_j) \subset I_k)\enspace. \]
+Let $q \in \N_0, I_1, \dots, I_q \subset \{1, \dots, n\}$. We say that $I_1, \dots, I_q$ satisfy the running intersection property when for all $i=1, \dots, r$, there exists $k < i$ such that $I_i \bigcap (\bigcup_{j < i} I_j) \subset I_k$.
+%\[ \forall i = 2, \dots, r, (\exists k < i \,, \ (I_i \bigcap \bigcup_{j < i} I_j) \subset I_k)\enspace. \]
 \end{definition}
-
-We illustrate the benefits of these sparse semidefinite relaxations with the following example:
+This property together with the assumption mentioned in Remark~\ref{rk:sparsearch} allow to state the sparse variant of Theorem~\ref{th:densesdp}:
+%The optimal values of $\r_d^{\text{sparse}}$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
+%
+\begin{thm}[\protect{Lasserre~\cite[Theorem 3.6]{Las06SparseSOS}}]
+\label{th:sparsesdp}
+The sequence of optimal values $r_d^{\text{sparse}, \, \star}$ is nondecreasing and converges to $r^\star$.
+\end{thm}
+The interested reader can find more details in~\cite{Waki06SparseSOS} about additional ways to exploit sparsity in order to derive analogous sparse SDP relaxations.
+We illustrate the benefits of the SDP relaxations $\P_k^{\text{sparse}}$ with the following example:
 \begin{example}
 \label{ex:sparse}
 Consider the polynomial $f$ mentioned in Section~\ref{sec:intro}:
-\[ f(\x) := x_1 ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) 
-+ x_2 x_5 + x_3 x_6 - x_2 x_3  - x_5 x_6\enspace. \] 
+\[ f(\x) := x_2 x_5 + x_3 x_6 - x_2 x_3  - x_5 x_6 + x_1 ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) \enspace. \] 
 Here, $n = 6, d = 2, N = \{1,\dots, 6 \}$. The $6 \times 6$ correlative sparsity matrix $\mathbf{R}$ is:
 \[
 \mathbf{R} = 
@@ -486,19 +492,8 @@ Here, $n = 6, d = 2, N = \{1,\dots, 6 \}$. The $6 \times 6$ correlative sparsity
   1 & 0 & 1 & 0 & 1 & 1 
  \end{pmatrix}
 \]
-The csp graph $G$ associated to $\mathbf{R}$ is depicted in Figure~\ref{fig:csp_deltax}. The maximal cliques of $G$ are:
-\[ C_1 := \{1, 4\}, C_2 := \{1, 2, 3, 5\}, C_3 := \{1, 3, 5, 6\}\enspace. \]
-
-For instance, the set of supports associated with the maximal clique $C_1$ for monomials of degree at most 2 is:
-\begin{align*}
-\mons{2}{C_1} := & \{ (0, 0, 0, 0, 0, 0), (1, 0, 0, 0, 0, 0),  (0, 0, 0, 1, 0, 0)\enspace, \\
-                &(2, 0, 0, 0, 0, 0), (1, 0, 0, 1, 0, 0), (0, 0, 0, 2, 0, 0) \}\enspace. 
-\end{align*}
-
-Now consider the second order semidefinite relaxation. In the case of the dense semidefinite relaxation, the number of SDP variables is $\#\mons{4}{6} = \binom{6 + 4}{4} = 210$ since we are considering sums of squares of degree at most 4.
-Conversely, in the case of the sparse relaxation, this number is $\#( \mons{4}{C_1} \cup \mons{4}{C_2} \cup \mons{4}{C_3}) = 115 $. The dense moment matrix is a single block diagonal matrix of size 28, while the sparse moment matrix is a block diagonal matrix with a $6 \times 6$ block and two $15 \times 15$ blocks.
-
-
+The csp graph $G$ associated to $\mathbf{R}$ is depicted in Figure~\ref{fig:csp_deltax}. 
+%
 \begin{figure}[!ht]	
 \begin{center}
 \includegraphics[scale=0.7]{csp_deltax.pdf}
@@ -506,17 +501,17 @@ Conversely, in the case of the sparse relaxation, this number is $\#( \mons{4}{C
 \label{fig:csp_deltax}
 \end{center}
 \end{figure}
+%
+The maximal cliques of $G$ are $C_1 := \{1, 4\}$, $C_2 := \{1, 2, 3, 5\}$ and $C_3 := \{1, 3, 5, 6\}$. For $d=2$, the dense SDP relaxation $\P_2$ involves $\binom{6 + 4}{4} = 210$ variables against $\binom{2 + 4}{4} + 2 \binom{4 + 4}{4} = 115$ for the sparse variant $\P_2^{\text{sparse}}$. This difference becomes even more significant while noticing that the dense SDP relaxation $\P_3$ involves 924 variables against 448 for the sparse variant $\P_2^{\text{sparse}}$.
 \end{example}
-
-
+%
 \subsection{Computer assisted proofs for polynomial optimization}
 \label{sec:coqbackground}
 The aim of this section is to briefly recall some fundamental notions
 about the mechanisms of theorem proving within the $\coq$ proof
 assistant. For more details on the $\coq$ system, we recommend the
 documentation available in~\cite{bertot2004interactive}.
-
-
+%
 \begin{figure}[!ht]
 \centering
 \includegraphics{reflexion.pdf}
@@ -529,13 +524,14 @@ documentation available in~\cite{bertot2004interactive}.
 
 \paragraph{Simplification of error term products}
 We first need the following lemma.
-\begin{lemma}
+\begin{lemma}[\protect{Higham~\cite[Lemma 3.3]{higham2002accuracy}}]
 \label{th:redproduct}
-Let $\epsilon < \frac{1}{k}$ and define $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\displaystyle \prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
+Let $\epsilon < \frac{1}{k}$ and $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\displaystyle \prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
 \end{lemma}
-\begin{proof}
-The result is a direct consequence of~\cite[Lemma 3.3]{higham2002accuracy}.
-\end{proof}
+%
+%\begin{proof}
+%The result is a direct consequence of~\cite[Lemma 3.3]{higham2002accuracy}.
+%\end{proof}
 Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Hence, one can derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
 
 \subsection{Polynomial Programs}

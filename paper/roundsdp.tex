@@ -64,6 +64,8 @@
 \newcommand{\Plamp}{\P_{\lambda}^{(p)}}
 \def\P{\mathbf{P}}
 \def\Q{\mathbf{Q}}
+\def\L{\mathbf{L}}
+\def\D{\mathbf{D}}
 \def\q{\mathbf{q}}
 \newcommand{\M}{\mathbf{M}}
 \def\m{\mathbf{m}}
@@ -325,7 +327,7 @@ Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the res
 %
 as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \cap \R_{2 d}[\x]$ to polynomials of degree at most $2 d$. For instance, the following bivariate polynomial  $\sigma (\x) := 1 + (x_1^2 - x_2^2)^2$ lies in $\Sigma_4[\x] \subseteq \R_4[\x]$.
 
-At some point, optimization methods based on sums of squares use the well-known fact that for all $p \in \Sigma[\x]$, then $p(\x)\geq 0$ for all $\x \in \R^n$, i.e. $\Sigma[\x]$ is a restriction of the set of the nonnegative polynomials.
+At some point, optimization methods based on sums of squares use the implication $p \in \Sigma[\x] \implies \forall \x \in \R^n, \, p(\x) \geq 0$, i.e. the inclusion of $\Sigma[\x]$ in the cone of nonnegative polynomials.
 
 Given $r \in \R[\x]$, one considers the following polynomial minimization problem:
 \begin{equation}
@@ -348,16 +350,16 @@ The existence of a sums of squares decomposition $p = \sum_i q_i^2$ valid
 over $\R^n$ is ensured by the existence of a symmetric real matrix $Q$, solution of the following matrix linear feasibility problem:
 \begin{align}
 \label{eq:sdp}
-p(\x) = \m_d(\x)^T \, \Q \, \m_d(\x) \,, \quad \forall \x \in \R^n, \,
+p(\x) = \m_d(\x)^\intercal \, \Q \, \m_d(\x) \,, \quad \forall \x \in \R^n, \,
 \end{align}
 %
-where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the matrix $\Q$ has only nonnegative eigenvalues. Such a matrix $\Q$ is called {\em semidefinite positive}. The vector $\m_d$ and matrix $\Q$ have both a size equal to ${n + d \choose d}$. Problem~\eqref{eq:sdp} can be handled with semidefinite programming (SDP) solvers, such as {\sc Mosek}~\cite{mosek} or {\sc SDPA}~\cite{sdpa7} (see ~\cite{Vandenberghe94SDP} for specific background about SDP).
+where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the matrix $\Q$ has only nonnegative eigenvalues. Such a matrix $\Q$ is called {\em semidefinite positive}. The vector $\m_d$ and matrix $\Q$ have both a size equal to ${n + d \choose d}$. Problem~\eqref{eq:sdp} can be handled with semidefinite programming (SDP) solvers, such as {\sc Mosek}~\cite{mosek} or {\sc SDPA}~\cite{sdpa7} (see~\cite{Vandenberghe94SDP} for specific background about SDP).
 %
 \begin{example}
-Let define $q(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $q(\x) = \m_2 (\x)^T \, \Q \, \m_2(\x)$.
+Let define $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(1,0,0,2,0,0)$, yielding the following sums of squares decomposition: $p(\x) =  (\L \,
+\m_2(\x))^\intercal \, \D \, (\L \, \m_2(\x)) = 1 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
 \end{example}
 \if{
-one looks for a semidefinite positive matrix $Q$ such that the polynomial equality $q(x) = b_1(x)^T \, \Q \, b_1(x)$ holds for all $x \in \rr^2$. 
 The matrix \[\Q = 
 \begin{pmatrix}
 1 & 0 & 0\\
@@ -371,7 +373,6 @@ b_1(x))^T \, D \, (L \, b_1(x)) = \sigma (x) = 1 + (x_1 - x_2)^2$, for all $x
 \in \rr^2$. The polynomial $\sigma$ is called a {\em SOS certificate} and
 guarantees that $q$ is nonnegative.
 \end{example}
-In practice, one can solve the general problem~\eqref{eq:sdp} by using semidefinite programming (SDP) solvers (e.g. {\sc Mosek}~\cite{mosek}, SDPA~\cite{Yamashita10SDPA}). For more details about SDP, we refer the interested reader to~\cite{Vandenberghe94semidefiniteprogramming}.
 }\fi
 %
 
@@ -380,7 +381,7 @@ Now we explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop
 (\P_d):\left\{			
 \begin{array}{lll}
 r_d^\star := & \sup_{\mu, \sigma_j} & \mu\enspace, \\			 
-& \text{s.t.} & f (\x) - \mu = \sum\limits_{j = 0}^{k} \sigma_j(\x) g_j(\x)\enspace, \\
+& \text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k} \sigma_j(\x) g_j(\x)\enspace, \\
 & & \mu\in \R \,, \quad \sigma_j \in \Sigma[\x] \,, \quad \deg \sigma_j g_j \leq  2 d, \quad j = 0,\dots,k \enspace.\\
 \end{array} \right.
 \]

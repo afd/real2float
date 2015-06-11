@@ -138,10 +138,10 @@
 \newcommand{\sthreefp}{\mathtt{s3fp}}
 \newcommand{\realtofloat}{\mathtt{Real2Float}}
 \newcommand{\hol}{\text{\sc Hol-light}}
-\newcommand{\ocaml}{\mathtt{OCaml}}
 \newcommand{\op}{\mathtt{op}}
 \newcommand{\bop}{\mathtt{bop}}
-\newcommand{\coq}{\mathtt{Coq}}
+\newcommand{\coq}{\text{\sc Coq}}
+\newcommand{\ocaml}{\text{\sc OCaml}}
 \newcommand{\rosa}{\mathtt{rosa}}
 \newcommand{\sdpa}{\text{\sc sdpa}}
 \newcommand{\fptaylor}{\mathtt{FPTaylor}}
@@ -581,10 +581,10 @@ The maximal cliques of $G$ are $C_1 := \{1, 4\}$, $C_2 := \{1, 2, 3, 5\}$ and $C
 %
 \subsection{Computer assisted proofs for polynomial optimization}
 \label{sec:coqbackground}
-The aim of this section is to briefly recall some fundamental notions
-about the mechanisms of theorem proving within the $\coq$ proof
+The aim of this section is to briefly recall some existing work
+about the mechanisms of formal polynomial optimization within the $\coq$ proof
 assistant. For more details on the $\coq$ system, we recommend the
-documentation available in~\cite{bertot2004interactive}.
+documentation available in~\cite{bertot2004interactive}. 
 %
 \begin{figure}[!ht]
 \centering
@@ -730,11 +730,10 @@ However, $\fptaylor$ implements special cases to eliminate some error terms, for
 
 {\scriptsize
 \begin{lstlisting}
-procedure doppler1(u : real, v : real, T : real) returns (r : real) {
- assume (-100.0 <= u && u <= 100.0 && 20.0 <= v && v <= 20000.0 && -30.0 <= T && T <= 50.0);
-  var t1 := 331.4 + 0.6 * T;
-  r := -t1*v/((t1 + u)*(t1 + u));
-}
+let box_doppler1 u v T = [$(-100, 100); (20, 2e4);(-30, 50)$];; 
+let obj_doppler1 u v T = [(
+let $t_1 = 331.4 + 0.6 * T$ in 
+$-t_1*v/((t_1 + u)*(t_1 + u))$, $3e-13$)];;
 \end{lstlisting}
 }
 {\scriptsize

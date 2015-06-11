@@ -38,8 +38,8 @@
 }
   \matrix (m) [matrix of nodes, nodes = {style={draw,rectangle, rounded corners, draw=black, very thick}, align=center, text width = 3.2cm}, row sep=4em, column sep=8em]
   {
-     $x_1^2 - 2 x_1 x_2 + x_2^2$       & $\mathtt{p\_12}$ \\
-     $(x_1 - x_2)^2$ & {$\mathtt{[([(one, x\_12)], xH)]}  $ }\\};
+     $1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$       & $\mathtt{p\_12}$ \\
+     $1 + (x_1^2 - x_2^2)^2$ & {$\mathtt{[([(one, x\_12)], xH)]}  $ }\\};
   \path[-stealth]
     (m-2-1) edge node [left] {reflexive tactic} (m-1-1)
             %edge [double] node [above] {reification} (m-1-2)

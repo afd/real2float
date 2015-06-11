@@ -414,7 +414,7 @@ for polynomial functions $g_1, \dots, g_k$. The set $\K$ is called a {\em basic 
 %
 \begin{remark}
 \label{rk:arch}
- When the input variables satisfy interval constraints $\x \in [a_1, b_1] \times \dots \times [a_n, b_n]$ then one can easily show that there exists some integer $M > 0$ such that $M - \sum_{i=0}^n x_i^2 \geq 0$. 
+ When the input variables satisfy interval constraints $\x \in [a_1, b_1] \times \dots \times [a_n, b_n]$ then one can easily show that there exists some integer $M > 0$ such that $M - \sum_{i=1}^n x_i^2 \geq 0$. 
 In the sequel, one assumes that this nonnegativity constraint appears explicitly in the definition of $\K$. Such an assumption is mandatory to prove the convergence of semidefinite relaxations stated in Theorem~\ref{th:densesdp}.
 \end{remark}
 %
@@ -436,7 +436,8 @@ where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the mat
 \m_d(\x))^\intercal \, \D \, (\L \, \m_d(\x)) = \sum_{i=0}^{s_n^d} q_i(\x)^2$. Such a decomposition is called a sums of squares (SOS) {\em certificate}.
 %
 \begin{example}
-Let define $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(1,0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = 1 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
+\label{ex:sdp}
+Let define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
 \end{example}
 %
 \paragraph{Dense SDP relaxations for polynomial optimization}
@@ -477,7 +478,7 @@ size $O (\kappa^ {2 d})$ where $\kappa$ is the average size
 of the maximal cliques of the correlation pattern of the polynomial
 variables (see~\cite{Waki06SparseSOS}). We now present these notions as well as the formulation of sparse SDP relaxations~$(\S_d)$.
 
-We note $\N^n$ the set of $n$-tuple of nonnegative integers. The support of a polynomial $r(\x) := \sum_{\alphab \in \N^n} r_{\alphab} \x^{\alphab}$ is defined as $\suppf{r} := \{ \, \alphab \in \N^n \, : \, r_{\alphab} \neq 0 \, \}$. For instance the support of $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ is $\suppf{p} = \{ \, (0,0), (4, 0), (2,2), (0,4) \, \}$.
+We note $\N^n$ the set of $n$-tuple of nonnegative integers. The support of a polynomial $r(\x) := \sum_{\alphab \in \N^n} r_{\alphab} \x^{\alphab}$ is defined as $\suppf{r} := \{ \, \alphab \in \N^n \, : \, r_{\alphab} \neq 0 \, \}$. For instance the support of $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ is $\suppf{p} = \{ \, (0,0), (4, 0), (2,2), (0,4) \, \}$.
 
 Let $F_j$ be the index set of variables which are involved in the polynomial $g_j$, for each $j=1, \dots, k$.
 The correlative sparsity is represented by the 
@@ -581,10 +582,21 @@ The maximal cliques of $G$ are $C_1 := \{1, 4\}$, $C_2 := \{1, 2, 3, 5\}$ and $C
 %
 \subsection{Computer assisted proofs for polynomial optimization}
 \label{sec:coqbackground}
-The aim of this section is to briefly recall some existing work
-about the mechanisms of formal polynomial optimization within the $\coq$ proof
-assistant. For more details on the $\coq$ system, we recommend the
-documentation available in~\cite{bertot2004interactive}. 
+Here, we briefly recall some existing features of the $\coq$ proof assistant to handle formal polynomial optimization.
+%about the mechanisms of formal polynomial optimization within the $\coq$ proof assistant.
+For more details on the $\coq$ system, we recommend the
+documentation available in~\cite{bertot2004interactive}.
+Giving a polynomial $r$ and a set of constraints $\K$, one can obtain a lower bound of $r$ by solving any instance of Problem~$(\P_d)$. Then, one can verify formally the correctness of the lower bound $r_d^\star$, using the SOS certificate output $\sigma_0, \dots, \sigma_k$. Indeed it is enough to prove the polynomial equality $r(\x) - r_d^\star = \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ inside $\coq$. Such equalities can be efficiently proved using $\coq$'s ring tactic~\cite{ring05} via the mechanism of computational reflection~\cite{Boutin97usingreflection}.
+For the sake of clarity, let consider the unconstrained case, i.e.~$\K = \R^n$. One encodes an SOS certificate $\sigma_0(\x) = \sum_{i=1}^m q_i^2$  with the sequence of polynomials $[q_1; \dots; q_m]$, with each $q_i$ being of type \code{polC} (see Section~\ref{sec:fpbackground}). To prove the equality $r = \sigma_0$, our version normalizes both $r$ and the sequence $[q_1; \dots; q_m]$ and compares the two normalization results. This mechanism is illustrated in Figure~\ref{fig:reflexion} with the polynomial $p := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ (see Example~\ref{ex:sdp}) being encoded by \code{p : polC}  and the polynomials $1/2$ and $x_1^2 - x_2^2$ being encoded respectively by $\mathtt{q_1}$ and $\mathtt{q_2}$. 
+
+\if{
+In the general case, one applies a correctness lemma:
+\begin{lstlisting}
+Lemma correct_pop env $r$ cert_pop $ $:  
+g_nonneg env g $\to$ checker g $\fpop$ $\mu_k^-$ cert_pop  $\eqcoq$ true $\to$ 
+$\mu_k^-$ $\leq$ $\evalexpr{\fpop}$.
+\end{lstlisting}
+}\fi
 %
 \begin{figure}[!ht]
 \centering
@@ -592,7 +604,11 @@ documentation available in~\cite{bertot2004interactive}.
 \caption{An illustration of computational reflection}	
 \label{fig:reflexion}
 \end{figure}
-
+%
+In the general case, this computational step is done through a \code{checker_sos} procedure which returns a boolean value. If this value is true, one applies a correctness lemma, whose conclusion yields the nonnegativity of $r - r_d^\star$ over $\K$.
+In practice, the SDP solvers are implemented in floating-point precision, thus the above equality between $r - r_d^\star$ and the SOS certificate does not hold. However, following Remark~\ref{rk:arch}, each variable lies in a closed interval, thus one can bound the remainder polynomial $\epsilon(\x) := r(\x) - r_d^\star - \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ using basic interval arithmetic, so that the lower bound $\epsilon^\star$ of $\epsilon$ yields the valid inequality: $\forall \x \in \K, r(\x) \geq r_d^\star + \epsilon^\star$.
+For more explanations, we refer the interested reader to the formal framework developed in~\cite{jfr14}. Note that this formal verification remains valid when considering the sparse variant~$(\S_d)$.
+%
 \section{Guaranteed Round-off Error Bounds using SDP Relaxations}
 \label{sec:fpsdp}
 
@@ -612,8 +628,8 @@ Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1
 
 \begin{figure}[!ht]
 \begin{algorithmic}[1]                    
-\Require real polynomial result $f(\x)$, floating-point polynomial result $\hat{f}(\x, \epsilonb)$, set of constraints $\X$ on $\x$, set of constraints $\B$ on $\epsilonb$, relaxation order $k$
-\Ensure upper bound $r_k^*$ for the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \B$
+\Require real polynomial result $f(\x)$, floating-point polynomial result $\hat{f}(\x, \e)$, set of constraints $\X$ on $\x$, set of constraints $\E$ on $\epsilonb$, relaxation order $d$
+\Ensure upper bound $r_d^*$ for the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \B$
 \State Define the error polynomial $r(\x, \epsilonb) := \hat{f}(\x) - f(\x, \epsilonb) = \displaystyle\sum_{\alphab} r_{\alphab}(\epsilonb) \x^{\alphab}$
 %\State For each $\alphab$, compute a lower (resp. upper) degree 1 polynomial bound $\underline{r_{\alphab}}(\epsilonb)$ (resp. $\overline{r_{\alphab}}(\epsilonb)$) of $r_{\alphab}(\epsilonb)$ over $\B$ 
 \For {each $\alphab$}

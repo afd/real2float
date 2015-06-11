@@ -1,11 +1,36 @@
-\documentclass[a4paper,10pt]{article}
+%-----------------------------------------------------------------------------
+%
+%               Template for sigplanconf LaTeX Class
+%
+% Name:         sigplanconf-template.tex
+%
+% Purpose:      A template for sigplanconf.cls, which is a LaTeX 2e class
+%               file for SIGPLAN conference proceedings.
+%
+% Guide:        Refer to "Author's Guide to the ACM SIGPLAN Class,"
+%               sigplanconf-guide.pdf
+%
+% Author:       Paul C. Anagnostopoulos
+%               Windfall Software
+%               978 371-2316
+%               paul@windfall.com
+%
+% Created:      15 February 2005
+%
+%-----------------------------------------------------------------------------
 
-\textheight235mm
-\textwidth160mm
-\voffset-10mm
-\hoffset-10mm
-\parindent0cm
-\parskip2mm
+
+\documentclass[preprint]{sigplanconf}
+
+% The following \documentclass options may be useful:
+
+% preprint      Remove this option only once the paper is in final form.
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% authoryear    To obtain author/year citation style instead of numeric.
+
+\usepackage{amsmath}
+
 \usepackage{listings}
 \def\lstlanguagefiles{defManOcaml.tex}
 \lstset{language = Ocaml}
@@ -27,7 +52,7 @@
 \usepackage{hyperref}
 \usepackage{subfigure}
 \usepackage{enumerate}
-\usepackage{caption}
+%\usepackage{caption}
 \usepackage{multirow}
 %\usepackage{natbib} %for bibliography via bibtex
 %\usepackage{enumitem}
@@ -80,6 +105,7 @@
 \def\B{\mathbf{B}}
 \def\E{\mathbf{E}}
 \def\K{\mathbf{K}}
+\def\S{\mathbf{S}}
 \def\Q{\mathbf{Q}}
 \def\X{\mathbf{X}}
 \def\Y{\mathbf{Y}}
@@ -140,26 +166,58 @@
 %\newtheorem*{note}{Note}
 \newtheorem{case}{Case}
 
-\title{\bf Automated Precision Tuning using Semidefinite Programming}
-\begin{document}
-\author{Victor Magron$^{1}$ \and George Constantinides$^{1}$ \and Alastair Donaldson$^{2}$}
 
-\footnotetext[1]{Circuits and Systems Group, Department of Electrical and Electronic Engineering,
-Imperial College London, South Kensington Campus, London SW7 2AZ, UK.}
-\footnotetext[2]{Multicore Programming Group, Department of Computing,
-Imperial College London, South Kensington Campus, London SW7 2AZ, UK.}
-%\date{Draft of \today}
+
+
+\begin{document}
+
+\special{papersize=8.5in,11in}
+\setlength{\pdfpageheight}{\paperheight}
+\setlength{\pdfpagewidth}{\paperwidth}
+
+\conferenceinfo{CONF 'yy}{Month d--d, 20yy, City, ST, Country} 
+\copyrightyear{20yy} 
+\copyrightdata{978-1-nnnn-nnnn-n/yy/mm} 
+\doi{nnnnnnn.nnnnnnn}
+
+% Uncomment one of the following two, if you are not going for the 
+% traditional copyright transfer agreement.
+
+%\exclusivelicense                % ACM gets exclusive license to publish, 
+                                  % you retain copyright
+
+%\permissiontopublish             % ACM gets nonexclusive license to publish
+                                  % (paid open-access papers, 
+                                  % short abstracts)
+
+%\titlebanner{banner above paper title}        % These are ignored unless
+%\preprintfooter{short description of paper}   % 'preprint' option specified.
+
+\title{Automated Precision Tuning using Semidefinite Programming}
+%\subtitle{Subtitle Text, if any}
+
+\authorinfo{Name1}
+           {Affiliation1}
+           {Email1}
+\authorinfo{Name2\and Name3}
+           {Affiliation2/3}
+           {Email2/3}
 
 \maketitle
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{abstract}
-%real2float allows the user to write programs with real-valued semialgebraic programs.
-%Semidefinite programming can provide precise information to automatically tune reconfigurable hardware (e.g. FPGA) to algorithm specifications.
+This is the text of the abstract.
 \end{abstract}
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\paragraph{Keywords}
-hardware precision tuning; round-off error; numerical accuracy; floating-point arithmetic; fixed-precision arithmetic; semidefinite programming; sums of squares; correlation sparsity pattern
+
+\category{CR-number}{subcategory}{third-level}
+
+% general terms are not compulsory anymore, 
+% you may leave them out
+%\terms
+%term1, term2
+
+\keywords
+hardware precision tuning; round-off error; numerical accuracy; floating-point arithmetic; fixed-precision arithmetic; semidefinite programming; sums of squares; correlation sparsity pattern.
 \section{Introduction} %3p
 \label{sec:intro}
 %
@@ -180,17 +238,24 @@ Semidefinite programming (SDP) is relevant to a wide range of mathematical field
 \subsection{Overview of our Method}
 %
 Consider the program implementing the following polynomial expression $f$:
-\[ f(\x) := x_2 \times x_5 + x_3 \times x_6 - x_2 \times x_3  - x_5 \times x_6 + x_1 \times ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) \enspace, \]
+\begin{align*}
+f(\x) := x_2 \times x_5 + x_3 \times x_6 - x_2 \times x_3  - x_5 \times x_6 \\
++ x_1 \times ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) \,,
+\end{align*}
+%
 where the six variable vector $\x :=  (x_1, x_2, x_3, x_4, x_5, x_6)$ is the input of the program. Here, the set $\X$ of possible input values is taken as a product of closed intervals: $\X = [4.00, 6.36]^6$ but could be defined in general with a set of inequality constraints among the variables $x_1, \dots, x_6$. 
 
 The polynomial expression $f$ is obtained by performing 15 basic operations (1 negation, 3 subtractions, 6 additions and 5 multiplications). 
 When executing this program with a set of floating-point numbers $\hat{\x} :=  (\hat{x}_1, \hat{x}_2, \hat{x}_3, \hat{x}_4, \hat{x}_5, \hat{x}_6) \in \X$, one actually computes a floating-point result $\hat{f}$, where all operations $+, -, \times$ are replaced by the respectively associated floating-point operations $\oplus, \ominus, \otimes$. 
 The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$, where the bound $\epsilon$ is the machine precision (e.g.~$2^{-24}$ for single precision). One would like to bound the absolute rounding error $|r(\x, \e)| := | \hat{f}(\x, \e) - f (\x) |$ over  all possible input variables $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$. Let define $\E := [-\epsilon, \epsilon]^{15}$ and $\K := \X \times \E$, then note that our bound problem can be cast as a nonlinear optimization problem:
 %
-\begin{equation}
+\begin{align}
+\begin{split}
 \label{eq:roptim}
-r^\star := \max_{(\x, \e) \in \K} | r(\x, \e) | = \max \{-\min_{(\x, \e) \in \K} r(\x, \e), \max_{(\x, \e) \in \K} r(\x,\e)\} \enspace. 
-\end{equation}
+r^\star := & \max_{(\x, \e) \in \K} | r(\x, \e) | \\
+ = & \ \ \max \{-\min_{(\x, \e) \in \K} r(\x, \e), \max_{(\x, \e) \in \K} r(\x,\e)\} \enspace. 
+\end{split}
+\end{align}
 %
 One can directly try to solve these two polynomial optimization problems using classical SDP relaxations~\cite{Lasserre01moments}.
 As in~\cite{fptaylor15}, one can also decompose the error term $r$ as the sum of a term $l(\x,\e)$, which is linear w.r.t.~$\e$, and a nonlinear term $h(\x,\e) := r(\x,\e) - l(\x,\e)$. Then the triangular inequality yields:
@@ -203,8 +268,8 @@ r^\star \leq \max_{(\x, \e) \in \K} |l(\x, \e)| + \max_{(\x, \e) \in \K} |h(\x, 
 It follows that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x_5 + x_3 x_6) e_3 + \dots + f(\x) e_{15} = \sum_{i=1}^{15} s_i(\x) e_i$. The {\em Symbolic Taylor expansions} method~\cite{fptaylor15} consists in using Taylor-interval optimization to compute a rigorous interval enclosure of each polynomial $s_i$, $i = 1,\dots,15$, over $\X$ and finally obtain an upper bound of $|l| + |h|$ over $\K$.
 % over $\X \times \E$
 \begin{itemize}
-\item A direct attempt to solve the two polynomial problems occurring in~\eqref{eq:roptim} fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory. 
-\item Using sparse semidefinite optimization (derived from~\cite{Las06SparseSOS}) to bound $l$ and basic interval arithmetic to bound $h$, one obtains an upper bound of $789 \epsilon$ for $|l| + |h|$ over $\K$. This computation is performed in less than one second on a modern computer.
+\item A direct attempt to solve the two polynomial problems occurring in Equation~\eqref{eq:roptim} fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory. 
+\item Using sparse semidefinite optimization (derived from \cite{Las06SparseSOS}) to bound $l$ and basic interval arithmetic to bound $h$, one obtains an upper bound of $789 \epsilon$ for $|l| + |h|$ over $\K$. This computation is performed in less than one second on a modern computer.
 \item Using basic interval arithmetic, one obtains more quickly (about 17 times less CPU) a coarser bound of $2023 \epsilon$. 
 \item Symbolic Taylor expansions provide an intermediate bound of $936 \epsilon$ but it takes about 16.3 times more CPU than our method. 
 \item Finally, our bound is also obtained with the $\rosa$ tool~\cite{Darulova14Popl} but it takes about 4.6 times more CPU.
@@ -277,10 +342,10 @@ The value of the relative error bound $\epsilon (f_\R)$ differs from the machine
 %
 We consider generic programs encoded in an ML-like language:
 \begin{lstlisting}
-let box_prog       $x_1 \dots x_n = [(a_1, b_1); \dots ; (a_n, b_n)]$;;
-let obj_prog       $x_1 \dots x_n = [(f(\x), \epsilon_{\text{total}})]$;;
-let cstr_prog      $x_1 \dots x_n = [g_1 (\x), \dots, g_k(\x)]$;;
-let uncertain_prog $x_1 \dots x_n = [u_1, \dots, u_n]$;;
+let box_prog    $x_1 \dots x_n = [(a_1, b_1); \dots ; (a_n, b_n)]$;;
+let obj_prog    $x_1 \dots x_n = [(f(\x), \epsilon_{\text{total}})]$;;
+let cstr_prog   $x_1 \dots x_n = [g_1 (\x), \dots, g_k(\x)]$;;
+let uncert_prog $x_1 \dots x_n = [u_1, \dots, u_n]$;;
 \end{lstlisting}
 Here, the first line encodes interval constraints for input variables, namely $\x := (x_1, \dots, x_n) \in [a_1, b_1]\times \dots \times [a_n, b_n]$.
 The second line provides the function $f(\x)$ as well as the total rounding error bound $\epsilon_{\text{total}}$.
@@ -290,20 +355,24 @@ The type of numerical constants is denoted by \code{C}. In our current implement
 
 The inductive type of polynomial expressions with coefficients in \code{C} is \code{polC} defined as follows:
 \begin{lstlisting}
-type polC = | Pc of C | Px of positive | Pneg of polC
-| Padd of polC * polC | Pmul of polC * polC | Psub of polC * polC
+type polC = | Pc of C | Px of positive 
+| Psub of polC$\,$*$\,$polC | Pneg of polC 
+| Padd of polC$\,$*$\,$polC | Pmul of polC$\,$*$\,$polC
 \end{lstlisting}
 %
 The constructor \code{Px} takes a positive integer as argument to represent either an input or local variable.
 %The polynomial expressions $g_1(\x), \dots, g_k(\x)$ have this type \code{polC}.
 The inductive type \code{nlexpr} of nonlinear expressions (such as $f(\x)$) is defined as follows:
 \begin{lstlisting}
-type nlexpr = | Pol of polC | Neg of nlexpr
-| Add of nlexpr * nlexpr | Mul of nlexpr * nlexpr | Sub of nlexpr * nlexpr 
-| Div of nlexpr * nlexpr | Sqrt of nlexpr 
-| Transc of transc * nlexpr
-| IfThenElse of polC * nlexpr * nlexpr
-| Let of positive * nlexpr * nlexpr
+type nlexpr = 
+| Pol of polC | Neg of nlexpr
+| Add of nlexpr$\,$*$\,$nlexpr 
+| Mul of nlexpr$\,$*$\,$nlexpr 
+| Sub of nlexpr$\,$*$\,$nlexpr 
+| Div of nlexpr$\,$*$\,$nlexpr | Sqrt of nlexpr 
+| Transc of transc$\,$*$\,$nlexpr
+| IfThenElse of polC$\,$*$\,$nlexpr$\,$*$\,$nlexpr
+| Let of positive$\,$*$\,$nlexpr$\,$*$\,$nlexpr
 \end{lstlisting}
 %
 The type \code{transc} corresponds to the dictionary $\setD$ of special functions. For instance, the term~\lstinline|Transc ($\exp$, $f(\x)$)| represents the program implementing $\exp(f(\x)$.
@@ -363,7 +432,7 @@ over $\R^n$ is ensured by the existence of a symmetric real matrix $Q$, solution
 p(\x) = \m_d(\x)^\intercal \, \Q \, \m_d(\x) \,, \quad \forall \x \in \R^n, \,
 \end{align}
 %
-where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the matrix $\Q$ has only nonnegative eigenvalues. Such a matrix $\Q$ is called {\em semidefinite positive}. The vector $\m_d$ and matrix $\Q$ have both a size equal to $s_n^d := {n + d \choose d}$. Problem~\eqref{eq:sdp} can be handled with semidefinite programming (SDP) solvers, such as {\sc Mosek}~\cite{mosek} or {\sc SDPA}~\cite{sdpa7} (see~\cite{Vandenberghe94SDP} for specific background about SDP). Then, one computes the ``LDL'' decomposition $\Q = \L^\intercal \D \L$ (variant of the classical Cholesky decomposition), where $\L$ is a lower triangular matrix and $\D$ is a diagonal matrix. Finally, one obtains $p(\x) =  (\L \,
+where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the matrix $\Q$ has only nonnegative eigenvalues. Such a matrix $\Q$ is called {\em semidefinite positive}. The vector $\m_d$ and matrix $\Q$ have both a size equal to $s_n^d := \binom{n + d}{d}$. Problem~\eqref{eq:sdp} can be handled with semidefinite programming (SDP) solvers, such as {\sc Mosek}~\cite{mosek} or {\sc SDPA}~\cite{sdpa7} (see~\cite{Vandenberghe94SDP} for specific background about SDP). Then, one computes the ``LDL'' decomposition $\Q = \L^\intercal \D \L$ (variant of the classical Cholesky decomposition), where $\L$ is a lower triangular matrix and $\D$ is a diagonal matrix. Finally, one obtains $p(\x) =  (\L \,
 \m_d(\x))^\intercal \, \D \, (\L \, \m_d(\x)) = \sum_{i=0}^{s_n^d} q_i(\x)^2$. Such a decomposition is called a sums of squares (SOS) {\em certificate}.
 %
 \begin{example}
@@ -374,56 +443,58 @@ Let define $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x
 We first explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the following programs $(\P_d)$:
 \[
 (\P_d):\left\{			
-\begin{array}{lll}
-r_d^\star := & \sup_{\mu, \sigma_j} & \mu\enspace, \\			 
-& \text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
-& & \mu\in \R \,, \quad \sigma_j \in \Sigma[\x] \,, \quad \deg \sigma_j g_j \leq  2 d, \quad j = 0,\dots,k \enspace.\\
+\begin{array}{rl}
+p_d^\star := \sup\limits_{\sigma_j, \mu} & \mu\enspace, \\			 
+\text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
+& \sigma_j \in \Sigma[\x] \,, \quad   \mu\in \R \,, \\
+& \deg (\sigma_j g_j) \leq  2 d, \ j = 0,\dots,k \enspace.\\
 \end{array} \right.
 \]
 %
 The next theorem is a consequence of the assumption mentioned in Remark~\ref{rk:arch}.
 \begin{theorem}[Lasserre~\cite{Lasserre01moments}]
 \label{th:densesdp}
-The sequence $(r_d^\star)_d$ is nondecreasing and converges to $r^\star$.
+Let $p_d^{\star}$ be the optimal value of the sparse SDP relaxation~$(\P_d)$.
+Then, the sequence of optimal values $(p_d^\star)_{d \in \N}$ is nondecreasing and converges to $r^\star$.
 \end{theorem}
 %
 The size of the truncated SDP variables
 grows polynomially with the SDP-relaxation order $d$.
-Indeed, at fixed $n$, the relaxation $\P_d$ involves $O((2 d)^{n})$ SDP
+Indeed, at fixed $n$, the relaxation~$(\P_d)$ involves $O((2 d)^{n})$ SDP
 variables and $(k + 1)$ linear matrix inequalities (LMIs) of size
 $O(d^n)$. When $d$ increases, then more accurate lower bounds of $r^\star$ can be obtained, at an increasing computational cost.
-At fixed $d$,  the relaxation $\P_d$ involves $O(n^{2d})$ SDP variables and $(d + 1)$ linear matrix inequalities (LMIs) of size
+At fixed $d$,  the relaxation $(\P_d)$ involves $O(n^{2d})$ SDP variables and $(d + 1)$ linear matrix inequalities (LMIs) of size
 $O(n^{d})$.
 
 There are several ways to decrease the size of the SDP problems. 
-First, symmetries in SDP relaxations for polynomial optimization problems can be exploited to replace one SDP problem $\P_d$ by
+First, symmetries in SDP relaxations for polynomial optimization problems can be exploited to replace one SDP problem~$(\P_d)$ by
 several smaller SDPs~\cite{Riener2013SymmetricSDP}. Notice that it is possible only if the multivariate polynomials of the initial problem are invariant under the action of a finite subgroup $G$ of the group $GL_{n}(\R)$. 
 %
 
 \paragraph{Exploiting sparsity} Here we describe how to exploit the structured sparsity of the
-problem to replace one SDP problem $\P_d$ by an SDP problem $\P_d^{\text{sparse}}$ of
+problem to replace one SDP problem~$(\P_d)$ by an SDP problem~$(\S_d)$ of
 size $O (\kappa^ {2 d})$ where $\kappa$ is the average size
 of the maximal cliques of the correlation pattern of the polynomial
-variables (see~\cite{Waki06SparseSOS}). We now present these notions as well as the formulation of sparse SDP relaxations $\P_d^{\text{sparse}}$.
+variables (see~\cite{Waki06SparseSOS}). We now present these notions as well as the formulation of sparse SDP relaxations~$(\S_d)$.
 
 We note $\N^n$ the set of $n$-tuple of nonnegative integers. The support of a polynomial $r(\x) := \sum_{\alphab \in \N^n} r_{\alphab} \x^{\alphab}$ is defined as $\suppf{r} := \{ \, \alphab \in \N^n \, : \, r_{\alphab} \neq 0 \, \}$. For instance the support of $p(\x) := 1 + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ is $\suppf{p} = \{ \, (0,0), (4, 0), (2,2), (0,4) \, \}$.
 
 Let $F_j$ be the index set of variables which are involved in the polynomial $g_j$, for each $j=1, \dots, k$.
 The correlative sparsity is represented by the 
 $n \times n$ correlative sparsity matrix (csp matrix) $\mathbf{R}$ defined by:
-\begin{equation}
+\begin{equation*}
 \label{eq:csp}
 \mathbf{R}(i, j) := \left \{
 \begin{array}{ll}
   1 & \text{ if }  i = j \enspace, \\
-  1 & \text{ if }  \exists \alphab \in \suppf{f} \text{ such that } \alpha_i \geq 1 \text{ and } \alpha_j \geq 1\enspace, \\
-  1 & \text{ if }  \exists k \in \{1, \dots, m\} \text{ such that } i \in F_k \text{ and } j \in F_k \enspace,\\
+  1 & \text{ if }  \exists \alphab \in \suppf{f} \text{ such that } \alpha_i, \alpha_j \geq 1 \,, \\
+  1 & \text{ if }  \exists k \in \{1, \dots, m\} \text{ such that } i, j \in F_k  \,,\\
   0 & \text{otherwise .} 
 \end{array} \right.
-\end{equation}
+\end{equation*}
 
-We define the undirected csp graph $G(N, E)$ with:
- \[ N = \{\, 1, \dots, n \,\} \text{ and } E = \{ \, \{i, j\} : i, j \in N \,, \ i < j \,, \mathbf{R}(i, j) = 1 \, \} \enspace. \]
+We define the undirected csp graph $G(N, E)$ with
+ $N = \{ 1, \dots, n \}$ and $E = \{\{i, j\} : i, j \in N , \ i < j , \mathbf{R}(i, j) = 1 \}$. 
 Then, let $C_1,\dots, C_l \subset N$ denote the maximal cliques of $G(N, E)$ and 
 %and define the sets of supports: 
 %\[\mons{d}{C_q} := \{ \alphab \in  \mons{d}{n} : \alpha_i = 0 \text{ if } i %\notin C_q \}, \ (q=1 ,\dots,l)\enspace. \]
@@ -437,7 +508,7 @@ From the assumption of Remark~\ref{rk:arch}, one can add the $l$ redundant addit
 g_{k + j} := n_j M^2 - \sum_{i \in C_j} {x_i^2} \geq 0\,, \  j=1 ,\dots, l \,,
 \end{equation}
 set $k' = k + l$, define the compact semialgebraic set:
-\[\K' := \{\, \x \in \R^n \, : \, g_1 (\x) \geq 0, \dots, g_k' (\x) \geq 0 \,\} \,,\]
+\[\K' := \{\, \x \in \R^n \, : \, g_1 (\x) \geq 0, \dots, g_{k'} (\x) \geq 0 \,\} \,,\]
 and modify Problem~\eqref{eq:minpop} into the following optimization problem:
 \begin{equation}
 \label{eq:sparseminpop}
@@ -449,37 +520,40 @@ For each $j=1 ,\dots,l$, we note $\R_{2 d}[\x, C_j]$ the set of polynomials of $
 
 The following program is the sparse variant of the SDP program $(\P_d)$:
 \[
-(\P^{\text{sparse}}_d):\left\{			
-\begin{array}{lll}
-r_d^{\text{sparse}, \, \star} := & \sup_{\mu, \sigma_j} & \mu\enspace, \\			 
-& \text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k'} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
-& & \mu\in \R \,, \ \sigma_j \in \Sigma[\x, F_j] \,, \ \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k' \enspace,\\
-& & \sigma_0 \in \sum\limits_{j = 1}^l \Sigma [\x, C_k] \,.
+(\S_d):\left\{			
+\begin{array}{rl}
+r_d^\star := \sup\limits_{\mu, \sigma_j} & \mu\enspace, \\	 
+\text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k'} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
+& \mu\in \R \,, \ \sigma_j \in \Sigma[\x, F_j] \,, \\
+& \sigma_0 \in \sum\limits_{j = 1}^l \Sigma [\x, C_k] \,, \\
+& \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k' \,.
 \end{array} \right.
 \]
 %
-The number of SDP variables of Problem~$(\P^{\text{sparse}}_d)$ is $\sum_{j=1}^l {n_j + 2 d \choose 2 d}$. Let $\kappa := \frac{1}{l} \sum{j=1}^l n_j$ be the average size of the cliques $C_1, \dots, c_l$. Then, at fixed $d$ it yields an SDP problem with $O(\kappa^{2d})$ variables.
+The number of SDP variables of the relaxation~$(\S_d)$ is $\sum_{j=1}^l \binom{n_j + 2 d}{2 d}$. Let $\kappa := \frac{1}{l} \sum_{j=1}^l n_j$ be the average size of the cliques $C_1, \dots, C_l$. At fixed $d$, it yields an SDP problem with $O(\kappa^{2d})$ variables.
 %
-Moreover, the cliques $C_1, \dots, C_l$ satisfy the running intersection property (see Definition~\ref{def:rip} below): 
+Moreover, the cliques $C_1, \dots, C_l$ satisfy the running intersection property: 
 %
-\begin{definition}[Running Intersection Property]
+\begin{definition}[RIP]
 \label{def:rip}
-Let $q \in \N_0, I_1, \dots, I_q \subset \{1, \dots, n\}$. We say that $I_1, \dots, I_q$ satisfy the running intersection property when for all $i=1, \dots, r$, there exists $k < i$ such that $I_i \bigcap (\bigcup_{j < i} I_j) \subset I_k$.
+Let $l \in \N_0$  and $I_1, \dots, I_l$ be subsets of $\{1, \dots, n\}$. We say that $I_1, \dots, I_l$ satisfy the running intersection property (RIP) when for all $i=1, \dots, l$, there exists $k < i$ such that $I_i \bigcap (\bigcup_{j < i} I_j) \subset I_k$.
 %\[ \forall i = 2, \dots, r, (\exists k < i \,, \ (I_i \bigcap \bigcup_{j < i} I_j) \subset I_k)\enspace. \]
 \end{definition}
-This property together with the assumption mentioned in Remark~\ref{rk:sparsearch} allow to state the sparse variant of Theorem~\ref{th:densesdp}:
-%The optimal values of $\r_d^{\text{sparse}}$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
+This RIP property together with the assumption mentioned in Remark~\ref{rk:sparsearch} allow to state the sparse variant of Theorem~\ref{th:densesdp}:
+%The optimal values of $\r_d$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
 %
 \begin{thm}[\protect{Lasserre~\cite[Theorem 3.6]{Las06SparseSOS}}]
 \label{th:sparsesdp}
-The sequence of optimal values $r_d^{\text{sparse}, \, \star}$ is nondecreasing and converges to $r^\star$.
+Let $r_d^{\star}$ be the optimal value of the sparse SDP relaxation~$(\S_d)$. Then the sequence $(r_d^{\star})_{d \in \N}$ is nondecreasing and converges to $r^\star$.
 \end{thm}
 The interested reader can find more details in~\cite{Waki06SparseSOS} about additional ways to exploit sparsity in order to derive analogous sparse SDP relaxations.
-We illustrate the benefits of the SDP relaxations $\P_k^{\text{sparse}}$ with the following example:
+We illustrate the benefits of the SDP relaxations~$(\S_d)$ with the following example:
 \begin{example}
 \label{ex:sparse}
 Consider the polynomial $f$ mentioned in Section~\ref{sec:intro}:
-\[ f(\x) := x_2 x_5 + x_3 x_6 - x_2 x_3  - x_5 x_6 + x_1 ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) \enspace. \] 
+$f(\x) := x_2 x_5 + x_3 x_6 - x_2 x_3  - x_5 x_6 
++ x_1 ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6)$.
+%
 Here, $n = 6, d = 2, N = \{1,\dots, 6 \}$. The $6 \times 6$ correlative sparsity matrix $\mathbf{R}$ is:
 \[
 \mathbf{R} = 
@@ -502,7 +576,7 @@ The csp graph $G$ associated to $\mathbf{R}$ is depicted in Figure~\ref{fig:csp_
 \end{center}
 \end{figure}
 %
-The maximal cliques of $G$ are $C_1 := \{1, 4\}$, $C_2 := \{1, 2, 3, 5\}$ and $C_3 := \{1, 3, 5, 6\}$. For $d=2$, the dense SDP relaxation $\P_2$ involves $\binom{6 + 4}{4} = 210$ variables against $\binom{2 + 4}{4} + 2 \binom{4 + 4}{4} = 115$ for the sparse variant $\P_2^{\text{sparse}}$. This difference becomes even more significant while noticing that the dense SDP relaxation $\P_3$ involves 924 variables against 448 for the sparse variant $\P_2^{\text{sparse}}$.
+The maximal cliques of $G$ are $C_1 := \{1, 4\}$, $C_2 := \{1, 2, 3, 5\}$ and $C_3 := \{1, 3, 5, 6\}$. For $d=2$, the dense SDP relaxation~$(\P_2)$ involves $\binom{6 + 4}{4} = 210$ variables against $\binom{2 + 4}{4} + 2 \binom{4 + 4}{4} = 115$ for the sparse variant~$(\S_2)$. This difference becomes even more significant while comparing the dense SDP relaxation~$(\P_3)$ involving 924 variables against 448 for the sparse variant~$(\S_3)$.
 \end{example}
 %
 \subsection{Computer assisted proofs for polynomial optimization}
@@ -514,7 +588,7 @@ documentation available in~\cite{bertot2004interactive}.
 %
 \begin{figure}[!ht]
 \centering
-\includegraphics{reflexion.pdf}
+\includegraphics[scale=0.75]{reflexion.pdf}
 \caption{An illustration of computational reflection}	
 \label{fig:reflexion}
 \end{figure}
@@ -604,7 +678,7 @@ Here, one can actually reduce the number of variables of the problem, noticing t
 
 \section{Implementation Benchmarks} %4p
 \label{sec:benchs}
-\begin{table}[!ht]
+\begin{table*}[!ht]
 %\small
 \begin{center}
 \caption{Comparison of error bounds $r_k^*$ obtained with different methods}
@@ -649,7 +723,7 @@ Here, one can actually reduce the number of variables of the problem, noticing t
 \end{tabular}
 \label{table:error}
 \end{center}
-\end{table}
+\end{table*}
 
 
 However, $\fptaylor$ implements special cases to eliminate some error terms, for instance when $\op$ is the multiplication and one of the operands is a nonnegative power of two, then the error $e$ is set to zero. 
@@ -730,32 +804,37 @@ SMT solvers allow to analyze programs with various semantics or specifications b
 We have presented a verification framework to over-approximate round-off errors occurring while executing nonlinear programs implemented with finite precision.
 The framework relies on semidefinite optimization, ensuring tight and certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables.
 
+\appendix
 \if{
-In this work, we have proposed a methods to approximate polynomial images of basic compact semialgebraic sets, a numerical approximation alternative to exact methods in case where the latter are too computationally demanding. In its present form, this methodology is applicable to problems of modest size, except if some sparsity can be taken into account, as explained earlier. 
-Therefore, to handle larger size problems, the methodology needs to be adapted. 
-A topic of further investigation is to search for alternative positivity certificates, less demanding than the SOS certificates used in this paper but more efficient than the LP based certificates as defined in~\cite{Handelman1988,Vasilescu}. On the one hand, the latter are really appealing since they yield a hierarchy of LP relaxations (as opposed to semidefinite relaxations as in this paper). Moreover, today's LP solvers can handle huge size LP problems, which is far from being the case for semidefinite solvers. But, on the other hand, it has been shown in~\cite{lasserre2009moments} that generically finite convergence cannot occur for convex problems, except for the linear case.
+\section{Appendix Title}
+
+This is the text of the appendix, if you need one.
 }\fi
-\if{
-\section*{Acknowledgments}
+\acks
 This work was partly funded by the Engineering and Physical Sciences Research Council (EPSRC) Challenging Engineering Grant (EP/I020457/1).
-% Thank Jean-Michel Muller and Nathalie Revol for suggestions using simplified formulas involving power of x
-% Thank Tillmann Weisser and Cordian Riener for suggesting the use of Newton sums to break problem symmetries
-% Thank Johan Löfberg for his help concerning Yalmip scripts tuning
+
+% We recommend abbrvnat bibliography style.
+
+\bibliographystyle{abbrvnat}
+\bibliography{roundsdp}
+% The bibliography should be embedded for final submission.
+
+\if{
+\begin{thebibliography}{}
+\softraggedright
+
+\bibitem[Smith et~al.(2009)Smith, Jones]{smith02}
+P. Q. Smith, and X. Y. Jones. ...reference text...
+
+\end{thebibliography}
 }\fi
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-%\addtolength{\textheight}{-3cm}   % This command serves to balance the column lengths
-
-                                  % on the last page of the document manually. It shortens
-                                  % the textheight of the last page by a suitable amount.
-                                  % This command does not take effect until the next page
-                                  % so it should come on the page before the last. Make
-                                  % sure that you do not shorten the textheight too much.
-                                  
-
-%
-\bibliographystyle{alpha}                       
-%\bibliographystyle{alpha}
-\bibliography{roundsdp}%2.5p
 
 \end{document}
+
+%                       Revision History
+%                       -------- -------
+%  Date         Person  Ver.    Change
+%  ----         ------  ----    ------
+
+%  2013.06.29   TU      0.1--4  comments on permission/copyright notices
+

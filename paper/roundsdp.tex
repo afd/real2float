@@ -609,21 +609,9 @@ In the general case, this computational step is done through a \code{checker_sos
 In practice, the SDP solvers are implemented in floating-point precision, thus the above equality between $r - r_d^\star$ and the SOS certificate does not hold. However, following Remark~\ref{rk:arch}, each variable lies in a closed interval, thus one can bound the remainder polynomial $\epsilon(\x) := r(\x) - r_d^\star - \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ using basic interval arithmetic, so that the lower bound $\epsilon^\star$ of $\epsilon$ yields the valid inequality: $\forall \x \in \K, r(\x) \geq r_d^\star + \epsilon^\star$.
 For more explanations, we refer the interested reader to the formal framework developed in~\cite{jfr14}. Note that this formal verification remains valid when considering the sparse variant~$(\S_d)$.
 %
-\section{Guaranteed Round-off Error Bounds using SDP Relaxations}
+\section{Guaranteed Roundoff Error Bounds using SDP Relaxations}
 \label{sec:fpsdp}
-
-\paragraph{Simplification of error term products}
-We first need the following lemma.
-\begin{lemma}[\protect{Higham~\cite[Lemma 3.3]{higham2002accuracy}}]
-\label{th:redproduct}
-Let $\epsilon < \frac{1}{k}$ and $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\displaystyle \prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
-\end{lemma}
-%
-%\begin{proof}
-%The result is a direct consequence of~\cite[Lemma 3.3]{higham2002accuracy}.
-%\end{proof}
-Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Hence, one can derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
-
+In this section, we present our new algorithm to bound rounding errors of nonlinear programs, relying on sparse SDP relaxations. We first explain how to handle polynomial programs and then present extensions to the non-polynomial case.
 \subsection{Polynomial Programs}
 
 \begin{figure}[!ht]
@@ -692,6 +680,16 @@ Here, one can actually reduce the number of variables of the problem, noticing t
 %
 %\subsection{Transcendental programs}
 
+\paragraph{Simplification of error term}
+%
+In practice, the algorithm integrates features to save error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.
+We can also simplify error term products, thanks to the following lemma.
+\begin{lemma}[\protect{Higham~\cite[Lemma 3.3]{higham2002accuracy}}]
+\label{th:redproduct}
+Let $\epsilon < \frac{1}{k}$ and $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\displaystyle \prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
+\end{lemma}
+Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Hence, one can derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
+%
 \section{Implementation Benchmarks} %4p
 \label{sec:benchs}
 \begin{table*}[!ht]

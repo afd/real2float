@@ -124,6 +124,7 @@
 \newcommand{\nan}{\text{NaN}}
 \newcommand{\nlift}{n_{\text{lift}}}
 \newcommand{\Slift}{\S_{\text{lift}}}
+\renewcommand{\prec}{\text{prec}}
 \newcommand{\mlift}{m_{\text{lift}}}
 \newcommand{\dlift}{r_{\text{lift}}}
 \newcommand{\msdp}{m_{\text{sdp}}}
@@ -133,6 +134,10 @@
 %\DeclareMathOperator{\op}{op}
 \DeclareMathOperator{\conv}{conv}
 \newcommand{\red}[1]{\textbf{{\color{red}#1}}}
+\newcommand{\iaboundfun}[2]{\mathtt{ia\_bound}(#1, #2)}
+\newcommand{\sdpboundfun}[3]{\mathtt{sdp\_bound}(#1, #2, #3)}
+\newcommand{\iabound}{\mathtt{ia\_bound}}
+\newcommand{\sdpbound}{\mathtt{sdp\_bound}}
 %\newcommand{\brev}{\color{red}}
 %\newcommand{\erev}{\color{black}}
 \newcommand{\sthreefp}{\mathtt{s3fp}}
@@ -321,11 +326,11 @@ We adopt the standard practice~\cite{higham2002accuracy} to approximate a real f
 The operator $\hat{\cdot}$ is called the rounding operator and can be selected among rounding to nearest, rounding toward zero (resp.~$\infty$).
 The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig$ and an {\em exponent} $exp$, so that its numerical evaluation yields $(-1)^{s} \times sig \times 2^{exp}$ (resp.~$(-1)^{s} \times sig \times 10^{exp}$). 
 
-The value of $\epsilon$ actually gives the upper bound of the relative floating-point error and is equal to $2^{-m}$, where $m$ is called the {\em precision}, referring to the number of significand bits used. For single floating-point precision, one has $m = 24$. For double (resp.~quadruple) precision, one has $m = 53$ (resp.~$m=113$). Let define $\R$ the set of real numbers and $\F$ the set of binary floating-point numbers.
+The value of $\epsilon$ actually gives the upper bound of the relative floating-point error and is equal to $2^{-\prec}$, where $\prec$ is called the {\em precision}, referring to the number of significand bits used. For single floating-point precision, one has $\prec = 24$. For double (resp.~quadruple) precision, one has $\prec = 53$ (resp.~$\prec=113$). Let define $\R$ the set of real numbers and $\F$ the set of binary floating-point numbers.
 For each real-valued operation $\bop_\R \in \{+, -, \times, \slash \}$ complying with IEEE 754 standard arithmetic~\cite{IEEE}, the result of the corresponding floating-point operation $\bop_\F \in \{\oplus, \ominus, \otimes, \oslash \}$ satisfies the following:
 \begin{equation}
 \label{eq:roundbop}
-\bop_\F \, (\hat{x}, \hat{y}) = \bop_\R \, (x, y) \, (1 + e) \enspace, \quad \mid e \mid \leq \epsilon = 2^{-m} \enspace.
+\bop_\F \, (\hat{x}, \hat{y}) = \bop_\R \, (x, y) \, (1 + e) \enspace, \quad \mid e \mid \leq \epsilon = 2^{-\prec} \enspace.
 \end{equation}
 %
 Other operations include special functions taken from a {\em dictionary} $\setD$, containing the unary functions
@@ -496,19 +501,19 @@ $n \times n$ correlative sparsity matrix (csp matrix) $\mathbf{R}$ defined by:
 
 We define the undirected csp graph $G(N, E)$ with
  $N = \{ 1, \dots, n \}$ and $E = \{\{i, j\} : i, j \in N , \ i < j , \mathbf{R}(i, j) = 1 \}$. 
-Then, let $C_1,\dots, C_l \subset N$ denote the maximal cliques of $G(N, E)$ and 
+Then, let $C_1,\dots, C_m \subset N$ denote the maximal cliques of $G(N, E)$ and 
 %and define the sets of supports: 
 %\[\mons{d}{C_q} := \{ \alphab \in  \mons{d}{n} : \alpha_i = 0 \text{ if } i %\notin C_q \}, \ (q=1 ,\dots,l)\enspace. \]
- define $n_j := \#C_j$, for each $j=1 ,\dots,l$.
+ define $n_j := \#C_j$, for each $j=1 ,\dots,m$.
 
 \begin{remark}
 \label{rk:sparsearch}
-From the assumption of Remark~\ref{rk:arch}, one can add the $l$ redundant additional constraints:
+From the assumption of Remark~\ref{rk:arch}, one can add the $m$ redundant additional constraints:
 \begin{equation}
 \label{eq:assum_sos_sparse}
-g_{k + j} := n_j M^2 - \sum_{i \in C_j} {x_i^2} \geq 0\,, \  j=1 ,\dots, l \,,
+g_{k + j} := n_j M^2 - \sum_{i \in C_j} {x_i^2} \geq 0\,, \  j=1 ,\dots, m \,,
 \end{equation}
-set $k' = k + l$, define the compact semialgebraic set:
+set $k' = k + m$, define the compact semialgebraic set:
 \[\K' := \{\, \x \in \R^n \, : \, g_1 (\x) \geq 0, \dots, g_{k'} (\x) \geq 0 \,\} \,,\]
 and modify Problem~\eqref{eq:minpop} into the following optimization problem:
 \begin{equation}
@@ -517,7 +522,7 @@ r^*  :=  \inf_{\x \in \R^n} \, \{ \, r (\x) \, : \, \x \in \K' \, \} \,.
 \end{equation}
 \end{remark}
 %Notice that the sums of squares of polynomials that belong to $\Sigma [\x, \mons{d}{C_q}]$ only involve variables $x_i (i \in C_q)$.
-For each $j=1 ,\dots,l$, we note $\R_{2 d}[\x, C_j]$ the set of polynomials of $\R_{2 d}[\x]$ which involve the variables $(x_i)_{i \in C_j}$. We note $\Sigma [\x, C_j] := \Sigma [\x] \bigcap \R_{2 d}[\x, C_j]$. Similarly, we define $\Sigma [\x, F_j]$, for each $j=1, \dots, k$.
+For each $j=1 ,\dots,m$, we note $\R_{2 d}[\x, C_j]$ the set of polynomials of $\R_{2 d}[\x]$ which involve the variables $(x_i)_{i \in C_j}$. We note $\Sigma [\x, C_j] := \Sigma [\x] \bigcap \R_{2 d}[\x, C_j]$. Similarly, we define $\Sigma [\x, F_j]$, for each $j=1, \dots, k$.
 
 The following program is the sparse variant of the SDP program $(\P_d)$:
 \[
@@ -526,18 +531,18 @@ The following program is the sparse variant of the SDP program $(\P_d)$:
 r_d^\star := \sup\limits_{\mu, \sigma_j} & \mu\enspace, \\	 
 \text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k'} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
 & \mu\in \R \,, \ \sigma_j \in \Sigma[\x, F_j] \,, \\
-& \sigma_0 \in \sum\limits_{j = 1}^l \Sigma [\x, C_k] \,, \\
+& \sigma_0 \in \sum\limits_{j = 1}^m \Sigma [\x, C_m] \,, \\
 & \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k' \,.
 \end{array} \right.
 \]
 %
-The number of SDP variables of the relaxation~$(\S_d)$ is $\sum_{j=1}^l \binom{n_j + 2 d}{2 d}$. Let $\kappa := \frac{1}{l} \sum_{j=1}^l n_j$ be the average size of the cliques $C_1, \dots, C_l$. At fixed $d$, it yields an SDP problem with $O(\kappa^{2d})$ variables.
+The number of SDP variables of the relaxation~$(\S_d)$ is $\sum_{j=1}^m \binom{n_j + 2 d}{2 d}$. Let $\kappa := \frac{1}{m} \sum_{j=1}^m n_j$ be the average size of the cliques $C_1, \dots, C_m$. At fixed $d$, it yields an SDP problem with $O(\kappa^{2d})$ variables.
 %
-Moreover, the cliques $C_1, \dots, C_l$ satisfy the running intersection property: 
+Moreover, the cliques $C_1, \dots, C_m$ satisfy the running intersection property: 
 %
 \begin{definition}[RIP]
 \label{def:rip}
-Let $l \in \N_0$  and $I_1, \dots, I_l$ be subsets of $\{1, \dots, n\}$. We say that $I_1, \dots, I_l$ satisfy the running intersection property (RIP) when for all $i=1, \dots, l$, there exists $k < i$ such that $I_i \bigcap (\bigcup_{j < i} I_j) \subset I_k$.
+Let $l \in \N_0$  and $I_1, \dots, I_m$ be subsets of $\{1, \dots, n\}$. We say that $I_1, \dots, I_m$ satisfy the running intersection property (RIP) when for all $i=1, \dots, m$, there exists $k < i$ such that $I_i \bigcap (\bigcup_{j < i} I_j) \subset I_m$.
 %\[ \forall i = 2, \dots, r, (\exists k < i \,, \ (I_i \bigcap \bigcup_{j < i} I_j) \subset I_k)\enspace. \]
 \end{definition}
 This RIP property together with the assumption mentioned in Remark~\ref{rk:sparsearch} allow to state the sparse variant of Theorem~\ref{th:densesdp}:
@@ -587,7 +592,7 @@ Here, we briefly recall some existing features of the $\coq$ proof assistant to 
 For more details on the $\coq$ system, we recommend the
 documentation available in~\cite{bertot2004interactive}.
 Giving a polynomial $r$ and a set of constraints $\K$, one can obtain a lower bound of $r$ by solving any instance of Problem~$(\P_d)$. Then, one can verify formally the correctness of the lower bound $r_d^\star$, using the SOS certificate output $\sigma_0, \dots, \sigma_k$. Indeed it is enough to prove the polynomial equality $r(\x) - r_d^\star = \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ inside $\coq$. Such equalities can be efficiently proved using $\coq$'s ring tactic~\cite{ring05} via the mechanism of computational reflection~\cite{Boutin97usingreflection}.
-For the sake of clarity, let consider the unconstrained case, i.e.~$\K = \R^n$. One encodes an SOS certificate $\sigma_0(\x) = \sum_{i=1}^m q_i^2$  with the sequence of polynomials $[q_1; \dots; q_m]$, with each $q_i$ being of type \code{polC} (see Section~\ref{sec:fpbackground}). To prove the equality $r = \sigma_0$, our version normalizes both $r$ and the sequence $[q_1; \dots; q_m]$ and compares the two normalization results. This mechanism is illustrated in Figure~\ref{fig:reflexion} with the polynomial $p := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ (see Example~\ref{ex:sdp}) being encoded by \code{p : polC}  and the polynomials $1/2$ and $x_1^2 - x_2^2$ being encoded respectively by $\mathtt{q_1}$ and $\mathtt{q_2}$. 
+For the sake of clarity, let consider the unconstrained case, i.e.~$\K = \R^n$. One encodes an SOS certificate $\sigma_0(\x) = \sum_{i=1}^m q_i^2$  with the sequence of polynomials $[q_1; \dots; q_m]$, with each $q_i$ being of type \code{polC} (see Section~\ref{sec:fpbackground}). To prove the equality $r = \sigma_0$, our version of ring's tactic normalizes both $r$ and the sequence $[q_1; \dots; q_m]$ and compares the two normalization results. This mechanism is illustrated in Figure~\ref{fig:reflexion} with the polynomial $p := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ (see Example~\ref{ex:sdp}) being encoded by \code{p : polC}  and the polynomials $1/2$ and $x_1^2 - x_2^2$ being encoded respectively by $\mathtt{q_1}$ and $\mathtt{q_2}$. 
 
 \if{
 In the general case, one applies a correctness lemma:
@@ -613,31 +618,30 @@ For more explanations, we refer the interested reader to the formal framework de
 \label{sec:fpsdp}
 In this section, we present our new algorithm to bound rounding errors of nonlinear programs, relying on sparse SDP relaxations. We first explain how to handle polynomial programs and then present extensions to the non-polynomial case.
 \subsection{Polynomial Programs}
+Here we consider a given program which implements a polynomial expression $f$ with input variables $\x$ satisfying a set of constraints $\X$. Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|rounding| procedure (see Section~\ref{sec:fpbackground}), introducing the introduction of error variables $\e$. 
 
+The algorithm \code{bound_poly}, depicted in Figure~\ref{alg:bound_poly}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^k$, with $k$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound_poly} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an upper bound of the maximal absolute error bound $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
+
+After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of a polynomial $l$ which is linear w.r.t.~the error variable $\e$ and a remainder polynomial $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of a-priori much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}).
+ 
+%
 \begin{figure}[!ht]
 \begin{algorithmic}[1]                    
-\Require real polynomial result $f(\x)$, floating-point polynomial result $\hat{f}(\x, \e)$, set of constraints $\X$ on $\x$, set of constraints $\E$ on $\epsilonb$, relaxation order $d$
-\Ensure upper bound $r_d^*$ for the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \B$
-\State Define the error polynomial $r(\x, \epsilonb) := \hat{f}(\x) - f(\x, \epsilonb) = \displaystyle\sum_{\alphab} r_{\alphab}(\epsilonb) \x^{\alphab}$
-%\State For each $\alphab$, compute a lower (resp. upper) degree 1 polynomial bound $\underline{r_{\alphab}}(\epsilonb)$ (resp. $\overline{r_{\alphab}}(\epsilonb)$) of $r_{\alphab}(\epsilonb)$ over $\B$ 
-\For {each $\alphab$}
-\State Write $r_{\alphab}(\epsilonb) = l_{\alphab}(\epsilonb) + h_{\alphab}(\epsilonb)$, with $\deg l_{\alphab} = 1$ and $\deg h_{\alphab} > 1$
-%\State compute a degree 1 under-approximation $\underline{r_{\alphab}}(\epsilonb)$ of $r_{\alphab}(\epsilonb)$ over $\B$
-%\State compute a degree 1 over-approximation $\overline{r_{\alphab}}(\epsilonb)$ of $r_{\alphab}(\epsilonb)$ over $\B$
-\EndFor
-\State Define $h(\x, \epsilonb) := \displaystyle\sum_{\alphab} h_{\alphab}(\epsilonb) \x^{\alphab}$ and $l(\x,\epsilonb):= \displaystyle\sum_{\alphab} l_{\alphab}(\epsilonb) \x^{\alphab}$
-\State Compute an upper bound $h^*$ of $h$ over $\K$ with interval arithmetic
-\State Compute an upper bound $l_k^*$ of $l$ over $\K$ with sparse SOS optimization at relaxation order $k$ \label{line:boundq}
-%\State For each $\alphab$, compute an interval enclosure $[\underline{r_{\alphab}}, \overline{r_{\alphab}}]$ of $r_{\alphab}(\epsilonb)$ over $\B$
-%\State Define the product of closed intervals $\Y := \prod_{\alphab} [\underline{r_{\alphab}}, \overline{r_{\alphab}}]$
-%\State Compute a lower (resp. upper) bound $\underline{q}$ (resp. $\overline{q}$) of $q(\x,\y):= \sum_{\alphab} \y_{\alphab} \x^{\alphab}$ over $\X \times \Y$ \label{line:boundq}
-%\State Compute an interval enclosure $I := [\underline{q}, \overline{q}]$ of $q(\x,\y):= \sum_{\alphab} \y_{\alphab} \x^{\alphab}$ over $\X \times \Y$ \label{line:boundq}
-\State \Return $r_k^* := h^* + l_k^*$
+\Require input variables $\x$, input constraints $\X$, real polynomial $f(\x)$, rounded polynomial $\hat{f}(\x, \e)$, error variables $\e$, error constraints $\E$, relaxation order $d$
+\Ensure upper bound $f_d$ of the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \E$
+\State Define the error polynomial $r(\x, \e) := \hat{f}(\x,\e) - f(\x)$ \label{line:r}
+\State Compute $l(\x,\e) := \sum_{i=1}^m \frac{\partial r(\x,\e)} {\partial e_i} (\x,0) \, e_i$ \label{line:l}
+\State Compute $h := r - l$ \label{line:h}
+\State Compute interval bounds for $h$: $I^h := \iaboundfun{h}{\K}$ \label{line:iabound}
+\State Compute interval bounds for $l$: $I_d^l := \sdpboundfun{l}{\K}{d}$  \label{line:sdpbound}
+\State Compute $I_d := I_d^l + I^h = [\underline{f_d}, \overline{f_d}]$ 
+\State \Return $f_d := \max \{- \underline{f_d}, \overline{f_d} \}$
 \end{algorithmic}
-\caption{$\realtofloat$}
-\label{alg:realtofloat}
+\caption{\code{bound_poly}}
+\label{alg:bound_poly}
 \end{figure}
-%Let define $h_{\alphab} (y_{\alphab}) := (\overline{r_{\alphab}} - y_{\alphab}) (y_{\alphab} - \underline{r_{\alphab}})$, for each $\alphab$.
+%
+
 To compute an upper bound of the polynomial $l$, one writes
 \[ 
 l(\x,\epsilonb):= \sum_{\alphab} l_{\alphab}(\epsilonb) \x^{\alphab} = \sum_{i=1}^{n^\B} \epsilon_i \, l_i(\x) \,.

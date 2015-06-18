@@ -343,7 +343,7 @@ f_\F (\hat{x}) = f_\R (x) (1 + e) \enspace, \quad \mid e \mid \leq \epsilon (f_\
 The value of the relative error bound $\epsilon (f_\R)$ differs from the machine precision $\epsilon$ in Equation~\eqref{eq:roundbop} and has to be properly adjusted. We refer the interested reader to~\cite{VerifCADTransc} for relative error bound verification of transcendental functions (see also~\cite{VerifHOLTransc} for formalization in $\hol$).
 %
 %In a similar fashion, 
-\paragraph{Program semantics}
+\paragraph{Program semantics.}
 %
 We consider generic programs encoded in an ML-like language:
 \begin{lstlisting}
@@ -394,7 +394,7 @@ Finally, one obtains rounded nonlinear expressions using an inductive procedure~
 \label{sec:sdpbackground}
 Here, we recall mandatory background about the method that we use to handle the optimization problem of Equation~\eqref{eq:roptim}, when the nonlinear function $r$ is a polynomial expression.
 
-\paragraph{Sums of squares certificates and semidefinite programming}
+\paragraph{Sums of squares certificates and semidefinite programming.}
 We remind basic facts about generation of sums of squares certificates for polynomial optimization, using semidefinite programming.
 Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the restriction of $\R[\x]$ to polynomials of degree at most $2 d$. Let define the cone of sums of squares:
 \begin{equation}
@@ -445,15 +445,17 @@ where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the mat
 Let define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
 \end{example}
 %
-\paragraph{Dense SDP relaxations for polynomial optimization}
+\paragraph{Dense SDP relaxations for polynomial optimization.}
 We first explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the following programs $(\P_d)$:
 \[
 (\P_d):\left\{			
-\begin{array}{rl}
-p_d^\star := \sup\limits_{\sigma_j, \mu} & \mu\enspace, \\			 
-\text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
-& \sigma_j \in \Sigma[\x] \,, \quad   \mu\in \R \,, \\
-& \deg (\sigma_j g_j) \leq  2 d, \ j = 0,\dots,k \enspace.\\
+\begin{array}{rlr}
+p_d^\star := \sup\limits_{\sigma_j, \mu} & \mu \enspace, \\			 
+\text{s.t.} & r (\x) - \mu = \sum_{j = 0}^{k} \sigma_j(\x) g_j(\x) \,, \ \forall \x \,, \\
+\\
+& \mu\in \R \,, \sigma_j \in \Sigma[\x] \,, \quad \ \, \quad  \ j = 0,\dots,k \,, \\
+\\
+& \deg (\sigma_j g_j) \leq  2 d,             \quad \ \, \, \qquad  j = 0,\dots,k \,.\\
 \end{array} \right.
 \]
 %
@@ -477,7 +479,7 @@ First, symmetries in SDP relaxations for polynomial optimization problems can be
 several smaller SDPs~\cite{Riener2013SymmetricSDP}. Notice that it is possible only if the multivariate polynomials of the initial problem are invariant under the action of a finite subgroup $G$ of the group $GL_{n}(\R)$. 
 %
 
-\paragraph{Exploiting sparsity} Here we describe how to exploit the structured sparsity of the
+\paragraph{Exploiting sparsity.} Here we describe how to exploit the structured sparsity of the
 problem to replace one SDP problem~$(\P_d)$ by an SDP problem~$(\S_d)$ of
 size $O (\kappa^ {2 d})$ where $\kappa$ is the average size
 of the maximal cliques of the correlation pattern of the polynomial
@@ -529,14 +531,20 @@ The following program is the sparse variant of the SDP program $(\P_d)$:
 (\S_d):\left\{			
 \begin{array}{rl}
 r_d^\star := \sup\limits_{\mu, \sigma_j} & \mu\enspace, \\	 
-\text{s.t.} & r (\x) - \mu = \sum\limits_{j = 0}^{k'} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
-& \mu\in \R \,, \ \sigma_j \in \Sigma[\x, F_j] \,, \\
-& \sigma_0 \in \sum\limits_{j = 1}^m \Sigma [\x, C_m] \,, \\
-& \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k' \,.
+\text{s.t.} & r (\x) - \mu = \sum_{j = 0}^{k'} \sigma_j(\x) g_j(\x) \,, \ \forall \x \,, \\
+\\
+& \mu\in \R \,,\  \sigma_0 \in \sum_{j = 1}^m \Sigma [\x, C_j] \,, \\
+\\
+& \sigma_j \in \Sigma[\x, F_j]  \,,\ j = 1,\dots,k' \,, \\
+\\
+& \deg (\sigma_j g_j) \leq 2 d  \,,\ j = 0,\dots,k' \,,
 \end{array} \right.
 \]
 %
-The number of SDP variables of the relaxation~$(\S_d)$ is $\sum_{j=1}^m \binom{n_j + 2 d}{2 d}$. Let $\kappa := \frac{1}{m} \sum_{j=1}^m n_j$ be the average size of the cliques $C_1, \dots, C_m$. At fixed $d$, it yields an SDP problem with $O(\kappa^{2d})$ variables.
+where $\sigma \in \sum_{j = 1}^m \Sigma [\x, C_j]$ if and only if there exist $\sigma^1 \in \Sigma[\x, C_1], \dots, \sigma^m \in \Sigma[\x,C_m]$ such that $\sigma (\x) = \sum_{j = 1}^m \sigma^j (\x)$, for all $\x \in \R^n$.
+%
+
+The number of SDP variables of the relaxation~$(\S_d)$ is $\sum_{j=1}^m \binom{n_j + 2 d}{2 d}$. At fixed $d$, it yields an SDP problem with $O(\kappa^{2d})$ variables, where $\kappa := \frac{1}{m} \sum_{j=1}^m n_j$ is the average size of the cliques $C_1, \dots, C_m$.
 %
 Moreover, the cliques $C_1, \dots, C_m$ satisfy the running intersection property: 
 %
@@ -636,7 +644,7 @@ After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{
 \Require input variables $\x$, input constraints $\X$, real polynomial $f(\x)$, rounded polynomial $\hat{f}(\x, \e)$, error variables $\e$, error constraints $\E$, relaxation order $d$
 \Ensure upper bound $f_d$ of the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \E$
 \State Define the error polynomial $r(\x, \e) := \hat{f}(\x,\e) - f(\x)$ \label{line:r}
-\State Compute $l(\x,\e) := \sum_{i=1}^m \frac{\partial r(\x,\e)} {\partial e_i} (\x,0) \, e_i$ \label{line:l}
+\State Compute $l(\x,\e) := \sum_{j=1}^m \frac{\partial r(\x,\e)} {\partial e_j} (\x,0) \, e_j$ \label{line:l}
 \State Compute $h := r - l$ \label{line:h}
 \State Compute interval bounds for $h$: $I^h := \iaboundfun{h}{\K}$ \label{line:iabound}
 \State Compute interval bounds for $l$: $I_d^l := \sdpboundfun{l}{\K}{d}$  \label{line:sdpbound}
@@ -647,15 +655,15 @@ After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{
 \label{alg:bound_poly}
 \end{figure}
 %
-
-First, note that one can map each input variables $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_i$ to $n+i$, for all $i=1,\dots,m$. Then, define the sets $C_1 := {1,\dots,n,n+1}, \dots, C_m := {1,\dots,n,n+m}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
+\paragraph{Optimization procedure $\sdpbound$.}
+First, note that one can map each input variables $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_j$ to $n+j$, for all $j=1,\dots,m$. Then, define the sets $C_1 := {1,\dots,n,n+1}, \dots, C_m := {1,\dots,n,n+m}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
 We also scale the optimization problems by writing 
 \begin{align}
 \label{eq:lscale}
-l(\x,\e) = \sum_{i=1}^m s_i (\x) e_i = \epsilon \sum_{i=1}^m s_i (\x) \frac{e_i}{\epsilon} \,,
+l(\x,\e) = \sum_{j=1}^m s_j (\x) e_j = \epsilon \sum_{j=1}^m s_j (\x) \frac{e_j}{\epsilon} \,,
 \end{align}
 %
-leading to compute an interval enclosure of $l/\epsilon$ over $\K' := \X \times [-1, 1]^m$.
+with $s_j(\x) := \frac{\partial r(\x,\e)} {\partial e_j} (\x,0)$, for all $j=1,\dots,m$. It leads to compute an interval enclosure of $l/\epsilon$ over $\K' := \X \times [-1, 1]^m$.
 Recall that from Remark~\ref{rk:arch}, there exists an integer $M > 0$ such that $M - \sum_{i=1}^n x_i^2 \geq 0$, as the input variable satisfy box constraints.
 Moreover, to fulfil the assumption of Remark~\ref{rk:sparsearch},  one encodes $\K'$ as follows: 
 \begin{align*}
@@ -663,20 +671,56 @@ Moreover, to fulfil the assumption of Remark~\ref{rk:sparsearch},  one encodes $
 g_{k+1}(\x,e_1) \geq 0, \dots, g_{k+m} (\x, e_m) \geq 0 \,\} \,,
 \end{align*}
 %
-with $g_{k+i}(\x, e_i) := M + 1 -  \sum_{i=1}^n x_i^2 + e_i^2$, for all $i=1,\dots, m$.
-Then, one can compute the minimum of $l(\x,\e)$ over $\K$ by solving the following optimization problem:
-\[
+with $g_{k+j}(\x, e_j) := M + 1 -  \sum_{i=1}^n x_i^2 + e_j^2$, for all $j=1,\dots, m$. 
+The index set of variables involved in $g_j$ is $F_j := N = \{1, \dots, n\}$ for all $j=1, \dots, k$. 
+The index set of variables involved in $g_{k+j}$ is $F_j := C_j$ for all $j=1, \dots, m$. 
+
+Then, one can compute a lower bound of the minimum of $l'(\x,\e) := l(\x, \e) / \epsilon$ over $\K'$ by solving the following optimization problem:
+%
+\begin{align}
+\begin{split}
+\label{eq:lscalesdp1}
 \left\{			
 \begin{array}{rl}
-\underline{l_d} := \sup\limits_{\mu, \sigma_j} & \mu\enspace, \\	 
-\text{s.t.} & l (\x, \e) - \mu = \sum\limits_{j = 0}^{k'} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
-& \mu\in \R \,, \ \sigma_j \in \Sigma[\x, F_j] \,, \\
-& \sigma_0 \in \sum\limits_{j = 1}^m \Sigma [\x, C_m] \,, \\
-& \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k' \,.
+\underline{l_d'} := \sup\limits_{\mu, \sigma_j} & \mu\enspace, \\	 
+\text{s.t.} & l' - \mu = \sigma_0 + \sum_{j = 0}^{k+m} \sigma_j g_j \,, \\
+\\
+& \mu\in \R \,,\ \sigma_0 \in \sum_{j = 1}^m \Sigma [(\x, \e), C_j] \,, \\
+\\
+& \sigma_j \in \Sigma[(\x,\e), F_j] \,, \ j = 1,\dots,k+m \,, \\
+\\
+& \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 0,\dots,k+m \,.
 \end{array} \right.
-\]
-
-\paragraph{Convergence of the SDP hierarchy of error bounds}
+\end{split}
+\end{align}
+%
+A feasible solution of Problem~\eqref{eq:lscalesdp1} ensures the existence of $\sigma^1 \in \Sigma[(\x,e_1)], \dots, \sigma^m \in \Sigma[(\x,e_m)]$ such that $\sigma_0 = \sum_{j=0}^m \sigma^j$, allowing the following reformulation:
+%
+\begin{align}
+\begin{split}
+\label{eq:lscalesdp2}
+\left\{			
+\begin{array}{rl}
+\underline{l_d'} := \sup\limits_{\mu, \sigma_j} & \mu\enspace, \\	
+\text{s.t.} & l' - \mu = \sum_{j=1}^m \sigma^j + \sum_{j = 1}^{k+m} \sigma_j g_j \,, \\
+\\
+& \mu\in \R \,, \ \sigma_j \in \Sigma[\x] \,, \ j = 1,\dots,m \,, \\
+\\
+& \sigma^j  \in \Sigma [(\x, e_j)] \,,  \deg (\sigma^j) \leq 2 d  \,, \ j = 1,\dots,m \,, \\
+\\
+&  \quad \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k+m \,.
+\end{array} \right.
+\end{split}
+\end{align}
+%
+An upper bound $\overline{l_d'}$ can be obtained by replacing $\sup$ with $\inf$ and $l' - \mu$ by $\mu - l'$ in Problem~\eqref{eq:lscalesdp2}.
+Our optimization procedure $\sdpbound$ computes the lower bound $\underline{l_d'}$ as well as an upper bound $\overline{l_d'}$ of $l'$ over $\K'$ then returns the interval $I_d^l := [\epsilon \, \underline{l_d'}, \epsilon \, \overline{l_d'}] $, which is a sound enclosure of the values of $l$ over $\K$.
+%
+\begin{remark}
+We emphasize the importance of scaling the error variables. First, it allows to consider a polynomial optimization problem in $\K' := \X \times [-1, 1]$, ensuring that the range of input variables does not significantly differs from the range of error variables, which is mandatory when considering SDP relaxations. Indeed, most SDP solvers (e.g.~{\sc Mosek}, {\sc SDPA}) are implemented using double floating-point precision. Hence, when the maximal value $\epsilon$ of error variables is less than $2^{-53}$, these solvers will treat each error variable term as 0, and consequently $l$ as the zero polynomial.
+In addition, 
+\end{remark}
+\paragraph{Convergence of the SDP hierarchy of error bounds.}
 
 \subsection{Non-polynomial Programs}
 
@@ -697,7 +741,7 @@ Here, one can actually reduce the number of variables of the problem, noticing t
 %
 %\subsection{Transcendental programs}
 
-\paragraph{Simplification of error term}
+\paragraph{Simplification of error term.}
 %
 In practice, the algorithm integrates features to save error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.
 We can also simplify error term products, thanks to the following lemma.

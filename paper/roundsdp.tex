@@ -442,7 +442,7 @@ where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the mat
 %
 \begin{example}
 \label{ex:sdp}
-Let define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,2,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
+Let define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
 \end{example}
 %
 \paragraph{Dense SDP relaxations for polynomial optimization}
@@ -501,7 +501,7 @@ $n \times n$ correlative sparsity matrix (csp matrix) $\mathbf{R}$ defined by:
 
 We define the undirected csp graph $G(N, E)$ with
  $N = \{ 1, \dots, n \}$ and $E = \{\{i, j\} : i, j \in N , \ i < j , \mathbf{R}(i, j) = 1 \}$. 
-Then, let $C_1,\dots, C_m \subset N$ denote the maximal cliques of $G(N, E)$ and 
+Then, let $C_1,\dots, C_m \subseteq N$ denote the maximal cliques of $G(N, E)$ and 
 %and define the sets of supports: 
 %\[\mons{d}{C_q} := \{ \alphab \in  \mons{d}{n} : \alpha_i = 0 \text{ if } i %\notin C_q \}, \ (q=1 ,\dots,l)\enspace. \]
  define $n_j := \#C_j$, for each $j=1 ,\dots,m$.
@@ -542,7 +542,7 @@ Moreover, the cliques $C_1, \dots, C_m$ satisfy the running intersection propert
 %
 \begin{definition}[RIP]
 \label{def:rip}
-Let $l \in \N_0$  and $I_1, \dots, I_m$ be subsets of $\{1, \dots, n\}$. We say that $I_1, \dots, I_m$ satisfy the running intersection property (RIP) when for all $i=1, \dots, m$, there exists $k < i$ such that $I_i \bigcap (\bigcup_{j < i} I_j) \subset I_m$.
+Let $l \in \N_0$  and $I_1, \dots, I_m$ be subsets of $\{1, \dots, n\}$. We say that $I_1, \dots, I_m$ satisfy the running intersection property (RIP) when for all $i=1, \dots, m$, there exists $k < i$ such that $I_i \bigcap (\bigcup_{j < i} I_j) \subseteq I_m$.
 %\[ \forall i = 2, \dots, r, (\exists k < i \,, \ (I_i \bigcap \bigcup_{j < i} I_j) \subset I_k)\enspace. \]
 \end{definition}
 This RIP property together with the assumption mentioned in Remark~\ref{rk:sparsearch} allow to state the sparse variant of Theorem~\ref{th:densesdp}:
@@ -620,11 +620,11 @@ In this section, we present our new algorithm to bound rounding errors of nonlin
 \subsection{Polynomial Programs}
 Here we consider a given program which implements a polynomial expression $f$ with input variables $\x$ satisfying a set of constraints $\X$. Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|rounding| procedure (see Section~\ref{sec:fpbackground}), introducing the introduction of error variables $\e$. 
 
-The algorithm \code{bound_poly}, depicted in Figure~\ref{alg:bound_poly}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^k$, with $k$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound_poly} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an upper bound of the maximal absolute error bound $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
+The algorithm \code{bound_poly}, depicted in Figure~\ref{alg:bound_poly}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound_poly} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an upper bound of the maximal absolute error bound $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
 
-After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of a polynomial $l$ which is linear w.r.t.~the error variable $\e$ and a remainder polynomial $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of a-priori much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}).
- 
+After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of a polynomial $l$ which is linear w.r.t.~the error variable $\e$ and a remainder polynomial $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of a-priori much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). The bound of $l$ is provided through solving two sparse SDP instances of Problem~$(\S_d)$, at relaxation order $d$. We now give more explanations about this optimization procedure. 
 %
+
 \begin{figure}[!ht]
 \begin{algorithmic}[1]                    
 \Require input variables $\x$, input constraints $\X$, real polynomial $f(\x)$, rounded polynomial $\hat{f}(\x, \e)$, error variables $\e$, error constraints $\E$, relaxation order $d$
@@ -641,6 +641,9 @@ After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{
 \label{alg:bound_poly}
 \end{figure}
 %
+
+First, note that one can map each input variables $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_i$ to $i+n$, for all $i=1,\dots,m$. Then, define the sets $C_1 := {1,\dots,n,n+1}, \dots, C_m := {1,\dots,n,n+m}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one involving a total number of $n+m $variables.
+
 
 To compute an upper bound of the polynomial $l$, one writes
 \[ 

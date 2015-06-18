@@ -442,7 +442,7 @@ where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the mat
 %
 \begin{example}
 \label{ex:sdp}
-Let define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
+Let define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,2,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
 \end{example}
 %
 \paragraph{Dense SDP relaxations for polynomial optimization}

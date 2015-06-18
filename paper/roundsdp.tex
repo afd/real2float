@@ -618,7 +618,13 @@ For more explanations, we refer the interested reader to the formal framework de
 \label{sec:fpsdp}
 In this section, we present our new algorithm to bound rounding errors of nonlinear programs, relying on sparse SDP relaxations. We first explain how to handle polynomial programs and then present extensions to the non-polynomial case.
 \subsection{Polynomial Programs}
-Here we consider a given program which implements a polynomial expression $f$ with input variables $\x$ satisfying a set of constraints $\X$. Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|rounding| procedure (see Section~\ref{sec:fpbackground}), introducing the introduction of error variables $\e$. 
+Here we consider a given program which implements a polynomial expression $f$ with input variables $\x$ satisfying a set of constraints $\X$. We assume that  $\X$ is included in a box (i.e.~a product of closed intervals) $[\a, \b] := [a_1, b_1] \times \dots \times [a_n, b_n]$ and that $\X$ is encoded as follows: 
+\[ 
+\X := \{\, \x \in \R^n \, : \, g_1 (\x) \geq 0, \dots, g_{k} (\x) \geq 0 \,\} \,,
+\]
+for polynomial functions $g_1, \dots, g_k$. 
+%
+Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|rounding| procedure (see Section~\ref{sec:fpbackground}), introducing the introduction of error variables $\e$. 
 
 The algorithm \code{bound_poly}, depicted in Figure~\ref{alg:bound_poly}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound_poly} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an upper bound of the maximal absolute error bound $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
 
@@ -642,29 +648,33 @@ After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{
 \end{figure}
 %
 
-First, note that one can map each input variables $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_i$ to $i+n$, for all $i=1,\dots,m$. Then, define the sets $C_1 := {1,\dots,n,n+1}, \dots, C_m := {1,\dots,n,n+m}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one involving a total number of $n+m $variables.
-
-
-To compute an upper bound of the polynomial $l$, one writes
-\[ 
-l(\x,\epsilonb):= \sum_{\alphab} l_{\alphab}(\epsilonb) \x^{\alphab} = \sum_{i=1}^{n^\B} \epsilon_i \, l_i(\x) \,.
-\]
-Then one uses the results of Section~\ref{sec:sdpbackground}, namely one solves the following optimization problem:
-%
+First, note that one can map each input variables $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_i$ to $n+i$, for all $i=1,\dots,m$. Then, define the sets $C_1 := {1,\dots,n,n+1}, \dots, C_m := {1,\dots,n,n+m}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
+We also scale the optimization problems by writing 
 \begin{align}
-\label{eq:primalexists}
-l^*_k := \inf\limits_{\sigma_j, \sigma_{0 i}, \sigma_{i}} \quad & \mu \\			
-\text{s.t.} \quad & \mu - l(\x, \epsilonb) = 
-\sum_{j=0}^m \sigma_j(\x) g_j(\x) + 
-\sum_{i=1}^{n^{\B}}\sigma_{0 i}(\x,\epsilon_i) +  \sum_{i=1}^{n^{\B}}\sigma_i(\x,\epsilon_i) g_i^{\B}(\epsilon_i)  \,, \
-\forall \x, \forall \epsilonb \,, \notag\\
-\quad & 
-\deg \sigma_j g_j \leq 2 k \,, \ 
-\deg \sigma_{0 i} \leq 2 k \,, \ 
-\deg \sigma_i g_j \leq 2 k \,, \ 
-\forall i = 1,\dots,n^{\B} \,, \ 
-\forall j = 0,\dots,m \,. \notag
+\label{eq:lscale}
+l(\x,\e) = \sum_{i=1}^m s_i (\x) e_i = \epsilon \sum_{i=1}^m s_i (\x) \frac{e_i}{\epsilon} \,,
 \end{align}
+%
+leading to compute an interval enclosure of $l/\epsilon$ over $\K' := \X \times [-1, 1]^m$.
+Recall that from Remark~\ref{rk:arch}, there exists an integer $M > 0$ such that $M - \sum_{i=1}^n x_i^2 \geq 0$, as the input variable satisfy box constraints.
+Moreover, to fulfil the assumption of Remark~\ref{rk:sparsearch},  one encodes $\K'$ as follows: 
+\begin{align*}
+\K' := \{\, (\x,\e) \in \R^{n+m} \, : \, g_1 (\x) \geq 0, \dots, g_k(\x) \geq 0 \,, \\
+g_{k+1}(\x,e_1) \geq 0, \dots, g_{k+m} (\x, e_m) \geq 0 \,\} \,,
+\end{align*}
+%
+with $g_{k+i}(\x, e_i) := M + 1 -  \sum_{i=1}^n x_i^2 + e_i^2$, for all $i=1,\dots, m$.
+Then, one can compute the minimum of $l(\x,\e)$ over $\K$ by solving the following optimization problem:
+\[
+\left\{			
+\begin{array}{rl}
+\underline{l_d} := \sup\limits_{\mu, \sigma_j} & \mu\enspace, \\	 
+\text{s.t.} & l (\x, \e) - \mu = \sum\limits_{j = 0}^{k'} \sigma_j(\x) g_j(\x) \,, \ \forall \x \in \R^n \,, \\
+& \mu\in \R \,, \ \sigma_j \in \Sigma[\x, F_j] \,, \\
+& \sigma_0 \in \sum\limits_{j = 1}^m \Sigma [\x, C_m] \,, \\
+& \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k' \,.
+\end{array} \right.
+\]
 
 \paragraph{Convergence of the SDP hierarchy of error bounds}
 

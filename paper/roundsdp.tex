@@ -654,7 +654,7 @@ After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{
 \end{figure}
 %
 \paragraph{Description of the $\sdpbound$ optimization procedure.}
-First, note that one can map each input variable $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_j$ to $n+j$, for all $j=1,\dots,m$. Then, define the sets $C_1 := {1,\dots,n,n+1}, \dots, C_m := {1,\dots,n,n+m}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
+First, note that one can map each input variable $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_j$ to $n+j$, for all $j=1,\dots,m$. Then, define the sets $C_1 := \{1,\dots,n,n+1\}, \dots, C_m := \{1,\dots,n,n+m\}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
 We also scale the optimization problems by writing 
 \begin{align}
 \label{eq:lscale}
@@ -728,7 +728,7 @@ Let $I_d^l$ be the interval enclosure obtained by calling the procedure $\sdpbou
 \end{lemma}
 %
 \begin{proof}
-It is enough to show the result for $l' = l/\epsilon$, since the lemma follows from a direct scaling argument.
+It is enough to show the similar convergence result for $l' = l/\epsilon$, as it implies the convergence for $l$ by a scaling argument.
 The sets $C_1,\dots, C_m$ satisfy the RIP property (see Definition~\ref{def:rip}). Moreover, the encoding of $\K'$ satisfies the assumption mentioned in Remark~\ref{rk:sparsearch}. Thus, Theorem~\ref{th:sparsesdp} implies that the sequence of lower bounds $(\underline{l_d'})_{d \in \N}$ converges to $\underline{l'} := \inf_{(\x,\e) \in \K'} l'(\x,\e)$. Similarly, the sequence of upper bounds converge to $\overline{l'}$, yielding the desired result.
 \end{proof}
 %

@@ -29,8 +29,6 @@
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
 
-\usepackage{amsmath}
-
 \usepackage{listings}
 \def\lstlanguagefiles{defManOcaml.tex}
 \lstset{language = Ocaml}
@@ -47,8 +45,8 @@
 \usepackage{myalgo}
 \let\proof\relax
 \let\endproof\relax
-%\usepackage{amsthm}
-\usepackage{ntheorem}
+\usepackage{amsthm}
+%\usepackage{ntheorem}
 \usepackage{hyperref}
 \usepackage{subfigure}
 \usepackage{enumerate}
@@ -153,7 +151,7 @@
 \newcommand{\nlcertify}{\mathtt{NLCertify}}
 %\newcommand{\II}{\mathbb{I}}
 %\theoremstyle{plain}
-\newtheorem{thm}{Theorem}[section]
+%\newtheorem{thm}{Theorem}[section]
 \newtheorem{theorem}{Theorem}[section]
 \newtheorem{lemma}[theorem]{Lemma}
 \newtheorem{proposition}[theorem]{Proposition}
@@ -556,10 +554,10 @@ Let $l \in \N_0$  and $I_1, \dots, I_m$ be subsets of $\{1, \dots, n\}$. We say 
 This RIP property together with the assumption mentioned in Remark~\ref{rk:sparsearch} allow to state the sparse variant of Theorem~\ref{th:densesdp}:
 %The optimal values of $\r_d$ converge to the global minimum $f^*$, as a corollary of~\cite[Theorem 3.6]{Las06SparseSOS}.
 %
-\begin{thm}[\protect{Lasserre~\cite[Theorem 3.6]{Las06SparseSOS}}]
+\begin{theorem}[\protect{Lasserre~\cite[Theorem 3.6]{Las06SparseSOS}}]
 \label{th:sparsesdp}
 Let $r_d^{\star}$ be the optimal value of the sparse SDP relaxation~$(\S_d)$. Then the sequence $(r_d^{\star})_{d \in \N}$ is nondecreasing and converges to $r^\star$.
-\end{thm}
+\end{theorem}
 The interested reader can find more details in~\cite{Waki06SparseSOS} about additional ways to exploit sparsity in order to derive analogous sparse SDP relaxations.
 We illustrate the benefits of the SDP relaxations~$(\S_d)$ with the following example:
 \begin{example}
@@ -655,8 +653,8 @@ After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{
 \label{alg:bound_poly}
 \end{figure}
 %
-\paragraph{Optimization procedure $\sdpbound$.}
-First, note that one can map each input variables $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_j$ to $n+j$, for all $j=1,\dots,m$. Then, define the sets $C_1 := {1,\dots,n,n+1}, \dots, C_m := {1,\dots,n,n+m}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
+\paragraph{Description of the $\sdpbound$ optimization procedure.}
+First, note that one can map each input variable $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_j$ to $n+j$, for all $j=1,\dots,m$. Then, define the sets $C_1 := {1,\dots,n,n+1}, \dots, C_m := {1,\dots,n,n+m}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
 We also scale the optimization problems by writing 
 \begin{align}
 \label{eq:lscale}
@@ -722,9 +720,23 @@ First, no computation is required to determine the correlation sparsity pattern 
 
 In addition, the linear dependency of $l$ w.r.t.~$\e$ allows to scale the error variables and optimize over a set of variables lying in $\K' := \X \times [-1, 1]$. It ensures that the range of input variables does not significantly differs from the range of error variables. This condition is mandatory while considering SDP relaxations because most SDP solvers (e.g.~{\sc Mosek}, {\sc SDPA}) are implemented using double floating-point precision. It is impossible to optimize $l$ over $\K$ (rather than $l'$ over $\K'$) when the maximal value $\epsilon$ of error variables is less than $2^{-53}$, due to the fact that SDP solvers would treat each error variable term as 0, and consequently $l$ as the zero polynomial. Hence, this decomposition prevents our framework from the numerical issues related to finite-precision implementation of SDP solvers.
 \end{remark}
-\paragraph{Convergence of the SDP hierarchy of error bounds.}
+Let define the interval $I^l := [\underline{l}, \overline{l}]$, with $\underline{l} := \inf_{(\x,\e) \in \K} l(\x,\e)$ and $\overline{l} := \sup_{(\x,\e) \in \K} l(\x,\e)$.
+The next lemma states that one can approximate $I^l$ as closely as desired using the $\sdpbound$ procedure.
+\begin{lemma}[Convergence of the $\sdpbound$ procedure]
+\label{th:cvg_sdpbound}
+Let $I_d^l$ be the interval enclosure obtained by calling the procedure $\sdpboundfun{l}{\K}{d}$. Then the sequence $(I_d^l)_{d \in \N}$ converges to $I^l$.
+\end{lemma}
+%
+\begin{proof}
+It is enough to show the result for $l' = l/\epsilon$, since the lemma follows from a direct scaling argument.
+The sets $C_1,\dots, C_m$ satisfy the RIP property (see Definition~\ref{def:rip}). Moreover, the encoding of $\K'$ satisfies the assumption mentioned in Remark~\ref{rk:sparsearch}. Thus, Theorem~\ref{th:sparsesdp} implies that the sequence of lower bounds $(\underline{l_d'})_{d \in \N}$ converges to $\underline{l'} := \inf_{(\x,\e) \in \K'} l'(\x,\e)$. Similarly, the sequence of upper bounds converge to $\overline{l'}$, yielding the desired result.
+\end{proof}
+%
+Lemma~\ref{th:cvg_sdpbound} guarantees asymptotic convergence to the exact enclosure of $l$ when the relaxation order $d$ tends to infinity. However, it is more reasonable in practice to keep this order as small as possible to obtain tractable SDP relaxations. Hence, we generically solve each instance of Problem~\eqref{eq:lscalesdp2} at the minimal relaxation order, that is $d_0 := \max \{\lceil \deg l / 2\rceil) , \max_{1 \leq j \leq k+m} \{ \lceil \deg (g_j) / 2\rceil) \} \}$. 
 
-\subsection{Non-polynomial Programs}
+We now present direct extensions of our method to other classes of nonlinear programs.
+%
+\subsection{Non-polynomial and Conditional Programs}
 
 Let $f : \S_f \to \R$ defined by $f(\x) := x_1 + \frac{x_2}{1 + x_3}$, for all $\x \in \S_f$. \\
 To perform semialgebraic optimization via sums of squares, one usually introduces a lifting variable  $z$ to represent the division. Let $\S_g := \{(\x,z) : \x \in \S_f\,, \ z (1 + x_3) = 1  \}$.

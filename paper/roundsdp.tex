@@ -127,6 +127,7 @@
 \newcommand{\dlift}{r_{\text{lift}}}
 \newcommand{\msdp}{m_{\text{sdp}}}
 \newcommand{\xlamstar}{{\x}^*({\lambda})}
+\newcommand{\Kpol}{\K_{\text{pol}}}
 \newcommand{\transpose}{\top}%\newcommand{\transpose}{\mathbf{\intercal}}
 \DeclareMathOperator{\vol}{vol}
 %\DeclareMathOperator{\op}{op}
@@ -624,6 +625,7 @@ For more explanations, we refer the interested reader to the formal framework de
 \label{sec:fpsdp}
 In this section, we present our new algorithm to bound rounding errors of nonlinear programs, relying on sparse SDP relaxations. We first explain how to handle polynomial programs and then present extensions to the non-polynomial case.
 \subsection{Polynomial Programs}
+\label{sec:polsdp}
 Here we consider a given program which implements a polynomial expression $f$ with input variables $\x$ satisfying a set of constraints $\X$. We assume that  $\X$ is included in a box (i.e.~a product of closed intervals) $[\a, \b] := [a_1, b_1] \times \dots \times [a_n, b_n]$ and that $\X$ is encoded as follows: 
 \[ 
 \X := \{\, \x \in \R^n \, : \, g_1 (\x) \geq 0, \dots, g_{k} (\x) \geq 0 \,\} \,,
@@ -733,11 +735,20 @@ The sets $C_1,\dots, C_m$ satisfy the RIP property (see Definition~\ref{def:rip}
 \end{proof}
 %
 Lemma~\ref{th:cvg_sdpbound} guarantees asymptotic convergence to the exact enclosure of $l$ when the relaxation order $d$ tends to infinity. However, it is more reasonable in practice to keep this order as small as possible to obtain tractable SDP relaxations. Hence, we generically solve each instance of Problem~\eqref{eq:lscalesdp2} at the minimal relaxation order, that is $d_0 := \max \{\lceil \deg l / 2\rceil) , \max_{1 \leq j \leq k+m} \{ \lceil \deg (g_j) / 2\rceil) \} \}$. 
-
-We now present direct extensions of our method to other classes of nonlinear programs.
 %
 \subsection{Non-polynomial and Conditional Programs}
+\label{sec:nonpolsdp}
+We now present direct extensions of our method to other classes of nonlinear programs, including semialgebraic and transcendental functions as well as programs involving conditional loops.
+\paragraph{Non-polynomial programs.} We first illustrate the extension to semialgebraic programs with the following example.
+\begin{example}
+Let consider the program implementing the rational function $f : [0, 1] \to \R$ defined by $f(x_1) := \frac{x_1}{1 + x_1}$. Applying the rounding procedure (with machine $\epsilon$) yields $\hat{f}(x_1,\e) := \frac{x _1(1 + e_2)}{(1 + x_1)(1 + e_1)}$ and the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1\,e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + h(x_1,\e)$. One has $s_1(x_1) = \frac{\partial r(x_1,\e)} {\partial e_1} (x_1,0) = -\frac{x_1}{1 + x_1}$ and $s_2(x_1) = - s_1(x_1)$.
 
+Let $\K := [0, 1] \times [-\epsilon, \epsilon]^2$. To use the sparse SDP program~\eqref{eq:lscalesdp2}, the idea is to transform the rational optimization problem $\inf_{(x_1,\e) \in \K} l (x_1, \e)$ into a polynomial optimization problem. One way to do it is to introduce a lifting variable $x_2 := \frac{x_1}{1 + x_1}$ to handle the division operator and to consider the equality constraint $p(x) := x_1 - x_2 (1 + x_1) = 0$, encoded by the two inequality constraints $p (\x) \geq 0$ and $-p(\x) \geq 0$. To ensure the compactness assumption, one can bound $x_2$ with the enclosure $[0, 1/2]$, using basic interval arithmetic.
+
+Let $\Kpol := \{(\x,\e) \in [0, 1] \times [0, 1/2] \times [\epsilon, \epsilon]^2 : p(\x) \geq 0 \,,\  - p(\x) \geq 0 \}$. Then the rational optimization problem involving $l$ is equivalent to $\inf_{(\x,\e) \in \Kpol} x_2 (-e_1 + e_2)$, a polynomial optimization that we can handle with the $\sdpbound$ procedure, described in Section~\ref{sec:polsdp}.
+\end{example}
+
+\if{
 Let $f : \S_f \to \R$ defined by $f(\x) := x_1 + \frac{x_2}{1 + x_3}$, for all $\x \in \S_f$. \\
 To perform semialgebraic optimization via sums of squares, one usually introduces a lifting variable  $z$ to represent the division. Let $\S_g := \{(\x,z) : \x \in \S_f\,, \ z (1 + x_3) = 1  \}$.
 %One can compute an interval enclosure $I_z$ of $z := 1 + x_3$ over $\S_f$.
@@ -752,6 +763,7 @@ To bound the error $\hat{f} -f$, one optimizes the function $\hat{g} - g$ over t
 \[\K_g := \{(\x, z, \epsilonb, \hat{z}) : (\x,z) \in \S_g \,, \ \epsilonb \in \B \,, \ \hat{z} (1 + x_3) (1 + \epsilon_3) = 1  \} \,. \]
 \\
 Here, one can actually reduce the number of variables of the problem, noticing that $z = \hat{z} (1 + \epsilon_3)$. However, in general one can not write $z$ as a polynomial of $\hat{z}$, $\x$ and $\epsilonb$ and one needs to consider two lifting variables for each non-polynomial operation involved in $f$.
+}\fi
 %
 %\subsection{Transcendental programs}
 

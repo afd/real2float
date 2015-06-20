@@ -127,16 +127,22 @@
 \newcommand{\dlift}{r_{\text{lift}}}
 \newcommand{\msdp}{m_{\text{sdp}}}
 \newcommand{\xlamstar}{{\x}^*({\lambda})}
-\newcommand{\Kpol}{\K_{\text{pol}}}
+\newcommand{\Kpol}{\K_{\text{poly}}}
 \newcommand{\transpose}{\top}%\newcommand{\transpose}{\mathbf{\intercal}}
 \DeclareMathOperator{\vol}{vol}
 %\DeclareMathOperator{\op}{op}
 \DeclareMathOperator{\conv}{conv}
 \newcommand{\red}[1]{\textbf{{\color{red}#1}}}
 \newcommand{\iaboundfun}[2]{\mathtt{ia\_bound}(#1, #2)}
-\newcommand{\sdpboundfun}[3]{\mathtt{sdp\_bound}(#1, #2, #3)}
 \newcommand{\iabound}{\mathtt{ia\_bound}}
+\newcommand{\sdpboundfun}[3]{\mathtt{sdp\_bound}(#1, #2, #3)}
 \newcommand{\sdpbound}{\mathtt{sdp\_bound}}
+\newcommand{\sdppolyfun}[3]{\mathtt{sdp\_poly}(#1, #2, #3)}
+\newcommand{\sdppoly}{\mathtt{sdp\_poly}}
+\newcommand{\sdpsafun}[3]{\mathtt{sdp\_sa}(#1, #2, #3)}
+\newcommand{\sdpsa}{\mathtt{sdp\_sa}}
+\newcommand{\sdptranscfun}[3]{\mathtt{sdp\_trancs}(#1, #2, #3)}
+\newcommand{\sdptrancs}{\mathtt{sdp\_transc}}
 %\newcommand{\brev}{\color{red}}
 %\newcommand{\erev}{\color{black}}
 \newcommand{\sthreefp}{\mathtt{s3fp}}
@@ -589,7 +595,7 @@ The csp graph $G$ associated to $\mathbf{R}$ is depicted in Figure~\ref{fig:csp_
 \end{center}
 \end{figure}
 %
-The maximal cliques of $G$ are $C_1 := \{1, 4\}$, $C_2 := \{1, 2, 3, 5\}$ and $C_3 := \{1, 3, 5, 6\}$. For $d=2$, the dense SDP relaxation~$(\P_2)$ involves $\binom{6 + 4}{4} = 210$ variables against $\binom{2 + 4}{4} + 2 \binom{4 + 4}{4} = 115$ for the sparse variant~$(\S_2)$. This difference becomes even more significant while comparing the dense SDP relaxation~$(\P_3)$ involving 924 variables against 448 for the sparse variant~$(\S_3)$.
+The maximal cliques of $G$ are $C_1 := \{1, 4\}$, $C_2 := \{1, 2, 3, 5\}$ and $C_3 := \{1, 3, 5, 6\}$. For $d=2$, the dense SDP relaxation~$(\P_2)$ involves $\binom{6 + 4}{4} = 210$ variables against $\binom{2 + 4}{4} + 2 \binom{4 + 4}{4} = 115$ for the sparse variant~$(\S_2)$. This difference becomes even more significant while comparing the dense SDP relaxation~$(\P_3)$ involving $924$ variables against $448$ for the sparse variant~$(\S_3)$.
 \end{example}
 %
 \subsection{Computer assisted proofs for polynomial optimization}
@@ -623,10 +629,12 @@ For more explanations, we refer the interested reader to the formal framework de
 %
 \section{Guaranteed Roundoff Error Bounds using SDP Relaxations}
 \label{sec:fpsdp}
-In this section, we present our new algorithm to bound rounding errors of nonlinear programs, relying on sparse SDP relaxations. We first explain how to handle polynomial programs and then present extensions to the non-polynomial case.
-\subsection{Polynomial Programs}
-\label{sec:polsdp}
-Here we consider a given program which implements a polynomial expression $f$ with input variables $\x$ satisfying a set of constraints $\X$. We assume that  $\X$ is included in a box (i.e.~a product of closed intervals) $[\a, \b] := [a_1, b_1] \times \dots \times [a_n, b_n]$ and that $\X$ is encoded as follows: 
+In this section, we present our new algorithm to bound rounding errors of nonlinear transcendental programs, relying on sparse SDP relaxations. After stating our general algorithm (Section~\ref{sec:transcsdp}), we detail how this procedure can handle polynomial programs (Section~\ref{sec:polsdp}) and then present extensions to the non-polynomial case (Section~\ref{sec:nonpolsdp}).
+
+\subsection{The General Optimization Framework}
+\label{sec:transcsdp}
+%
+Here we consider a given program which implements a nonlinear transcendental expression $f$ with input variables $\x$ satisfying a set of constraints $\X$. We assume that  $\X$ is included in a box (i.e.~a product of closed intervals) $[\a, \b] := [a_1, b_1] \times \dots \times [a_n, b_n]$ and that $\X$ is encoded as follows: 
 \[ 
 \X := \{\, \x \in \R^n \, : \, g_1 (\x) \geq 0, \dots, g_{k} (\x) \geq 0 \,\} \,,
 \]
@@ -634,16 +642,13 @@ for polynomial functions $g_1, \dots, g_k$.
 %
 Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|rounding| procedure (see Section~\ref{sec:fpbackground}), introducing the introduction of error variables $\e$. 
 
-The algorithm \code{bound_poly}, depicted in Figure~\ref{alg:bound_poly}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound_poly} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an upper bound of the maximal absolute error bound $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
-
-After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of a polynomial $l$ which is linear w.r.t.~the error variable $\e$ and a remainder polynomial $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of a-priori much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). The bound of $l$ is provided through solving two sparse SDP instances of Problem~$(\S_d)$, at relaxation order $d$. We now give more explanations about this optimization procedure. 
-%
+The algorithm \code{bound_nlexpr}, depicted in Figure~\ref{alg:bound_nlexpr}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound_nlexpr} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an upper bound of the maximal absolute error bound $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
 
 \begin{figure}[!ht]
 \begin{algorithmic}[1]                    
-\Require input variables $\x$, input constraints $\X$, real polynomial $f(\x)$, rounded polynomial $\hat{f}(\x, \e)$, error variables $\e$, error constraints $\E$, relaxation order $d$
+\Require input variables $\x$, input constraints $\X$, nonlinear expression $f(\x)$, rounded expression $\hat{f}(\x, \e)$, error variables $\e$, error constraints $\E$, relaxation order $d$
 \Ensure upper bound $f_d$ of the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \E$
-\State Define the error polynomial $r(\x, \e) := \hat{f}(\x,\e) - f(\x)$ \label{line:r}
+\State Define the absolute error $r(\x, \e) := \hat{f}(\x,\e) - f(\x)$ \label{line:r}
 \State Compute $l(\x,\e) := \sum_{j=1}^m \frac{\partial r(\x,\e)} {\partial e_j} (\x,0) \, e_j$ \label{line:l}
 \State Compute $h := r - l$ \label{line:h}
 \State Compute interval bounds for $h$: $I^h := \iaboundfun{h}{\K}$ \label{line:iabound}
@@ -651,19 +656,26 @@ After computing the rounding error polynomial $r := \hat{f} - f$ (Line~\lineref{
 \State Compute $I_d := I_d^l + I^h = [\underline{f_d}, \overline{f_d}]$ 
 \State \Return $f_d := \max \{- \underline{f_d}, \overline{f_d} \}$
 \end{algorithmic}
-\caption{\code{bound_poly}}
-\label{alg:bound_poly}
+\caption{\code{bound_nlexpr}}
+\label{alg:bound_nlexpr}
 \end{figure}
+
+After computing the absolute rounding error $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of an expression $l$ which is linear w.r.t.~the error variable $\e$ and a remainder $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of a-priori much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). 
 %
-\paragraph{Description of the $\sdpbound$ optimization procedure.}
-First, note that one can map each input variable $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_j$ to $n+j$, for all $j=1,\dots,m$. Then, define the sets $C_1 := \{1,\dots,n,n+1\}, \dots, C_m := \{1,\dots,n,n+m\}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
+\subsection{Polynomial Programs}
+\label{sec:polsdp}
+%
+We first describe our $\sdpbound$ optimization algorithm when implementing polynomial programs. In this case, $\sdpbound$ calls an auxiliary procedure $\sdppoly$.
+The bound of $l$ is provided through solving two sparse SDP instances of Problem~$(\S_d)$, at relaxation order $d$. We now give more explanations about the $\sdppoly$ procedure.
+
+We can map each input variable $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_j$ to $n+j$, for all $j=1,\dots,m$. Then, define the sets $C_1 := \{1,\dots,n,n+1\}, \dots, C_m := \{1,\dots,n,n+m\}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
 We also scale the optimization problems by writing 
 \begin{align}
 \label{eq:lscale}
 l(\x,\e) = \sum_{j=1}^m s_j (\x) e_j = \epsilon \sum_{j=1}^m s_j (\x) \frac{e_j}{\epsilon} \,,
 \end{align}
 %
-with $s_j(\x) := \frac{\partial r(\x,\e)} {\partial e_j} (\x,0)$, for all $j=1,\dots,m$. It leads to compute an interval enclosure of $l/\epsilon$ over $\K' := \X \times [-1, 1]^m$.
+with $s_j(\x) := \frac{\partial r(\x,\e)} {\partial e_j} (\x,0)$, for all $j=1,\dots,m$. Replacing $\e$ by $\e/\epsilon$ leads to compute an interval enclosure of $l/\epsilon$ over $\K' := \X \times [-1, 1]^m$.
 Recall that from Remark~\ref{rk:arch}, there exists an integer $M > 0$ such that $M - \sum_{i=1}^n x_i^2 \geq 0$, as the input variable satisfy box constraints.
 Moreover, to fulfil the assumption of Remark~\ref{rk:sparsearch},  one encodes $\K'$ as follows: 
 \begin{align*}
@@ -714,7 +726,7 @@ A feasible solution of Problem~\eqref{eq:lscalesdp1} ensures the existence of $\
 \end{align}
 %
 An upper bound $\overline{l_d'}$ can be obtained by replacing $\sup$ with $\inf$ and $l' - \mu$ by $\mu - l'$ in Problem~\eqref{eq:lscalesdp2}.
-Our optimization procedure $\sdpbound$ computes the lower bound $\underline{l_d'}$ as well as an upper bound $\overline{l_d'}$ of $l'$ over $\K'$ then returns the interval $I_d^l := [\epsilon \, \underline{l_d'}, \epsilon \, \overline{l_d'}] $, which is a sound enclosure of the values of $l$ over $\K$.
+Our optimization procedure $\sdppoly$ computes the lower bound $\underline{l_d'}$ as well as an upper bound $\overline{l_d'}$ of $l'$ over $\K'$ then returns the interval $I_d^l := [\epsilon \, \underline{l_d'}, \epsilon \, \overline{l_d'}] $, which is a sound enclosure of the values of $l$ over $\K$.
 %
 \begin{remark}
 We emphasize two advantages of the decomposition $r := l + h$ and more precisely of the linear dependency of $l$ w.r.t.~$\e$: scalability and robustness to SDP numerical issues.
@@ -723,10 +735,10 @@ First, no computation is required to determine the correlation sparsity pattern 
 In addition, the linear dependency of $l$ w.r.t.~$\e$ allows to scale the error variables and optimize over a set of variables lying in $\K' := \X \times [-1, 1]$. It ensures that the range of input variables does not significantly differs from the range of error variables. This condition is mandatory while considering SDP relaxations because most SDP solvers (e.g.~{\sc Mosek}, {\sc SDPA}) are implemented using double floating-point precision. It is impossible to optimize $l$ over $\K$ (rather than $l'$ over $\K'$) when the maximal value $\epsilon$ of error variables is less than $2^{-53}$, due to the fact that SDP solvers would treat each error variable term as 0, and consequently $l$ as the zero polynomial. Hence, this decomposition prevents our framework from the numerical issues related to finite-precision implementation of SDP solvers.
 \end{remark}
 Let define the interval $I^l := [\underline{l}, \overline{l}]$, with $\underline{l} := \inf_{(\x,\e) \in \K} l(\x,\e)$ and $\overline{l} := \sup_{(\x,\e) \in \K} l(\x,\e)$.
-The next lemma states that one can approximate $I^l$ as closely as desired using the $\sdpbound$ procedure.
-\begin{lemma}[Convergence of the $\sdpbound$ procedure]
-\label{th:cvg_sdpbound}
-Let $I_d^l$ be the interval enclosure obtained by calling the procedure $\sdpboundfun{l}{\K}{d}$. Then the sequence $(I_d^l)_{d \in \N}$ converges to $I^l$.
+The next lemma states that one can approximate $I^l$ as closely as desired using the $\sdppoly$ procedure.
+\begin{lemma}[Convergence of the $\sdppoly$ procedure]
+\label{th:cvg_sdppoly}
+Let $I_d^l$ be the interval enclosure obtained by calling the procedure $\sdppolyfun{l}{\K}{d}$. Then the sequence $(I_d^l)_{d \in \N}$ converges to $I^l$.
 \end{lemma}
 %
 \begin{proof}
@@ -734,11 +746,11 @@ It is enough to show the similar convergence result for $l' = l/\epsilon$, as it
 The sets $C_1,\dots, C_m$ satisfy the RIP property (see Definition~\ref{def:rip}). Moreover, the encoding of $\K'$ satisfies the assumption mentioned in Remark~\ref{rk:sparsearch}. Thus, Theorem~\ref{th:sparsesdp} implies that the sequence of lower bounds $(\underline{l_d'})_{d \in \N}$ converges to $\underline{l'} := \inf_{(\x,\e) \in \K'} l'(\x,\e)$. Similarly, the sequence of upper bounds converge to $\overline{l'}$, yielding the desired result.
 \end{proof}
 %
-Lemma~\ref{th:cvg_sdpbound} guarantees asymptotic convergence to the exact enclosure of $l$ when the relaxation order $d$ tends to infinity. However, it is more reasonable in practice to keep this order as small as possible to obtain tractable SDP relaxations. Hence, we generically solve each instance of Problem~\eqref{eq:lscalesdp2} at the minimal relaxation order, that is $d_0 := \max \{\lceil \deg l / 2\rceil) , \max_{1 \leq j \leq k+m} \{ \lceil \deg (g_j) / 2\rceil) \} \}$. 
+Lemma~\ref{th:cvg_sdppoly} guarantees asymptotic convergence to the exact enclosure of $l$ when the relaxation order $d$ tends to infinity. However, it is more reasonable in practice to keep this order as small as possible to obtain tractable SDP relaxations. Hence, we generically solve each instance of Problem~\eqref{eq:lscalesdp2} at the minimal relaxation order, that is $d_0 := \max \{\lceil \deg l / 2\rceil) , \max_{1 \leq j \leq k+m} \{ \lceil \deg (g_j) / 2\rceil) \} \}$. 
 %
 \subsection{Non-polynomial and Conditional Programs}
 \label{sec:nonpolsdp}
-We now present direct extensions of our method to other classes of nonlinear programs, including semialgebraic and transcendental functions as well as programs involving conditional loops.
+We now present how the general optimization procedure $\sdpbound$ can be extended to other classes of nonlinear programs, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional loops.
 \paragraph{Non-polynomial programs.} We first illustrate the extension to semialgebraic programs with the following example.
 \begin{example}
 Let consider the program implementing the rational function $f : [0, 1] \to \R$ defined by $f(x_1) := \frac{x_1}{1 + x_1}$. Applying the rounding procedure (with machine $\epsilon$) yields $\hat{f}(x_1,\e) := \frac{x _1(1 + e_2)}{(1 + x_1)(1 + e_1)}$ and the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1\,e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + h(x_1,\e)$. One has $s_1(x_1) = \frac{\partial r(x_1,\e)} {\partial e_1} (x_1,0) = -\frac{x_1}{1 + x_1}$ and $s_2(x_1) = - s_1(x_1)$.
@@ -747,6 +759,7 @@ Let $\K := [0, 1] \times [-\epsilon, \epsilon]^2$. To use the sparse SDP program
 
 Let $\Kpol := \{(\x,\e) \in [0, 1] \times [0, 1/2] \times [\epsilon, \epsilon]^2 : p(\x) \geq 0 \,,\  - p(\x) \geq 0 \}$. Then the rational optimization problem involving $l$ is equivalent to $\inf_{(\x,\e) \in \Kpol} x_2 (-e_1 + e_2)$, a polynomial optimization that we can handle with the $\sdpbound$ procedure, described in Section~\ref{sec:polsdp}.
 \end{example}
+%
 
 \if{
 Let $f : \S_f \to \R$ defined by $f(\x) := x_1 + \frac{x_2}{1 + x_3}$, for all $\x \in \S_f$. \\

@@ -351,7 +351,7 @@ f_\F (\hat{x}) = f_\R (x) (1 + e) \enspace, \quad \mid e \mid \leq \epsilon (f_\
 The value of the relative error bound $\epsilon (f_\R)$ differs from the machine precision $\epsilon$ in Equation~\eqref{eq:roundbop} and has to be properly adjusted. We refer the interested reader to~\cite{VerifCADTransc} for relative error bound verification of transcendental functions (see also~\cite{VerifHOLTransc} for formalization in $\hol$).
 %
 %In a similar fashion, 
-\paragraph{Program semantics.}
+\subsubsection*{\textit{Program semantics}}
 %
 We consider generic programs encoded in an ML-like language:
 \begin{lstlisting}
@@ -402,7 +402,7 @@ Finally, one obtains rounded nonlinear expressions using an inductive procedure~
 \label{sec:sdpbackground}
 Here, we recall mandatory background about the method that we use to handle the optimization problem of Equation~\eqref{eq:roptim}, when the nonlinear function $r$ is a polynomial expression.
 
-\paragraph{Sums of squares certificates and semidefinite programming.}
+\subsubsection*{\textit{Sums of squares certificates and semidefinite programming}}
 We remind basic facts about generation of sums of squares certificates for polynomial optimization, using semidefinite programming.
 Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the restriction of $\R[\x]$ to polynomials of degree at most $2 d$. Let define the cone of sums of squares:
 \begin{equation}
@@ -453,7 +453,7 @@ where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the mat
 Let define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$.
 \end{example}
 %
-\paragraph{Dense SDP relaxations for polynomial optimization.}
+\subsubsection*{\textit{Dense SDP relaxations for polynomial optimization}}
 We first explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the following programs $(\P_d)$:
 \[
 (\P_d):\left\{			
@@ -487,7 +487,8 @@ First, symmetries in SDP relaxations for polynomial optimization problems can be
 several smaller SDPs~\cite{Riener2013SymmetricSDP}. Notice that it is possible only if the multivariate polynomials of the initial problem are invariant under the action of a finite subgroup $G$ of the group $GL_{n}(\R)$. 
 %
 
-\paragraph{Exploiting sparsity.} Here we describe how to exploit the structured sparsity of the
+\subsubsection*{\textit{Exploiting sparsity}} 
+Here we describe how to exploit the structured sparsity of the
 problem to replace one SDP problem~$(\P_d)$ by an SDP problem~$(\S_d)$ of
 size $O (\kappa^ {2 d})$ where $\kappa$ is the average size
 of the maximal cliques of the correlation pattern of the polynomial
@@ -754,8 +755,10 @@ Lemma~\ref{th:cvg_sdppoly} guarantees asymptotic convergence to the exact enclos
 \subsection{Non-polynomial and Conditional Programs}
 \label{sec:nonpolsdp}
 We now present how the general optimization procedure $\sdpbound$ can be extended to other classes of nonlinear programs, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional loops.
-\paragraph{Semialgebraic programs.} 
-Following~\cite{LasPut10}, we explain how to transform the semialgebraic optimization problem $\inf_{(\x,\e) \in \K} l (\x, \e)$ into a polynomial optimization problem, so that we can use the sparse SDP program~\eqref{eq:lscalesdp2}. One way to perform this reformulation consists in introducing lifting variables to represent non-polynomial operations, such as divisions or square roots.
+%
+\subsubsection*{\textit{Semialgebraic programs}} 
+Here we assume that the function $l$ is semialgebraic, that is involves non-polynomial components such as divisions or square roots.
+Following~\cite{LasPut10}, we explain how to transform the optimization problem $\inf_{(\x,\e) \in \K} l (\x, \e)$ into a polynomial optimization problem, so that we can use the sparse SDP program~\eqref{eq:lscalesdp2}. One way to perform this reformulation consists in introducing lifting variables to represent non-polynomial operations.
 
 We first illustrate the extension to semialgebraic programs with the following example.
 \begin{example}
@@ -804,10 +807,27 @@ For the sake of consistency, we omit the other cases (\code{Neg}, \code{Add}, \c
 Finally, notice that the final set of variables $\y\poly$ can be decomposed as $(\x\poly, \e)$, where $\x\poly$ gathers the input variables together with the lifting variables.  
 Denoting by $n\poly$ the cardinal of $\x\poly$, one easily shows that the sets $\{1, \dots, n\poly, e_1\},\dots,\{1, \dots, n\poly, e_m\}$ satisfy the RIP, thus ensuring to solve efficiently the corresponding instances of Problem~\eqref{eq:lscalesdp2}.
 %
-\paragraph{Transcendental programs.}
+\subsubsection*{\textit{Transcendental programs}}
+Here we assume that the function $l$ is transcendental,~i.e.~involves non-semialgebraic components such as $\exp$ or $\sin$.
+
+We first illustrate the extension to transcendental programs with the following example.
+\begin{example}
+Let consider the program implementing the rational function $f : [-8, 8] \to \R$ defined by $f(x_1) := \log (1 + \exp(x_1))$. Applying the rounding procedure  yields $\hat{f}(x_1,\e) := \log [(1 + \exp(x_1) (1 + e_1)) \, (1 + e_2)](1 + e_3)$. 
+
+(with machine $\epsilon$)
+
+One obtains the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1\,e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + s_3 (x_1) e_3 + h(x_1,\e)$, with 
 
 
-\paragraph{Simplification of error terms.}
+
+One has $s_1(x_1) = \frac{\partial r(x_1,\e)} {\partial e_1} (x_1,0) = -\frac{x_1}{1 + x_1}$ and $s_2(x_1) = - s_1(x_1)$.
+
+Let $\K := [0, 1] \times [-\epsilon, \epsilon]^2$. One introduces a lifting variable $x_2 := \frac{x_1}{1 + x_1}$ to handle the division operator and encode the equality constraint $p(\x) :=  x_2 (1 + x_1) - x_1 = 0$ with the two inequality constraints $p (\x) \geq 0$ and $-p(\x) \geq 0$. To ensure the compactness assumption, one bounds $x_2$ within $I := [0, 1/2]$, using basic interval arithmetic.
+
+Let $\Kpol := \{(\x,\e) \in [0, 1] \times I \times [\epsilon, \epsilon]^2 : p(\x) \geq 0 \,,\  - p(\x) \geq 0 \}$. Then the rational optimization problem involving $l$ is equivalent to $\inf_{(\x,\e) \in \Kpol} x_2 (-e_1 + e_2)$, a polynomial optimization that we can handle with the $\sdppoly$ procedure, described in Section~\ref{sec:polsdp}.
+\end{example}
+
+\subsubsection*{\textit{Simplification of error terms}}
 %
 In practice, the algorithm integrates features to save error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.
 We can also simplify error term products, thanks to the following lemma.

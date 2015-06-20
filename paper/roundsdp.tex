@@ -139,6 +139,9 @@
 \newcommand{\sdpbound}{\mathtt{sdp\_bound}}
 \newcommand{\sdppolyfun}[3]{\mathtt{sdp\_poly}(#1, #2, #3)}
 \newcommand{\sdppoly}{\mathtt{sdp\_poly}}
+\newcommand{\liftfun}[3]{\mathtt{lift}(#1, #2, #3)}
+\newcommand{\lift}{\mathtt{lift}}
+\newcommand{\poly}{_\text{poly}}
 \newcommand{\sdpsafun}[3]{\mathtt{sdp\_sa}(#1, #2, #3)}
 \newcommand{\sdpsa}{\mathtt{sdp\_sa}}
 \newcommand{\sdptranscfun}[3]{\mathtt{sdp\_trancs}(#1, #2, #3)}
@@ -646,7 +649,7 @@ The algorithm \code{bound_nlexpr}, depicted in Figure~\ref{alg:bound_nlexpr}, ta
 
 \begin{figure}[!ht]
 \begin{algorithmic}[1]                    
-\Require input variables $\x$, input constraints $\X$, nonlinear expression $f(\x)$, rounded expression $\hat{f}(\x, \e)$, error variables $\e$, error constraints $\E$, relaxation order $d$
+\Require input variables $\x$, input constraints $\X$, nonlinear expression $f$, rounded expression $\hat{f}$, error variables $\e$, error constraints $\E$, relaxation order $d$
 \Ensure upper bound $f_d$ of the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \E$
 \State Define the absolute error $r(\x, \e) := \hat{f}(\x,\e) - f(\x)$ \label{line:r}
 \State Compute $l(\x,\e) := \sum_{j=1}^m \frac{\partial r(\x,\e)} {\partial e_j} (\x,0) \, e_j$ \label{line:l}
@@ -751,36 +754,60 @@ Lemma~\ref{th:cvg_sdppoly} guarantees asymptotic convergence to the exact enclos
 \subsection{Non-polynomial and Conditional Programs}
 \label{sec:nonpolsdp}
 We now present how the general optimization procedure $\sdpbound$ can be extended to other classes of nonlinear programs, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional loops.
-\paragraph{Non-polynomial programs.} We first illustrate the extension to semialgebraic programs with the following example.
+\paragraph{Semialgebraic programs.} 
+Following~\cite{LasPut10}, we explain how to transform the semialgebraic optimization problem $\inf_{(\x,\e) \in \K} l (\x, \e)$ into a polynomial optimization problem, so that we can use the sparse SDP program~\eqref{eq:lscalesdp2}. One way to perform this reformulation consists in introducing lifting variables to represent non-polynomial operations, such as divisions or square roots.
+
+We first illustrate the extension to semialgebraic programs with the following example.
 \begin{example}
 Let consider the program implementing the rational function $f : [0, 1] \to \R$ defined by $f(x_1) := \frac{x_1}{1 + x_1}$. Applying the rounding procedure (with machine $\epsilon$) yields $\hat{f}(x_1,\e) := \frac{x _1(1 + e_2)}{(1 + x_1)(1 + e_1)}$ and the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1\,e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + h(x_1,\e)$. One has $s_1(x_1) = \frac{\partial r(x_1,\e)} {\partial e_1} (x_1,0) = -\frac{x_1}{1 + x_1}$ and $s_2(x_1) = - s_1(x_1)$.
 
-Let $\K := [0, 1] \times [-\epsilon, \epsilon]^2$. To use the sparse SDP program~\eqref{eq:lscalesdp2}, the idea is to transform the rational optimization problem $\inf_{(x_1,\e) \in \K} l (x_1, \e)$ into a polynomial optimization problem. One way to do it is to introduce a lifting variable $x_2 := \frac{x_1}{1 + x_1}$ to handle the division operator and to consider the equality constraint $p(x) := x_1 - x_2 (1 + x_1) = 0$, encoded by the two inequality constraints $p (\x) \geq 0$ and $-p(\x) \geq 0$. To ensure the compactness assumption, one can bound $x_2$ with the enclosure $[0, 1/2]$, using basic interval arithmetic.
+Let $\K := [0, 1] \times [-\epsilon, \epsilon]^2$. One introduces a lifting variable $x_2 := \frac{x_1}{1 + x_1}$ to handle the division operator and encode the equality constraint $p(\x) :=  x_2 (1 + x_1) - x_1 = 0$ with the two inequality constraints $p (\x) \geq 0$ and $-p(\x) \geq 0$. To ensure the compactness assumption, one bounds $x_2$ within $I := [0, 1/2]$, using basic interval arithmetic.
 
-Let $\Kpol := \{(\x,\e) \in [0, 1] \times [0, 1/2] \times [\epsilon, \epsilon]^2 : p(\x) \geq 0 \,,\  - p(\x) \geq 0 \}$. Then the rational optimization problem involving $l$ is equivalent to $\inf_{(\x,\e) \in \Kpol} x_2 (-e_1 + e_2)$, a polynomial optimization that we can handle with the $\sdpbound$ procedure, described in Section~\ref{sec:polsdp}.
+Let $\Kpol := \{(\x,\e) \in [0, 1] \times I \times [\epsilon, \epsilon]^2 : p(\x) \geq 0 \,,\  - p(\x) \geq 0 \}$. Then the rational optimization problem involving $l$ is equivalent to $\inf_{(\x,\e) \in \Kpol} x_2 (-e_1 + e_2)$, a polynomial optimization that we can handle with the $\sdppoly$ procedure, described in Section~\ref{sec:polsdp}.
 \end{example}
 %
 
-\if{
-Let $f : \S_f \to \R$ defined by $f(\x) := x_1 + \frac{x_2}{1 + x_3}$, for all $\x \in \S_f$. \\
-To perform semialgebraic optimization via sums of squares, one usually introduces a lifting variable  $z$ to represent the division. Let $\S_g := \{(\x,z) : \x \in \S_f\,, \ z (1 + x_3) = 1  \}$.
-%One can compute an interval enclosure $I_z$ of $z := 1 + x_3$ over $\S_f$.
-%Let $\S_g := \S_f \times I_z$.
-Then, one has $f(\x) = g(\x,z) := x_1 + x_2 z$, for all $(\x,z) \in \S_g$. \\
-Here things are slightly different as we need to take into account the floating point representation of the denominator.\\
-The floating point representation of $f$ is $\hat{f}(\x,\epsilonb) := [x_1 + \frac{x_2}{(1 + x_3)(1 + \epsilon_3)}(1 + \epsilon_2)](1 + \epsilon_1)$, for all $\x \in \S_f, \epsilonb \in \B$.
-Then, one introduces a second lifting variable $\hat{z}$ and 
-\[\K_f := \{(\x, \epsilonb, \hat{z}) : \x \in \S_f \,, \ \epsilonb \in \B \,, \ \hat{z} (1 + x_3) (1 + \epsilon_3) = 1  \} \,. \]
-One has $\hat{f}(\x,\epsilonb) = \hat{g}(\x,\epsilonb,\hat{z}) := [x_1 + x_2 \hat{z}(1+\epsilon_2) ](1+\epsilon_1)$, for all $(\x, \epsilonb, \hat{z}) \in \K_f$. 
-To bound the error $\hat{f} -f$, one optimizes the function $\hat{g} - g$ over the set 
-\[\K_g := \{(\x, z, \epsilonb, \hat{z}) : (\x,z) \in \S_g \,, \ \epsilonb \in \B \,, \ \hat{z} (1 + x_3) (1 + \epsilon_3) = 1  \} \,. \]
-\\
-Here, one can actually reduce the number of variables of the problem, noticing that $z = \hat{z} (1 + \epsilon_3)$. However, in general one can not write $z$ as a polynomial of $\hat{z}$, $\x$ and $\epsilonb$ and one needs to consider two lifting variables for each non-polynomial operation involved in $f$.
-}\fi
-%
-%\subsection{Transcendental programs}
+In the semialgebraic case, $\sdpbound$ calls an auxiliary procedure $\sdpsa$. 
+Given input variables $\y := (\x,\e)$, input constraints $\K := \X \times \E$ and a 
+semialgebraic function $l$,  $\sdpsa$ first applies a recursive procedure $\lift$ 
+which returns variables $\y\poly$, constraints $\K\poly$ and a polynomial $f\poly$ such that the 
+interval enclosure $I^l$ of $l(\y)$ over $\K$ is equal to the interval enclosure of 
+the polynomial $l\poly(\y\poly)$ over $\K\poly$. 
+Finally, $\sdpsa$ returns the interval enclosure $I^l_d := \sdppolyfun{l\poly}{\K\poly}{d}$. We detail the lifting procedure $\lift$ in Figure~\ref{alg:lift} for the constructors \code{Pol}(Line~\eqref{line:liftpol}), \code{Div} (Line~\eqref{line:liftdiv}) and \code{Sqrt} (Line~\eqref{line:liftsqrt}). 
+The interval $I$ obtained through the $\iabound$ procedure (Line~\eqref{line:liftia}) allows to constrain the additional variable $x$ to ensure the assumption of Remark~\ref{rk:sparsearch}.
+For the sake of consistency, we omit the other cases (\code{Neg}, \code{Add}, \code{Mul} and \code{Sub}) where the procedure is straightforward. For a similar procedure in the context of global optimization, we refer the interested reader to~\cite[Chapter 2]{MagronPhD}.
 
-\paragraph{Simplification of error term.}
+\begin{figure}[!ht]
+\begin{algorithmic}[1]                 
+\Require input variables $\y$, input constraints $\K$, semialgebraic expression $f$
+\Ensure variables $\y\poly$, constraints $\K\poly$, polynomial expression $f\poly$
+    \State $I := \iaboundfun{f}{Y}$ \label{line:liftia}
+	\If {\lstinline|$f = \ $ Pol ($p$)|} \label{line:liftpol} $\y\poly := \y$, $\K\poly := \K$, $\f\poly := p$
+	\ElsIf {\lstinline|$f = \ $ Div ($g$, $h$)|} \label{line:liftdiv} 
+	\State $\y_g, \K_g, g\poly := \liftfun{\y}{\K}{g}$ 
+	\State $\y_h, \K_h, h\poly := \liftfun{\y}{\K}{h}$
+    \State $\y\poly := (\y_g,\y_h,x)$ \hspace{1cm} $f\poly := x$ 
+	\State $\K\poly := \{\y\poly \in \K_g \times \K_h \times I : x g\poly = f\poly \}$
+	\ElsIf {\lstinline|$f = \ $ Sqrt ($g$)|} \label{line:liftsqrt} 
+	\State $\y_g, \K_g, g\poly := \liftfun{\y}{\K}{g}$ 
+	\State $\y\poly := (\y_g,x)$ \hspace{1cm} $f\poly := x$ 
+	\State $\K\poly := \{\y\poly \in \K_g \times I : x^2 = g\poly \}$\\
+\code{...}
+	\EndIf
+%
+\State \Return $\y\poly, \K\poly, f\poly$
+\end{algorithmic}
+\caption{\code{lift}}
+\label{alg:lift}
+\end{figure}
+
+Finally, notice that the final set of variables $\y\poly$ can be decomposed as $(\x\poly, \e)$, where $\x\poly$ gathers the input variables together with the lifting variables.  
+Denoting by $n\poly$ the cardinal of $\x\poly$, one easily shows that the sets $\{1, \dots, n\poly, e_1\},\dots,\{1, \dots, n\poly, e_m\}$ satisfy the RIP, thus ensuring to solve efficiently the corresponding instances of Problem~\eqref{eq:lscalesdp2}.
+%
+\paragraph{Transcendental programs.}
+
+
+\paragraph{Simplification of error terms.}
 %
 In practice, the algorithm integrates features to save error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.
 We can also simplify error term products, thanks to the following lemma.

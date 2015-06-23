@@ -813,20 +813,30 @@ Here we assume that the function $l$ is transcendental,~i.e.~involves non-semial
 We first illustrate the extension to transcendental programs with the following example.
 \begin{example}
 Let consider the program implementing the rational function $f : [-8, 8] \to \R$ defined by $f(x_1) := \log (1 + \exp(x_1))$. Applying the rounding procedure  yields $\hat{f}(x_1,\e) := \log [(1 + \exp(x_1) (1 + e_1)) \, (1 + e_2)](1 + e_3)$. 
-
-(with machine $\epsilon$)
-
-One obtains the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1\,e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + s_3 (x_1) e_3 + h(x_1,\e)$, with 
+Here, $|e_1|$ is bounded by the machine $\epsilon$ while $|e_2|$ (resp.~$|e_3|$) are bounded with the adjusted absolute error $\epsilon(\log)$ (resp.~$\epsilon(\exp)$).
 
 
+One obtains the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1,\e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + s_3 (x_1) e_3 + h(x_1, \e)$, with 
+$s_1(x_1) = \frac{\exp(x_1)} {1 + \exp(x_1)}$, $s_2(x_1) = 1$ and $s_3(x_1) = f(x_1)$.
 
-One has $s_1(x_1) = \frac{\partial r(x_1,\e)} {\partial e_1} (x_1,0) = -\frac{x_1}{1 + x_1}$ and $s_2(x_1) = - s_1(x_1)$.
-
-Let $\K := [0, 1] \times [-\epsilon, \epsilon]^2$. One introduces a lifting variable $x_2 := \frac{x_1}{1 + x_1}$ to handle the division operator and encode the equality constraint $p(\x) :=  x_2 (1 + x_1) - x_1 = 0$ with the two inequality constraints $p (\x) \geq 0$ and $-p(\x) \geq 0$. To ensure the compactness assumption, one bounds $x_2$ within $I := [0, 1/2]$, using basic interval arithmetic.
-
-Let $\Kpol := \{(\x,\e) \in [0, 1] \times I \times [\epsilon, \epsilon]^2 : p(\x) \geq 0 \,,\  - p(\x) \geq 0 \}$. Then the rational optimization problem involving $l$ is equivalent to $\inf_{(\x,\e) \in \Kpol} x_2 (-e_1 + e_2)$, a polynomial optimization that we can handle with the $\sdppoly$ procedure, described in Section~\ref{sec:polsdp}.
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[scale=0.8]{logexp.pdf}
+\caption{Maxplus Approximations for $x_1 \mapsto \log(1 + \exp{x_1})$: $\max \{ f_0^- (x_1), f_8^- (x_1)\} \leq  \log(1 + \exp{x_1}) \leq \min \{ f_0^+ (x_1), f_8^+ (x_1)\} $}\label{fig:logexp}
+\end{center}
+\end{figure}
 \end{example}
 
+For each transcendental function $f_{\R}$ in our dictionary set $\setD$, one assumes that $f_{\R}$ is twice differentiable, so that the univariate function $g := f_{\R} + \frac{\gamma}{2} |\cdot|^2$ is convex on $I$ for large enough $\gamma > 0$ (for more details, see the references~\cite{agk04, mceneaney-livre}). It follows that there exists a constant $\gamma \leq \sup_{x\in I} -f_{\R}''(x)$ such that for all $x_i \in I$:
+\begin{align}
+\begin{split}
+\label{eq:maxplus}
+\forall x \in I, \quad f_{\R} (x)  \geq f_{x_i}^-(x) \,,\\
+\text{with } f_{x_i}^- :=  -\frac{\gamma}{2} (x-x_i)^2 +f_{\R}'(x_i) (x - x_i) + f_{\R} (x_i) \,,
+\end{split}
+\end{align}
+implying that for all $x \in I$, $f_{\R} (x)  \geq \max_{x_i \in I} f_{x_i}^-(x)$. Similarly, one obtains an upper-approximation $\min_{x_i \in I} f_{x_i}^+(x)$.
+%
 \subsubsection*{\textit{Simplification of error terms}}
 %
 In practice, the algorithm integrates features to save error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.

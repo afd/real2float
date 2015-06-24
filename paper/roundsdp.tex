@@ -142,10 +142,11 @@
 \newcommand{\liftfun}[3]{\mathtt{lift}(#1, #2, #3)}
 \newcommand{\lift}{\mathtt{lift}}
 \newcommand{\poly}{_\text{poly}}
+\newcommand{\sa}{_\text{sa}}
 \newcommand{\sdpsafun}[3]{\mathtt{sdp\_sa}(#1, #2, #3)}
 \newcommand{\sdpsa}{\mathtt{sdp\_sa}}
 \newcommand{\sdptranscfun}[3]{\mathtt{sdp\_trancs}(#1, #2, #3)}
-\newcommand{\sdptrancs}{\mathtt{sdp\_transc}}
+\newcommand{\sdptransc}{\mathtt{sdp\_transc}}
 %\newcommand{\brev}{\color{red}}
 %\newcommand{\erev}{\color{black}}
 \newcommand{\sthreefp}{\mathtt{s3fp}}
@@ -271,7 +272,7 @@ r^\star := & \max_{(\x, \e) \in \K} | r(\x, \e) | \\
 \end{align}
 %
 One can directly try to solve these two polynomial optimization problems using classical SDP relaxations~\cite{Lasserre01moments}.
-As in~\cite{fptaylor15}, one can also decompose the error term $r$ as the sum of a term $l(\x,\e)$, which is linear w.r.t.~$\e$, and a nonlinear term $h(\x,\e) := r(\x,\e) - l(\x,\e)$. Then the triangular inequality yields:
+As in~\cite{fptaylor15}, one can also decompose the error term $r$ as the sum of a term $l(\x,\e)$, which is affine w.r.t.~$\e$, and a nonlinear term $h(\x,\e) := r(\x,\e) - l(\x,\e)$. Then the triangular inequality yields:
 %
 \begin{equation}
 \label{eq:lhoptim} 
@@ -653,7 +654,7 @@ The algorithm \code{bound_nlexpr}, depicted in Figure~\ref{alg:bound_nlexpr}, ta
 \Require input variables $\x$, input constraints $\X$, nonlinear expression $f$, rounded expression $\hat{f}$, error variables $\e$, error constraints $\E$, relaxation order $d$
 \Ensure upper bound $f_d$ of the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \E$
 \State Define the absolute error $r(\x, \e) := \hat{f}(\x,\e) - f(\x)$ \label{line:r}
-\State Compute $l(\x,\e) := \sum_{j=1}^m \frac{\partial r(\x,\e)} {\partial e_j} (\x,0) \, e_j$ \label{line:l}
+\State Compute $l(\x,\e) := r(\x, 0) + \sum_{j=1}^m \frac{\partial r(\x,\e)} {\partial e_j} (\x,0) \, e_j$ \label{line:l}
 \State Compute $h := r - l$ \label{line:h}
 \State Compute interval bounds for $h$: $I^h := \iaboundfun{h}{\K}$ \label{line:iabound}
 \State Compute interval bounds for $l$: $I_d^l := \sdpboundfun{l}{\K}{d}$  \label{line:sdpbound}
@@ -664,7 +665,7 @@ The algorithm \code{bound_nlexpr}, depicted in Figure~\ref{alg:bound_nlexpr}, ta
 \label{alg:bound_nlexpr}
 \end{figure}
 
-After computing the absolute rounding error $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of an expression $l$ which is linear w.r.t.~the error variable $\e$ and a remainder $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of a-priori much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). 
+After computing the absolute rounding error $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of an expression $l$ which is affine w.r.t.~the error variable $\e$ and a remainder $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of a-priori much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). 
 %
 \subsection{Polynomial Programs}
 \label{sec:polsdp}
@@ -673,7 +674,7 @@ We first describe our $\sdpbound$ optimization algorithm when implementing polyn
 The bound of $l$ is provided through solving two sparse SDP instances of Problem~$(\S_d)$, at relaxation order $d$. We now give more explanations about the $\sdppoly$ procedure.
 
 We can map each input variable $x_i$ to the integer $i$, for all $i=1,\dots,n$, as well as each error variable $e_j$ to $n+j$, for all $j=1,\dots,m$. Then, define the sets $C_1 := \{1,\dots,n,n+1\}, \dots, C_m := \{1,\dots,n,n+m\}$. Here, we take advantage of the sparsity correlation pattern of $l$ by using $m$ distinct sets of cardinal $n+1$ rather than a single one of cardinal $n+m$, i.e.~the total number of variables. 
-We also scale the optimization problems by writing 
+After noticing that $r(\x,0) = \hat{f}(\x,0) - f(\x) = 0$, one can scale the optimization problems by writing 
 \begin{align}
 \label{eq:lscale}
 l(\x,\e) = \sum_{j=1}^m s_j (\x) e_j = \epsilon \sum_{j=1}^m s_j (\x) \frac{e_j}{\epsilon} \,,
@@ -699,13 +700,13 @@ Then, one can compute a lower bound of the minimum of $l'(\x,\e) := l(\x, \e) / 
 \left\{			
 \begin{array}{rl}
 \underline{l_d'} := \sup\limits_{\mu, \sigma_j} & \mu\enspace, \\	 
-\text{s.t.} & l' - \mu = \sigma_0 + \sum_{j = 0}^{k+m} \sigma_j g_j \,, \\
+\text{s.t.} & l' - \mu = \sigma_0 + \sum_{j = 1}^{k+m} \sigma_j g_j \,, \\
 \\
 & \mu\in \R \,,\ \sigma_0 \in \sum_{j = 1}^m \Sigma [(\x, \e), C_j] \,, \\
 \\
 & \sigma_j \in \Sigma[(\x,\e), F_j] \,, \ j = 1,\dots,k+m \,, \\
 \\
-& \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 0,\dots,k+m \,.
+& \deg (\sigma_j g_j) \leq 2 d  \,, \ j = 1,\dots,k+m \,.
 \end{array} \right.
 \end{split}
 \end{align}
@@ -784,7 +785,7 @@ For the sake of consistency, we omit the other cases (\code{Neg}, \code{Add}, \c
 \begin{algorithmic}[1]                 
 \Require input variables $\y$, input constraints $\K$, semialgebraic expression $f$
 \Ensure variables $\y\poly$, constraints $\K\poly$, polynomial expression $f\poly$
-    \State $I := \iaboundfun{f}{Y}$ \label{line:liftia}
+    \State $I := \iaboundfun{f}{\K}$ \label{line:liftia}
 	\If {\lstinline|$f = \ $ Pol ($p$)|} \label{line:liftpol} $\y\poly := \y$, $\K\poly := \K$, $\f\poly := p$
 	\ElsIf {\lstinline|$f = \ $ Div ($g$, $h$)|} \label{line:liftdiv} 
 	\State $\y_g, \K_g, g\poly := \liftfun{\y}{\K}{g}$ 
@@ -808,26 +809,7 @@ Finally, notice that the final set of variables $\y\poly$ can be decomposed as $
 Denoting by $n\poly$ the cardinal of $\x\poly$, one easily shows that the sets $\{1, \dots, n\poly, e_1\},\dots,\{1, \dots, n\poly, e_m\}$ satisfy the RIP, thus ensuring to solve efficiently the corresponding instances of Problem~\eqref{eq:lscalesdp2}.
 %
 \subsubsection*{\textit{Transcendental programs}}
-Here we assume that the function $l$ is transcendental,~i.e.~involves non-semialgebraic components such as $\exp$ or $\sin$.
-
-We first illustrate the extension to transcendental programs with the following example.
-\begin{example}
-Let consider the program implementing the rational function $f : [-8, 8] \to \R$ defined by $f(x_1) := \log (1 + \exp(x_1))$. Applying the rounding procedure  yields $\hat{f}(x_1,\e) := \log [(1 + \exp(x_1) (1 + e_1)) \, (1 + e_2)](1 + e_3)$. 
-Here, $|e_1|$ is bounded by the machine $\epsilon$ while $|e_2|$ (resp.~$|e_3|$) are bounded with an adjusted absolute error $\epsilon(\log)$ (resp.~$\epsilon(\exp)$).
-
-
-One obtains the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1,\e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + s_3 (x_1) e_3 + h(x_1, \e)$, with 
-$s_1(x_1) = \frac{\exp(x_1)} {1 + \exp(x_1)}$, $s_2(x_1) = 1$ and $s_3(x_1) = \log (1 + \exp(x_1)) = f(x_1)$.
-
-\begin{figure}[!h]
-\begin{center}
-\includegraphics[scale=0.8]{logexp.pdf}
-\caption{Maxplus Approximations for $x_1 \mapsto \log(1 + \exp{x_1})$: $\max \{ f_0^- (x_1), f_8^- (x_1)\} \leq  \log(1 + \exp{x_1}) \leq \min \{ f_0^+ (x_1), f_8^+ (x_1)\} $}\label{fig:logexp}
-\end{center}
-\end{figure}
-\end{example}
-
-For each transcendental function $f_{\R}$ in our dictionary set $\setD$, one assumes that $f_{\R}$ is twice differentiable, so that the univariate function $g := f_{\R} + \frac{\gamma}{2} |\cdot|^2$ is convex on $I$ for large enough $\gamma > 0$ (for more details, see the references~\cite{agk04, mceneaney-livre}). It follows that there exists a constant $\gamma \leq \sup_{x\in I} -f_{\R}''(x)$ such that for all $x_i \in I$:
+Here we assume that the function $l$ is transcendental,~i.e.~involves univariate non-semialgebraic components such as $\exp$ or $\sin$. For each univariate transcendental function $f_{\R}$ in our dictionary set $\setD$, one assumes that $f_{\R}$ is twice differentiable, so that the univariate function $g := f_{\R} + \frac{\gamma}{2} |\cdot|^2$ is convex on $I$ for large enough $\gamma > 0$ (for more details, see the references~\cite{agk04, mceneaney-livre}). It follows that there exists a constant $\gamma \leq \sup_{x\in I} -f_{\R}''(x)$ such that for all $x_i \in I$:
 \begin{align}
 \begin{split}
 \label{eq:maxplus}
@@ -836,11 +818,32 @@ For each transcendental function $f_{\R}$ in our dictionary set $\setD$, one ass
 \end{split}
 \end{align}
 implying that for all $x \in I$, $f_{\R} (x)  \geq \max_{x_i \in I} f_{x_i}^-(x)$. Similarly, one obtains an upper-approximation $\min_{x_i \in I} f_{x_i}^+(x)$.
-Figure~\ref{fig:logexp} provides such approximations for the function $f_{\R} := \log (1 + |\cdot|)$ on the interval $I := [-8, 8]$.
+Figure~\ref{fig:logexp} provides such approximations for the function $f_{\R}(x) := \log (1 + \exp(x))$ on the interval $I := [-8, 8]$.
+%
+\begin{figure}[!h]
+\begin{center}
+\includegraphics[scale=0.8]{logexp.pdf}
+\caption{Maxplus Approximations for $x \mapsto \log(1 + \exp{x})$: $\max \{ f_0^- (x), f_8^- (x)\} \leq  \log(1 + \exp{x}) \leq \min \{ f_0^+ (x), f_8^+ (x)\} $}\label{fig:logexp}
+\end{center}
+\end{figure}
+%
+For transcendental programs, our procedure $\sdpbound$ calls the auxiliary procedure $\sdptransc$. Given input variables $(\x,\e)$, constraints $\K$ and a transcendental function $l$, $\sdptransc$ first computes a semialgebraic lower (resp.~upper)  approximation $l^-$ (resp.~$l^+$) of $l$ over $\K$. For more details in the context of global optimization, we refer the reader to~\cite{Magron15sdp}. Then, calling the procedure $\sdpsa$ allows to get interval enclosures of $l^-$ as well as $l^+$.
+We illustrate the procedure to handle transcendental programs with the following example.
+\begin{example}
+Let consider the program implementing the transcendental function $f : [-8, 8] \to \R$ defined by $f(x_1) := \log (1 + \exp(x_1))$. Applying the rounding procedure  yields $\hat{f}(x_1,\e) := \log [(1 + \exp(x_1) (1 + e_1)) \, (1 + e_2)](1 + e_3)$. 
+Here, $|e_2|$ is bounded by the machine $\epsilon$ while $|e_1|$ (resp.~$|e_3|$) are bounded with an adjusted absolute error $\epsilon_1 := \epsilon(\exp)$ (resp.~$\epsilon_3 := \epsilon(\log)$).
+Let $\K:= [-8,8] \times [-\epsilon_1, \epsilon_1] \times [\epsilon, \epsilon] \times [-\epsilon_3, \epsilon_3]$.
+
+One obtains the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1,\e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + s_3 (x_1) e_3 + h(x_1, \e)$, with 
+$s_1(x_1) = \frac{\exp(x_1)} {1 + \exp(x_1)}$, $s_2(x_1) = 1$ and $s_3(x_1) = \log (1 + \exp(x_1)) = f(x_1)$. Figure~\ref{fig:logexp} provides a lower approximation $s_3^- := \max\{f_0^-,f_8^-\}$ of $s_3$ as well as an upper approximation $s_3^+ := \min \{f_0^+,f_8^+\}$. One can get similar approximations $s_1^-$ and $s_1^+$ for $s_1$. 
+
+One first obtains (coarse) interval enclosures $I_2 = \iaboundfun{s_1}{\K}$ and $I_3 = \iaboundfun{s_3}{\K}$ and one introduces extra variables $x_2 \in I_2$ and $x_3 \in I_3$ to represent $s_1$ and $s_3$ respectively.
+Then, the interval enclosure of $l$ over $\K$ is equal to the interval enclosure of $l\sa(\x,\e) := x_2 e_1 + e_2 + x_3 e_3$ over the set $\K\sa:= \{(x_1,\e) \in \K \,, (x_2, x_3) \in I_2 \times I_3 \,, s_1^-(x_1) \leq x_2 \leq s_1^+(x_1) \,, s_3^-(x_1) \leq x_3 \leq s_3^+(x_1) \}$.
+\end{example}
 %
 \subsubsection*{\textit{Simplification of error terms}}
 %
-In practice, the algorithm integrates features to save error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.
+Our algorithm integrates several features to reduce the number of error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.
 We can also simplify error term products, thanks to the following lemma.
 \begin{lemma}[\protect{Higham~\cite[Lemma 3.3]{higham2002accuracy}}]
 \label{th:redproduct}

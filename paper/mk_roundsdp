@@ -1,3 +1,4 @@
 pdflatex reflexion.tex
 pdflatex csp_deltax.tex
+pdflatex logexp.tex
 pdflatex roundsdp.tex && bibtex roundsdp && pdflatex roundsdp.tex && pdflatex roundsdp.tex

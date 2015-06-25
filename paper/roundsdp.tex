@@ -28,7 +28,7 @@
 % 10pt          To set in 10-point type instead of 9-point.
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
-
+\usepackage{times}
 \usepackage{listings}
 \def\lstlanguagefiles{defManOcaml.tex}
 \lstset{language = Ocaml}
@@ -137,8 +137,10 @@
 \newcommand{\iabound}{\mathtt{ia\_bound}}
 \newcommand{\sdpboundfun}[3]{\mathtt{sdp\_bound}(#1, #2, #3)}
 \newcommand{\sdpbound}{\mathtt{sdp\_bound}}
-\newcommand{\boundnlexprfun}[7]{\mathtt{bound\_nlexpr}(#1, #2, #3, #4, #5, #6, #7)}
-\newcommand{\boundnlexpr}{\mathtt{bound\_nlexpr}}
+\newcommand{\boundfun}[7]{\mathtt{bound}(#1, #2, #3, #4, #5, #6, #7)}
+\newcommand{\bound}{\mathtt{bound}}
+\newcommand{\boundnlprogfun}[7]{\mathtt{bound\_nlexpr}(#1, #2, #3, #4, #5, #6, #7)}
+\newcommand{\boundnlprog}{\mathtt{bound\_nlexpr}}
 \newcommand{\sdppolyfun}[3]{\mathtt{sdp\_poly}(#1, #2, #3)}
 \newcommand{\sdppoly}{\mathtt{sdp\_poly}}
 \newcommand{\liftfun}[3]{\mathtt{lift}(#1, #2, #3)}
@@ -649,22 +651,22 @@ for polynomial functions $g_1, \dots, g_k$.
 %
 Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|rounding| procedure (see Section~\ref{sec:fpbackground}), introducing the introduction of error variables $\e$. 
 
-The algorithm \code{bound_nlexpr}, depicted in Figure~\ref{alg:bound_nlexpr}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound_nlexpr} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an upper bound of the maximal absolute error bound $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
+The algorithm \code{bound}, depicted in Figure~\ref{alg:bound}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. Here we assume that our program implementing $f$ does not involve conditionals (this case will be discussed later in Section~\ref{sec:nonpolsdp}). For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an interval enclosure $I_d$ of the absolute error $\mid \hat{f}(\x,\e) - f(\x) \mid$ over $\K$. 
+From this interval $I_d:= [\underline{f_d}, \overline{f_d}]$, one can compute $f_d := \max \{- \underline{f_d}, \overline{f_d} \}$, which is a sound upper bound of the maximal absolute error $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
 
 \begin{figure}[!ht]
 \begin{algorithmic}[1]                    
 \Require input variables $\x$, input constraints $\X$, nonlinear expression $f$, rounded expression $\hat{f}$, error variables $\e$, error constraints $\E$, relaxation order $d$
-\Ensure upper bound $f_d$ of the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \E$
+\Ensure interval enclosure $I_d$ of the absolute error $\mid \hat{f} - f  \mid$ over $\K := \X \times \E$
 \State Define the absolute error $r(\x, \e) := \hat{f}(\x,\e) - f(\x)$ \label{line:r}
 \State Compute $l(\x,\e) := r(\x, 0) + \sum_{j=1}^m \frac{\partial r(\x,\e)} {\partial e_j} (\x,0) \, e_j$ \label{line:l}
 \State Compute $h := r - l$ \label{line:h}
 \State Compute interval bounds for $h$: $I^h := \iaboundfun{h}{\K}$ \label{line:iabound}
 \State Compute interval bounds for $l$: $I_d^l := \sdpboundfun{l}{\K}{d}$  \label{line:sdpbound}
-\State Compute $I_d := I_d^l + I^h = [\underline{f_d}, \overline{f_d}]$ 
-\State \Return $f_d := \max \{- \underline{f_d}, \overline{f_d} \}$
+\State \Return $I_d := I_d^l + I^h$ 
 \end{algorithmic}
-\caption{\code{bound_nlexpr}}
-\label{alg:bound_nlexpr}
+\caption{\code{bound}}
+\label{alg:bound}
 \end{figure}
 
 After computing the absolute rounding error $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of an expression $l$ which is affine w.r.t.~the error variable $\e$ and a remainder $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of a-priori much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). 
@@ -822,7 +824,7 @@ Here we assume that the function $l$ is transcendental,~i.e.~involves univariate
 implying that for all $x \in I$, $f_{\R} (x)  \geq \max_{x_i \in I} f_{x_i}^-(x)$. Similarly, one obtains an upper-approximation $\min_{x_i \in I} f_{x_i}^+(x)$.
 Figure~\ref{fig:logexp} provides such approximations for the function $f_{\R}(x) := \log (1 + \exp(x))$ on the interval $I := [-8, 8]$.
 %
-\begin{figure}[!h]
+\begin{figure}[!ht]
 \begin{center}
 \includegraphics[scale=0.8]{logexp.pdf}
 \caption{Maxplus Approximations for $x \mapsto \log(1 + \exp{x})$: $\max \{ f_0^- (x), f_8^- (x)\} \leq  \log(1 + \exp{x}) \leq \min \{ f_0^+ (x), f_8^+ (x)\} $}\label{fig:logexp}
@@ -844,40 +846,54 @@ Then, the interval enclosure of $l$ over $\K$ is equal to the interval enclosure
 \end{example}
 %
 \subsubsection*{\textit{Programs with conditionals}}
-Finally, we explain how to apply the \code{bound_nlexpr} procedure to nonlinear programs involving conditionals. 
+Finally, we explain how to extend our bounding procedure to nonlinear programs involving conditionals through the recursive algorithm given in Figure~\ref{alg:bound_nlprog}.
+The $\boundnlprog$ algorithm relies on the $\bound$ procedure (see Figure~\ref{alg:bound} in Section~\ref{sec:transcsdp}) to compute rounding error bounds of programs implementing transcendental functions (Line~\lineref{line:noncnd}).
+From Line~\lineref{line:cnd} to Line~\lineref{line:endcnd}, the algorithm handles the case when the program implements a function $f$ defined as follows:
+\[   
+f (\x) := 
+     \begin{cases}
+       g(\x) &\text{if } p(\x) \geq 0,\\
+       h(\x) &\text{otherwise}.
+     \end{cases}
+\]
+The first branch output is $g$ while the second one is $h$.
+
+A preliminary step consists in computing the rounding error enclosure $I_d^p := [\underline{p_d}, \overline{p_d}]$ (Line~\lineref{line:polcnd}) for the program implementing the polynomial $p$. 
+Then the procedure computes bounds related to the divergence path error, that is the maximal value between the four following errors: 
+\begin{itemize}
+\item (Line~\lineref{line:I1}) the error obtained while computing the rounded result $\hat{h}$ of the second branch instead of computing the exact result $g$ of the first one, occurring for the set of variables $(\x,\e)$ such that $\hat{p}(\x,\e) \leq 0 \leq p(\x)$. For scalability and numerical issues, we consider an over-approximation $\X_1$ (Line~\lineref{line:X1}) of this set, where the variables $\x$ satisfy the relaxed constraints $0 \leq p(\x) \leq \overline{p_d}$.
+\item (Line~\lineref{line:I2}) the error obtained while computing the rounded result $\hat{g}$ of the first branch instead of computing the exact result $h$ of the second one, occurring for the set of variables $(\x,\e)$ such that $p(\x) \leq 0 \leq \hat{p}(\x,\e)$. We also consider an over-approximation $\X_2$ (Line~\lineref{line:X2}) of this set, where the variables $\x$ satisfy the relaxed constraints $\underline{p_d} \leq p(\x) \leq 0$.
+\item (Line~\lineref{line:I3}) the rounding error corresponding to the program implementation of $g$.
+\item(Line~\lineref{line:I4}) the rounding error corresponding to the program implementation of $h$.
+\end{itemize}
 %
 \begin{figure}[!ht]
 \begin{algorithmic}[1]
-\Require variables $(\x,\e)$, constraints $\K = \X \times \E$, nonlinear expression \lstinline|$f = \ $ IfThenElse ($p, g, h$)|, rounded expression $\hat{f}$
-\State Compute $I_d^p := \boundnlexprfun{\x}{\X}{p}{\hat{p}}{\e}{\E}{d} = [\underline{p_d}, \overline{p_d}]$
-\State Define $\X_1 := \{ \x \in \X : 0 \leq p(\x) \leq \underline{p_d} \}$
-\State Define $\X_2 := \{ \x \in \X : 0 \leq p(\x) \leq \underline{p_d} \}$
-\Ensure upper bound $f_d$ of the error $\mid \hat{f} - f  \mid$ over $\K$
-
-\if{
-    \State $I := \iaboundfun{f}{\K}$ \label{line:liftia}
-	\If {\lstinline|$f = \ $ Pol ($p$)|} \label{line:liftpol} $\y\poly := \y$, $\K\poly := \K$, $\f\poly := p$
-	\ElsIf {\lstinline|$f = \ $ Div ($g$, $h$)|} \label{line:liftdiv} 
-	\State $\y_g, \K_g, g\poly := \liftfun{\y}{\K}{g}$ 
-	\State $\y_h, \K_h, h\poly := \liftfun{\y}{\K}{h}$
-    \State $\y\poly := (\y_g,\y_h,x)$ \hspace{1cm} $f\poly := x$ 
-	\State $\K\poly := \{\y\poly \in \K_g \times \K_h \times I : x g\poly = f\poly \}$
-	\ElsIf {\lstinline|$f = \ $ Sqrt ($g$)|} \label{line:liftsqrt} 
-	\State $\y_g, \K_g, g\poly := \liftfun{\y}{\K}{g}$ 
-	\State $\y\poly := (\y_g,x)$ \hspace{1cm} $f\poly := x$ 
-	\State $\K\poly := \{\y\poly \in \K_g \times I : x^2 = g\poly \}$\\
-\code{...}
-	\EndIf
-}\fi
-\State \Return $\max \{f_d^1, f_d^2, f_d^3, f_d^4 \}$
+\Require input variables $\x$, input constraints $\X$, nonlinear expression $f$, rounded expression $\hat{f}$, error variables $\e$, error constraints $\E$, relaxation order $d$
+\Ensure interval enclosure $I_d$ of the error $\mid \hat{f} - f  \mid$ over $\K := \X \times \E$
+%
+\If{\lstinline|$f = \ $ IfThenElse ($p, g, h$)|} \label{line:cnd}
+\State $I_d^p := \boundfun{\x}{\X}{p}{\hat{p}}{\e}{\E}{d} = [\underline{p_d}, \overline{p_d}]$ \label{line:polcnd}
+\State $\X_1 := \{ \x \in \X : 0 \leq p(\x) \leq \overline{p_d} \}$ \label{line:X1}
+\State $\X_2 := \{ \x \in \X : \underline{p_d} \leq p(\x) \leq 0 \}$\label{line:X2}
+\State $\X_3 := \{ \x \in \X : 0 \leq p(\x) \}$\label{line:X3}
+\State $\X_4 := \{ \x \in \X : p(\x) \leq 0 \}$\label{line:X4}
+\State $I_d^1 := \boundnlprogfun{\x}{\X_1}{g}{\hat{h}}{\e}{\E}{d}$\label{line:I1}
+\State $I_d^2 := \boundnlprogfun{\x}{\X_2}{h}{\hat{g}}{\e}{\E}{d}$\label{line:I2}
+\State $I_d^3 := \boundnlprogfun{\x}{\X_3}{g}{\hat{g}}{\e}{\E}{d}$\label{line:I3}
+\State $I_d^4 := \boundnlprogfun{\x}{\X_4}{h}{\hat{h}}{\e}{\E}{d}$\label{line:I4}
+\State \Return $I_d := I_d^1 \cup I_d^2 \cup I_d^3 \cup I_d^4$ \label{line:endcnd}
+\Else \State \Return $I_d := \boundfun{\x}{\X}{f}{\hat{f}}{\e}{\E}{d}$ \label{line:noncnd}
+\EndIf
+%
 \end{algorithmic}
-\caption{\code{bound_cndexpr}}
-\label{alg:bound_cndexpr}
+\caption{\code{bound_nlprog}}
+\label{alg:bound_nlprog}
 \end{figure}
 %
 \subsubsection*{\textit{Simplification of error terms}}
 %
-Our algorithm integrates several features to reduce the number of error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.
+In addition, our algorithm \code{bound_nlprog} integrates several features to reduce the number of error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to associate  the same error variable to the same operation when the operands are identical. For instance, several occurrences of $x_1 + x_2$ are replaced each time by $(x_1 + x_2) (1 + e_1)$.
 We can also simplify error term products, thanks to the following lemma.
 \begin{lemma}[\protect{Higham~\cite[Lemma 3.3]{higham2002accuracy}}]
 \label{th:redproduct}

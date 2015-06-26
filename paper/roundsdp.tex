@@ -139,8 +139,8 @@
 \newcommand{\sdpbound}{\mathtt{sdp\_bound}}
 \newcommand{\boundfun}[7]{\mathtt{bound}(#1, #2, #3, #4, #5, #6, #7)}
 \newcommand{\bound}{\mathtt{bound}}
-\newcommand{\boundnlprogfun}[7]{\mathtt{bound\_nlexpr}(#1, #2, #3, #4, #5, #6, #7)}
-\newcommand{\boundnlprog}{\mathtt{bound\_nlexpr}}
+\newcommand{\boundnlprogfun}[7]{\mathtt{bound\_nlprog}(#1, #2, #3, #4, #5, #6, #7)}
+\newcommand{\boundnlprog}{\mathtt{bound\_nlprog}}
 \newcommand{\sdppolyfun}[3]{\mathtt{sdp\_poly}(#1, #2, #3)}
 \newcommand{\sdppoly}{\mathtt{sdp\_poly}}
 \newcommand{\liftfun}[3]{\mathtt{lift}(#1, #2, #3)}
@@ -394,7 +394,7 @@ type nlexpr =
 \end{lstlisting}
 %
 The type \code{transc} corresponds to the dictionary $\setD$ of special functions. For instance, the term~\lstinline|Transc ($\exp$, $f(\x)$)| represents the program implementing $\exp(f(\x)$.
-Given a polynomial expression $p$ and two nonlinear expressions $f$ and $g$, the term ~\lstinline|IfThenElse($p(\x)$, $f(\x)$, $g(\x)$)| represents the conditional program implementing~\lstinline|if ($p(\x) \leq 0$) $f (\x)$ else $g (\x)$|. The constructor \code{Let} allows to define local variables in an ML fashion, e.g.~\lstinline|let $t_1 = 331.4 + 0.6 T$ in $-t_1 v /(t_1 + u)^2$| (part of the Doppler program considered in Section~\ref{sec:benchs}).
+Given a polynomial expression $p$ and two nonlinear expressions $f$ and $g$, the term ~\lstinline|IfThenElse($p(\x)$, $f(\x)$, $g(\x)$)| represents the conditional program implementing~\lstinline|if ($p(\x) \geq 0$) $f (\x)$ else $g (\x)$|. The constructor \code{Let} allows to define local variables in an ML fashion, e.g.~\lstinline|let $t_1 = 331.4 + 0.6 T$ in $-t_1 v /(t_1 + u)^2$| (part of the Doppler program considered in Section~\ref{sec:benchs}).
 %
 %\end{lstlisting}
 %
@@ -903,6 +903,9 @@ Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1
 %
 \section{Implementation Benchmarks} %4p
 \label{sec:benchs}
+Now, we present experimental results obtained with the implementation of the $\boundnlprog$ algorithm in the $\realtofloat$ tool.
+
+
 \begin{table*}[!ht]
 %\small
 \begin{center}
@@ -928,8 +931,12 @@ Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1
 & (double) & $3.98\text{e--}11$ & $6.48\text{e--}11$ & $5.24\text{e--}11$ & $3.98\text{e--}11$ & $2.19\text{e--}11$\\
 \multirow{1}{*}{verhulst}
 & (double) & $3.40\text{e--}16$ & $6.82\text{e--}16$ & $3.50\text{e--}16$ & $7.86\text{e--}01$ & $2.23\text{e--}16$\\
+\multirow{1}{*}{kepler0}
+& (double) & $8.76\text{e--}14$ & $9.07\text{e--}14$ & $1.04\text{e--}13$ & $1.03\text{e--}13$ & ?\\
 \multirow{1}{*}{kepler1}
-& (double) & $2.96\text{e--}13$ & ? & $4.49\text{e--}13$ & $1.67\text{e--}12$ & $5.\text{e--}14$\\
+& (double) & $2.96\text{e--}13$ & $4.43\text{e--}13$ & $4.49\text{e--}13$ & $6.52\text{e--}13$ & ?\\
+\multirow{1}{*}{kepler2}
+& (double) & $1.90\text{e--}12$ & $2.16\text{e--}12$ & $2.08\text{e--}12$ & $3.00\text{e--}12$ & ?\\
 \hline
 \multirow{2}{*}{sineTaylor}
 & (double) & $5.08\text{e--}16$ & $9.57\text{e--}16$ & $6.71\text{e--}16$ & $9.39\text{e--}16$ & $4.45\text{e--}16$\\

@@ -901,7 +901,7 @@ Let $\epsilon < \frac{1}{k}$ and $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$
 \end{lemma}
 Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Hence, one can derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
 %
-\section{Implementation Benchmarks} %4p
+\section{Implementation Benchmarks}
 \label{sec:benchs}
 Now, we present experimental results obtained with the implementation of the $\boundnlprog$ algorithm in the $\realtofloat$ tool.
 
@@ -909,10 +909,10 @@ Now, we present experimental results obtained with the implementation of the $\b
 \begin{table*}[!ht]
 %\small
 \begin{center}
-\caption{Comparison of error bounds $r_k^*$ obtained with different methods}
+\caption{Comparison results of upper and lower bounds for absolute rounding errors (the best results are emphasized using \textbf{bold fonts})}
 \begin{tabular}{p{2.3cm}lccccc}
 \hline
-\multirow{2}{*}{Benchmark} & \multirow{2}{*}{precision} & \multirow{2}{*}{$\realtofloat$} & $\rosa$  & $\fptaylor$  &\multirow{2}{*}{IA} & \multirow{2}{*}{Simulated error}
+\multirow{2}{*}{Benchmark} & \multirow{2}{*}{precision} & \multirow{2}{*}{$\realtofloat$} & $\rosa$  & $\fptaylor$  &\multirow{2}{*}{IA} & \multirow{2}{*}{lower bound}
 \\
 & & & \cite{Darulova14Popl} & \cite{fptaylor15} & & \\
 \hline            
@@ -931,17 +931,28 @@ Now, we present experimental results obtained with the implementation of the $\b
 & (double) & $3.98\text{e--}11$ & $6.48\text{e--}11$ & $5.24\text{e--}11$ & $3.98\text{e--}11$ & $2.19\text{e--}11$\\
 \multirow{1}{*}{verhulst}
 & (double) & $3.40\text{e--}16$ & $6.82\text{e--}16$ & $3.50\text{e--}16$ & $7.86\text{e--}01$ & $2.23\text{e--}16$\\
+\multirow{1}{*}{carbonGas}
+& (double) & $1.10\text{e--}08$ & $1.60\text{e--}08$ & $1.25\text{e--}08$ & $3.10\text{e--}03$ & $4.11\text{e--}09$ \\
+\multirow{1}{*}{jetEngine}
+& (double) & ? & ? & ? & ? & ? \\
+\multirow{1}{*}{predPrey}
+& (double) & $1.57\text{e--}16$ & $1.98\text{e--}16$ & $1.87\text{e--}16$ & $2.02\text{e--}16$ & $1.47\text{e--}16$ \\
 \multirow{1}{*}{kepler0}
-& (double) & $8.76\text{e--}14$ & $9.07\text{e--}14$ & $1.04\text{e--}13$ & $1.03\text{e--}13$ & ?\\
+& (double) & $8.76\text{e--}14$ & $9.07\text{e--}14$ & $1.04\text{e--}13$ & $1.03\text{e--}13$ & $2.23\text{e--}14$\\
 \multirow{1}{*}{kepler1}
-& (double) & $2.96\text{e--}13$ & $4.43\text{e--}13$ & $4.49\text{e--}13$ & $6.52\text{e--}13$ & ?\\
+& (double) & $2.96\text{e--}13$ & $4.43\text{e--}13$ & $4.49\text{e--}13$ & $6.52\text{e--}13$ & $7.58\text{e--}14$\\
 \multirow{1}{*}{kepler2}
-& (double) & $1.90\text{e--}12$ & $2.16\text{e--}12$ & $2.08\text{e--}12$ & $3.00\text{e--}12$ & ?\\
+& (double) & $1.90\text{e--}12$ & $2.16\text{e--}12$ & $2.08\text{e--}12$ & $3.00\text{e--}12$ & $3.03\text{e--}13$\\
+\multirow{1}{*}{floudas1}
+& (double) & $2.99\text{e--}13$ & $2.99\text{e--}13$ & $3.90\text{e--}13$ & $6.36\text{e--}13$ & $1.48\text{e--}13$ \\
+\multirow{1}{*}{floudas2}
+& (double) &  $9.03\text{e--}16$ & $1.12\text{e--}15$ & $9.96\text{e--}16$ & $1.12\text{e--}15$ & ? \\
+\multirow{1}{*}{floudas3}
+& (double) & $8.90\text{e--}15$ & $1.00\text{e--}14$ & $1.16\text{e--}14$ & $1.87\text{e--}14$ & $7.31\text{e--}15$ \\
 \hline
 \multirow{2}{*}{sineTaylor}
 & (double) & $5.08\text{e--}16$ & $9.57\text{e--}16$ & $6.71\text{e--}16$ & $9.39\text{e--}16$ & $4.45\text{e--}16$\\
 & (float) & $2.73\text{e--}07$ & $1.03\text{e--}06$ & $3.51\text{e--}07$ & $5.07\text{e--}07$ & $1.79\text{e--}07$\\
-%& (16bit) & $2.24\text{e--}3$ & $2.87\text{e--}4$ & ? & $1.55\text{e--}4$\\
 \hline
 \multirow{2}{*}{sineOrder3}
 & (double) & $6.53\text{e--}16$ & $1.11\text{e--}15$ & $9.96\text{e--}16$ & $8.82\text{e--}16$ & $3.34\text{e--}16$\\
@@ -952,10 +963,89 @@ Now, we present experimental results obtained with the implementation of the $\b
 & (float) & $4.06\text{e--}07$ & $9.03\text{e--}07$ & $4.23\text{e--}07$ & $4.56\text{e--}07$ & $2.45\text{e--}07$\\
 %& (16bit) & $3.33\text{e--}3$ & $5.97\text{e--}4$ & ? & $1.58\text{e--}4$\\
 \hline
+\multirow{1}{*}{logexp}
+& (double) & $1.65\text{e--}15$ & $-$ & $1.71\text{e--}15$ & $8.29\text{e--}13$ & $1.19\text{e--}15$ \\
+\multirow{1}{*}{sphere}
+& (double) & ? & $-$ & ? & ? & ? \\
+\multirow{1}{*}{azimuth}
+& (double) & ? & $-$ & ? & ? & ? \\
+\hline
+\multirow{1}{*}{cav10}
+& (double) & ? & ? & $-$ & ? & ? \\
+\hline
+%& (double) & ? & ? & ? & ? & ? \\
 \end{tabular}
 \label{table:error}
 \end{center}
 \end{table*}
+
+\begin{table}[!ht]
+%\small
+\begin{center}
+\caption{Comparison of CPU timings (in seconds) for absolute rounding errors (the best results are emphasized using \textbf{bold fonts})}
+\begin{tabular}{p{2.3cm}lccc}
+\hline
+\multirow{1}{*}{Benchmark} & \multirow{1}{*}{$\realtofloat$} & $\rosa$  & $\fptaylor$   \\
+\hline
+\multirow{1}{*}{doppler1$\star$}
+? & $27.3$ & $8.84$\\
+\multirow{1}{*}{doppler1}
+$13.3$ & $23.7$ & $7.45$$\\
+\multirow{1}{*}{doppler2}
+? & $24.0$ & $7.29$\\
+\multirow{1}{*}{doppler3}
+? & $35.4$ & $7.15$\\
+\multirow{1}{*}{rigidBody1}
+? & ? & ?\\
+\multirow{1}{*}{rigidBody2}
+? & ? & ?\\
+\multirow{1}{*}{verhulst}
+$2.50$ & $9.93$ & $3.52$\\
+\multirow{1}{*}{carbonGas}
+$5.05$ & $39.4$ & $10.1$\\
+\multirow{1}{*}{jetEngine}
+? & $328$ & ?\\
+\multirow{1}{*}{predPrey}
+? $4.10$ $36.2$ & $5.05$\\
+\multirow{1}{*}{kepler0}
+$0.93$ & $4.28$ & $15.1$\\
+\multirow{1}{*}{kepler1}
+$3.15$ & $32.9$ & $330$\\
+\multirow{1}{*}{kepler2}
+$21.6$ & $56.1$ & $939$\\
+\hline
+\multirow{1}{*}{floudas1}
+$19.5$ & $17.8$ & $15.3$\\
+\multirow{1}{*}{floudas2}
+$0.23$ & $2.49$ & $1.83$\\
+\multirow{1}{*}{floudas3}
+$0.28$ & $17.3$ & $4.40$\\
+\hline
+\multirow{1}{*}{sineTaylor}
+? & $0.99$ & ?\\
+\hline
+\multirow{1}{*}{sineOrder3}
+? & $6.71$ & ?\\
+\hline
+\multirow{1}{*}{sqroot}
+? & $1.89$ & ?\\
+\hline
+\multirow{1}{*}{logexp}
+$3.70$ & $-$ & $2.47$\\
+\hline
+\multirow{1}{*}{sphere}
+? & ? & ?\\
+\multirow{1}{*}{azimuth}
+? & ? & ?\\
+\hline
+\multirow{1}{*}{cav10}
+? & ? & $-$ \\
+\multirow{1}{*}{perin}
+? & ? & $-$ \\
+\end{tabular}
+\label{table:cpu}
+\end{center}
+\end{table}
 
 
 However, $\fptaylor$ implements special cases to eliminate some error terms, for instance when $\op$ is the multiplication and one of the operands is a nonnegative power of two, then the error $e$ is set to zero. 
@@ -1026,7 +1116,7 @@ procedure sqroot(x : real) returns (r : real) {
 }
 \end{lstlisting}
 }
-\section{Related Works} % 1.5p
+\section{Related Works}
 %
 SMT solvers allow to analyze programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetics. When SAT/SMT solvers output proof witnesses, they can be formally rechecked inside the $\coq$ proof assistant~\cite{smtcoq}. While ensuring soundness, the efficiency of the procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
 

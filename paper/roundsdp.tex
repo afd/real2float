@@ -224,7 +224,13 @@
 \maketitle
 
 \begin{abstract}
-This is the text of the abstract.
+Rounding errors cannot be avoided when implementing numerical programs with finite precision.         
+The ability to reason about rounding is especially important if one wants to explore a range of potential representations, for instance in the world of FPGAs. This problem becomes challenging when the program does not employ solely linear operations as non-linearities are inherent to many interesting computational problems in real-world applications. 
+
+Existing solutions to reasoning are limited in presence of nonlinear correlations between variables, leading to either imprecise bounds or high analysis time. Furthermore, while it is easy to implement a straightforward method such as interval arithmetic, sophisticated techniques are less straightforward to implement in a formal setting. Thus there is a need for methods which output certificates that can be formally  validated inside a proof assistant.
+
+We present a framework to provide upper bounds of absolute rounding errors. This framework is based on optimization techniques employing  semidefinite programming and sums of squares certificates, which can be formally checked inside the Coq theorem prover.
+Our tool covers a wide range of nonlinear programs, including polynomials and transcendental operations as well as conditional loops.                                                             We illustrate the efficiency and  precision of this tool on non-trivial programs coming from biology, optimization and space control.
 \end{abstract}
 
 \category{CR-number}{subcategory}{third-level}
@@ -978,7 +984,7 @@ Now, we present experimental results obtained with the implementation of the $\b
 \label{table:error}
 \end{center}
 \end{table*}
-
+\if{
 \begin{table}[!ht]
 %\small
 \begin{center}
@@ -1046,7 +1052,7 @@ $3.70$ & $-$ & $2.47$\\
 \label{table:cpu}
 \end{center}
 \end{table}
-
+}\fi
 
 However, $\fptaylor$ implements special cases to eliminate some error terms, for instance when $\op$ is the multiplication and one of the operands is a nonnegative power of two, then the error $e$ is set to zero. 
 
@@ -1122,18 +1128,17 @@ SMT solvers allow to analyze programs with various semantics or specifications b
 
 \section{Conclusion and Prospectives} %0.5p
 %
-We have presented a verification framework to over-approximate rounding errors occurring while executing nonlinear programs implemented with finite precision.
+Our verification framework allows to over-approximate rounding errors occurring while executing nonlinear programs implemented with finite precision.
 The framework relies on semidefinite optimization, ensuring tight and certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables.
 
 This work yields several directions for further investigation of research. 
 First, we intend to increase the size of graspable instances by taking into account symetry patterns related to certain program sub-classes. Next, we plan to improve the efficiency of the formal polynomial checker inside Coq by using the interval libraries available inside the proof assistant, rather than using exact polynomial arithmetic in the current framework. 
 We also intend to provide rounding error bounds for more general programs, involving both finite and infinite loops,  . Such extensions has been made realistic that recent efforts to approximate inductive invariants with semidefinite relaxations
-%In the sequel, we briefly outline some of these tracks.
 
-1) lower bounds with other hierarchies
-2) fixed precision
-3) while loops
-5) Formalization of maxplus (cf JFR)
+%1) lower bounds with other hierarchies
+%2) fixed precision
+%3) while loops
+%4) Formalization of maxplus (cf JFR)
 
 \appendix
 \if{

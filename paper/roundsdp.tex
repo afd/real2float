@@ -1122,8 +1122,18 @@ SMT solvers allow to analyze programs with various semantics or specifications b
 
 \section{Conclusion and Prospectives} %0.5p
 %
-We have presented a verification framework to over-approximate round-off errors occurring while executing nonlinear programs implemented with finite precision.
+We have presented a verification framework to over-approximate rounding errors occurring while executing nonlinear programs implemented with finite precision.
 The framework relies on semidefinite optimization, ensuring tight and certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables.
+
+This work yields several directions for further investigation of research. 
+First, we intend to increase the size of graspable instances by taking into account symetry patterns related to certain program sub-classes. Next, we plan to improve the efficiency of the formal polynomial checker inside Coq by using the interval libraries available inside the proof assistant, rather than using exact polynomial arithmetic in the current framework. 
+We also intend to provide rounding error bounds for more general programs, involving both finite and infinite loops,  . Such extensions has been made realistic that recent efforts to approximate inductive invariants with semidefinite relaxations
+%In the sequel, we briefly outline some of these tracks.
+
+1) lower bounds with other hierarchies
+2) fixed precision
+3) while loops
+5) Formalization of maxplus (cf JFR)
 
 \appendix
 \if{

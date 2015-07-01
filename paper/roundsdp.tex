@@ -160,7 +160,7 @@
 \newcommand{\bop}{\mathtt{bop}}
 \newcommand{\coq}{\text{\sc Coq}}
 \newcommand{\ocaml}{\text{\sc OCaml}}
-\newcommand{\rosa}{\mathtt{rosa}}
+\newcommand{\rosa}{\mathtt{Rosa}}
 \newcommand{\sdpa}{\text{\sc Sdpa}}
 \newcommand{\fptaylor}{\mathtt{FPTaylor}}
 \newcommand{\nlcertify}{\mathtt{NLCertify}}
@@ -571,7 +571,7 @@ Moreover, the cliques $C_1, \dots, C_m$ satisfy the running intersection propert
 %
 \begin{definition}[RIP]
 \label{def:rip}
-Let $l \in \N_0$  and $I_1, \dots, I_m$ be subsets of $\{1, \dots, n\}$. We say that $I_1, \dots, I_m$ satisfy the running intersection property (RIP) when for all $i=1, \dots, m$, there exists $k < i$ such that $I_i \bigcap (\bigcup_{j < i} I_j) \subseteq I_m$.
+Let $m \in \N_0$  and $I_1, \dots, I_m$ be subsets of $\{1, \dots, n\}$. We say that $I_1, \dots, I_m$ satisfy the running intersection property (RIP) when for all $i=1, \dots, m$, there exists an integer $k < i$ such that $I_i \cap (\cup_{j < i} I_j) \subseteq I_k$.
 %\[ \forall i = 2, \dots, r, (\exists k < i \,, \ (I_i \bigcap \bigcup_{j < i} I_j) \subset I_k)\enspace. \]
 \end{definition}
 This RIP property together with the assumption mentioned in Remark~\ref{rk:sparsearch} allow to state the sparse variant of Theorem~\ref{th:densesdp}:
@@ -918,15 +918,25 @@ For more details about the installation and usage of $\realtofloat$, we refer to
 All examples are displayed in Appendix A as the corresponding $\realtofloat$ input text files and satisfy our nonlinear program semantics (see Section~\ref{sec:fpbackground}).
 For each example, we compared the quality of the rounding error bounds and corresponding execution times while running our tool $\realtofloat$, $\fptaylor$ (version from May $2015$)~\cite{fptaylor15} and $\rosa$ (version from June $2015$)~\cite{Darulova14Popl}. All benchmark results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz).
 
+For each problem presented in Table~\ref{table:error}, we certify an upper bound of the rounding error.
+
+\if{
+ function $f$ on a box $K$. The semialgebraic optimization problems are solved at the SOS relaxation order $k$. When the relaxation gap is too high to certify the requested
+bound, then we perform a domain subdivision in order to get tighter bounds:
+we divide the maximal width interval of $K$ in two halves to get two sub-boxes $K_1$ and $K_2$ such that $K = K_1 \cup K_2$. We repeat this subdivision procedure,  by applying $\templateoptim$ on a finite set of sub-boxes,
+until we succeed to certify that $m$ is a lower bound of $f$.
+We note $\nbb$ the total number of sub-boxes generated
+by the algorithm.
+}\fi
+
 \begin{table*}[!ht]
 %\small
 \begin{center}
 \caption{Comparison results of upper and lower bounds for absolute rounding errors (the best results are emphasized using \textbf{bold fonts})}
-\begin{tabular}{p{2.3cm}lcccccc}
+\begin{tabular}{p{2.3cm}ccccccc}
 \hline
-\multirow{2}{*}{Benchmark} &  \multirow{2}{*}{\texttt{id}} & \multirow{2}{*}{precision} & \multirow{2}{*}{$\realtofloat$} & $\rosa$  & $\fptaylor$  &\multirow{2}{*}{IA} & \multirow{2}{*}{lower bound}
-\\
-& & & & \cite{Darulova14Popl} & \cite{fptaylor15} & & \\
+\multirow{1}{*}{Benchmark} &  \multirow{1}{*}{\texttt{id}} & \multirow{1}{*}{precision} & \multirow{1}{*}{$\realtofloat$} & $\rosa$  & $\fptaylor$  &\multirow{1}{*}{IA} & \multirow{1}{*}{lower bound} \\
+%& & & & \cite{Darulova14Popl} & \cite{fptaylor15} & & \\
 \hline  
 \\      
 \multicolumn{8}{l}{Programs involving polynomial and semialgebraic functions}    \\
@@ -934,19 +944,19 @@ For each example, we compared the quality of the rounding error bounds and corre
 \hline
 %\multirow{2}{*}{Method 1} & $n^{(1)}$/$m^{(1)}$ &  $40/30$ & $212/111$ & $1039/350 $ & $4211/915$ & $130768/1991$ & $40251/3822$ \\
 \multirow{1}{*}{doppler1} & \texttt{a}
-& (double) & $2.75\text{e--}13$ & $4.97\text{e--}13$ & $\mathbf{1.57\textbf{e--}13}$ & $3.95\text{e+}02$ & $7.11\text{e--}14$\\
+& (double) & $2.75\text{e--}13$ & $4.97\text{e--}13$ & $\mathbf{1.57\textbf{e--}13}$ & $\nan$ & $7.11\text{e--}14$\\
 \multirow{1}{*}{doppler2} & \texttt{b}
 & (double) & $8.04\text{e--}13$ & $1.29\text{e--}12$ & $\mathbf{2.87\textbf{e--}13}$ & $\nan$ & $1.14\text{e--}13$\\
 \multirow{1}{*}{doppler3} & \texttt{c}
-& (double) & $1.37\text{e--}13$ & $2.03\text{e--}13$ & $\mathbf{8.16\textbf{e--}14}$ & $1.09\text{e+}02$ & $4.27\text{e--}14$\\
+& (double) & $1.37\text{e--}13$ & $2.03\text{e--}13$ & $\mathbf{8.16\textbf{e--}14}$ & $\nan$ & $4.27\text{e--}14$\\
 %\multirow{1}{*}{doppler1$\star$}
 %& (double) & $5.05\text{e--}05$ & $2.36\text{e--}06$ & $6.40\text{e--}07$ & $3.95\text{e+}02$ & $5.97\text{e--}07$\\
 \multirow{1}{*}{rigidBody1} & \texttt{d}
-& (double) & $\mathbf{3.80\textbf{e--}13}$ & $5.08\text{e--}13$ & $3.87\text{e--}13$ & $3.55\text{e--}13$ & $2.28\text{e--}13$\\
+& (double) & $\mathbf{3.80\textbf{e--}13}$ & $5.08\text{e--}13$ & $3.87\text{e--}13$ & $\mathbf{3.80\textbf{e--}13}$ & $2.28\text{e--}13$\\
 \multirow{1}{*}{rigidBody2} & \texttt{e}
-& (double) & $\mathbf{3.98\textbf{e--}11}$ & $6.48\text{e--}11$ & $5.24\text{e--}11$ & $3.98\text{e--}11$ & $2.19\text{e--}11$\\
+& (double) & $\mathbf{3.98\textbf{e--}11}$ & $6.48\text{e--}11$ & $5.24\text{e--}11$ & $\mathbf{3.98\textbf{e--}11}$ & $2.19\text{e--}11$\\
 \multirow{1}{*}{verhulst} & \texttt{f}
-& (double) & $\mathbf{3.40\textbf{e--}16}$ & $6.82\text{e--}16$ & $3.50\text{e--}16$ & $7.86\text{e--}01$ & $2.23\text{e--}16$\\
+& (double) & $\mathbf{3.40\textbf{e--}16}$ & $6.82\text{e--}16$ & $3.50\text{e--}16$ & $6.22\text{e--}01$ & $2.23\text{e--}16$\\
 \multirow{1}{*}{carbonGas} & \texttt{g}
 & (double) & $\mathbf{1.10\textbf{e--}08}$ & $1.60\text{e--}08$ & $1.25\text{e--}08$ & $3.10\text{e--}03$ & $4.11\text{e--}09$ \\
 %\multirow{1}{*}{jetEngine} & (double) & ? & ? & ? & ? & ? \\
@@ -1002,12 +1012,12 @@ For each example, we compared the quality of the rounding error bounds and corre
 \\
 \hline
 \multirow{1}{*}{cav10} & \texttt{v}
-& (double) & ? & ? & $-$ & ? & ? \\
+& (double) & $\mathbf{2.91\textbf{e+}00}$ & $\mathbf{2.91\textbf{e+}00}$ & $-$ & $1.02\text{e+}02$ & $2.90\text{e+}00$ \\
 \multirow{1}{*}{perin} & \texttt{w}
-& (double) & ? & ? & $-$ & ? & ? \\
-\multirow{1}{*}{?} & \texttt{x}
-& (double) & ? & ? & $-$ & ? & ? \\
-%& (double) & ? & ? & ? & ? & ? \\
+& (double) & $\mathbf{2.01\textbf{e+}00}$ & $\mathbf{2.01\textbf{e+}00}$ & $-$ & $4.91\text{e+}01$ & $2.00\text{e+}00$ \\
+%\multirow{1}{*}{?} & \texttt{x}
+%& (double) & ? & ? & $-$ & ? & ? \\
+\hline
 \end{tabular}
 \label{table:error}
 \end{center}
@@ -1080,11 +1090,12 @@ $\mathbf{1.52}$ & $-$ & $62.5$ \\
 \multirow{1}{*}{hartman6} & \texttt{u} &
 $\mathbf{10.6}$ & $-$ & $\text{OoM}$ \\
 \multirow{1}{*}{cav10} & \texttt{v} &
-? & ? & $-$ \\
+$\mathbf{0.37}$ & $12.3$ & $-$ \\
 \multirow{1}{*}{perin} & \texttt{w} &
-? & ? & $-$ \\
-\multirow{1}{*}{?} & \texttt{x} &
-? & ? & $-$ \\
+$\mathbf{1.38}$ & $41.4$ & $-$ \\
+%\multirow{1}{*}{?} & \texttt{x} &
+%? & ? & $-$ \\
+\hline
 %}\fi
 \end{tabular}
 \label{table:cpu}
@@ -1096,6 +1107,7 @@ However, $\fptaylor$ implements special cases to eliminate some error terms, for
 % The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions
 % also able to handle input variable uncertainties
 % Our tool is limited w.r.t. symbolic manipulations (derivation, normalization of rational functions,...) thus not able to handle azimuth. However we found that FPTaylor upper bound for the azimuth benchmark is \infty after 2240 seconds of computation.
+% We didn't succeed to find conditional programs with more than 2 variables and constraints of degree greater than 3. 
 
 \section{Related Works}
 %

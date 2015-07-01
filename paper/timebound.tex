@@ -108,7 +108,8 @@
 \draw (1.497448, 0.491018) node {\squared{m}};
 
 \draw (0.599193, 0.112434) node {\circled{n}}; 
-\draw (1.407883, 0.041005) node {\squared{n}};
+% slightly modified for presentation purpose \draw (1.407883, 0.041005) node {\squared{n}};
+\draw (1.357883, 0.041005) node {\squared{n}};
 
 \draw (1.059586, 0.000000) node {\circled{o}}; 
 \draw (0.666785, 0.304348) node {\squared{o}};
@@ -119,14 +120,18 @@
 \draw (1.783802, 0.123596) node {\circled{q}}; 
 \draw (1.167739, 0.303371) node {\squared{q}};
 
-%\draw (-0.000000, -1.000000) node {\circled{r}}; 
-\draw (1.518514, 0.036364) node {\squared{r}};
+% slightly modified for presentation purpose \draw (1.518514, 0.036364) node {\squared{r}};
+\draw (1.518514, 0.076364) node {\squared{r}};
 
-%\draw (-0.000000, -1.000000) node {\circled{s}}; 
 \draw (2.171239, 0.658098) node {\squared{s}};
 
-%\draw (-0.000000, -1.000000) node {\circled{t}}; 
 \draw (1.603344, -0.965195) node {\squared{t}};
+
+\draw (1.508439, 0.000000) node {\circled{v}}; 
+
+% slightly modified for presentation purpose \draw (1.462398, 0.000000) node {\circled{w}}; 
+\draw (1.422398, 0.000000) node {\circled{w}}; 
+
 
 \draw (-0.1,-0.1) node {$0$}; 
 \draw (1,1pt) -- (1,-1pt); \draw (1,-0.1) node {$10$}; 
@@ -180,6 +185,8 @@ let s17 = terel 'q' 8.90e-15  1.00e-14  1.16e-14 0.28  17.3  4.40 in
 let s18 = terel 'r' 1.65e-15  0.  1.71e-15 0.06  0.  2.04 in
 let s19 = terel 's' 7.78e-15  0.  1.29e-14 0.03  0.  4.48 in
 let s20 = terel 't' 3.85e-13  0.  1.34e-14 1.52  0.  62.5  in
-print_endline (s1^s2^s3^s4^s5^s6^s7^s8 ^ s9 ^ s10 ^ s11 ^ s12 ^ s13 ^s14^s15^s16^s17^s18^s19^s20);;
+let s21 = terel 'v'   2.91 2.91 0. 0.37 12.3  0. in
+let s22 = terel 'w'   2.01 2.01 0. 1.38 41.4 0. in
+print_endline (s1^s2^s3^s4^s5^s6^s7^s8 ^ s9 ^ s10 ^ s11 ^ s12 ^ s13 ^s14^s15^s16^s17^s18^s19^s20^s21^s22);;
 
 }\fi

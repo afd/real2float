@@ -79,6 +79,7 @@
 \newcommand{\e}{\mathbf{e}}
 \newcommand{\y}{\mathbf{y}}
 \newcommand{\z}{\mathbf{z}}
+\newcommand{\nbenchs}{23}
 \newcommand{\alphab}{\boldsymbol{\alpha}}
 \newcommand{\epsilonb}{\boldsymbol{\epsilon}}
 \newcommand{\deltab}{\boldsymbol{\delta}}
@@ -918,7 +919,7 @@ The  $\boundnlprog$ algorithm is implemented in a tool called $\realtofloat$, bu
 For more details about the installation and usage of $\realtofloat$, we refer to the dedicated web-page of $\nlcertify$\footnote{\url{http://nl-certify.forge.ocamlcore.org}} and the user manual of $\realtofloat$\footnote{see the \texttt{README.md} file in the top level directory}. 
 All examples are displayed in Appendix A as the corresponding $\realtofloat$ input text files and satisfy our nonlinear program semantics (see Section~\ref{sec:fpbackground}). Results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz).
 %
-\subsection{Comparison Results}
+\subsection{Benchmark Presentation}
 %For each problem presented in Table~\ref{table:error}, 
 For each example, we compared the quality of the rounding error bounds (Table~\ref{table:error}) and corresponding execution times (Table~\ref{table:cpu}) while running our tool $\realtofloat$, $\fptaylor$ (version from May $2015$)~\cite{fptaylor15} and $\rosa$ (version from  May $2014$)~\cite{Darulova14Popl}.
 A given program implements a nonlinear function $f(\x)$, involving variables $\x$ lying in a set $\X$ contained in a box $[\a, \b]$.
@@ -926,20 +927,21 @@ Applying our rounding model on $f$ yields the nonlinear expression $\hat{f}(\x,\
 At a given semidefinite relaxation order $d$, our tool computes the upper bound $f_d$ of the absolute rounding $\mid f - \hat{f} \mid $ over $\K := \X \times \E$ and verifies that it is less than a requested number $\epsilon_{\text{total}}$. As we keep the relaxation order $d$ as low as possible to ensure tractable SDP programs, it can happen that $f_d > \epsilon_{\text{total}}$. 
  In this case, we subdivide a randomly chosen interval of the box  $[\a, \b]$ in two halves to obtain two sub-sets $\X_1$ and $\X_2$, fulfilling $\X := \X_1 \cup \X_2$, and apply the $\boundnlprog$ algorithm on both sub-sets until we succeed to certify that $\epsilon_{\text{total}}$ is a sound upper bound of the rounding error.
 
-The number $\epsilon_{\text{total}}$ is compared with the upper bounds computed by $\fptaylor$ which relies on Taylor Symbolic expansions~\cite{fptaylor15}, $\rosa$ which relies on SMT and affine arithmetic~\cite{Darulova14Popl}, as well as a third procedure IA relying on interval arithmetic. We designed IA to follow the same steps than $\boundnlprog$ together with the sub-procedure $\bound$ but to compute an interval enclosure of $l$ using basic interval arithmetic instead of calling the $\sdpbound$ procedure (see Line~\lineref{line:sdpbound} of the algorithm depicted in Figure~\ref{alg:bound}).
+The number $\epsilon_{\text{total}}$ is compared with the upper bounds computed by $\fptaylor$ which relies on Taylor Symbolic expansions~\cite{fptaylor15}, $\rosa$ which relies on SMT and affine arithmetic~\cite{Darulova14Popl}, as well as a third procedure IA relying on interval arithmetic. We designed IA to follow the same steps than $\boundnlprog$ together with the sub-procedure $\bound$ but to compute an interval enclosure of $l$ using basic interval arithmetic instead of calling the $\sdpbound$ procedure (see Line~\lineref{line:sdpbound} of the algorithm depicted in Figure~\ref{alg:bound}). For comparison purpose, we also ran simulation tests through instantiation of input variables to random inputs, yielding lower bounds of the absolute error (the technique is the same as in the $\rosa$ paper~\cite{Darulova14Popl}).
 
-Benchmarks have been selected among various nonlinear programs involving polynomial and semialgebraic functions, polynomial functions with polynomial preconditions (i.e. $\X$ is not a simple box but rather a set defined with conjunction of nonlinear polynomial inequalities), transcendental functions  and conditional loops.
+For the sake of further presentation, we associate an alphabet character (from \code{a} to \code{w}) to identify each of the $\nbenchs$ nonlinear programs:
+\begin{itemize}
+\item The $14$ first programs implement polynomial and semialgebraic functions: \code{a-e} come from physics, \code{f} and \code{h} from biology, \code{g} from control, \code{i-k} are derived from expressions involved in inequalities from the Flyspeck project~\cite{Flyspeck06} and \code{l-n} implement polynomial approximations of the sine and square root functions. At the exception of \code{i-k}, all these programs are used to compare $\fptaylor$ and $\rosa$ in~\cite{fptaylor15}. 
+\item The $3$ programs \code{o-q} come from the global optimization literature and correspond respectively to Problem 3.3, 4.6 and 4.7 in~\cite{Floudas90}. They implement polynomial functions and involve polynomial preconditions (i.e. $\X$ is not a simple box but rather a set defined with conjunction of nonlinear polynomial inequalities).
+\item The $4$ programs \code{r-u} involve transcendental functions. The two programs \code{r} and \code{s} are used in the $\fptaylor$ paper~\cite{fptaylor15} and correspond respectively to the program \code{logexp} (see Example~\ref{ex:logexp}) and the program \code{sphere} taken from NASA World Wind Java SDK~\cite{NASA}.
+\item The $2$ last programs \code{v-w} involve conditional loops and come from the static analysis literature. They correspond to the two respective running examples of~\cite{Zonotope10} and~\cite{Marechal14}. The first program \code{v} is used in the $\rosa$ paper~\cite{Darulova14Popl}.
+\end{itemize}
 
-%~\cite{fptaylor15} $\rosa$ paper~\cite{Darulova14Popl}
+For the programs involving transcendental functions, we followed the same procedure as in $\fptaylor$ while adjusting the precision $\epsilon \,  (f_{\R}) = 1.5 \epsilon$ for each special function $f_{\R} \in \{\sin, \cos, \log, \exp \}$. Each univariate transcendental function is approximated from below (resp.~from above) using suprema (resp.~infima) of linear or quadratic polynomials (see Example~\ref{ex:logexp} for the case of program \code{logexp}). 
 
-%We associate a character to each benchmark to be able 
-For the four programs involving transcendental functions, we followed the same procedure as in $\fptaylor$ while adjusting the precision $\epsilon \,  (f_{\R}) = 1.5 \epsilon$ for each special function $f_{\R} \in \{\sin, \cos, \log, \exp \}$. Each univariate transcendental function is approximated from below (resp.~from above) using suprema (resp.~infima) of linear or quadratic polynomials (see Example~\ref{ex:logexp} for the case of program \code{logexp}). 
+\subsection{Comparison Results}
 
-
-\if{
-We note $\nbb$ the total number of sub-boxes generated
-by the algorithm.
-}\fi
+Comparison results for error bound computation are presented in Table~\ref{table:error}. Our $\realtofloat$ tool computes the tightest upper bounds for $19$ out of $\nbenchs$ benchmarks.
 
 \begin{table*}[!ht]
 %\small
@@ -970,7 +972,6 @@ Figure~\ref{fig:timebound} provides a way to compare both execution times and er
 
 However, $\fptaylor$ implements special cases to eliminate some error terms, for instance when $\op$ is the multiplication and one of the operands is a nonnegative power of two, then the error $e$ is set to zero. 
 
-% The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions
 % also able to handle input variable uncertainties
 % Our tool is limited w.r.t. symbolic manipulations (derivation, normalization of rational functions,...) thus not able to handle azimuth.
 % We didn't succeed to find conditional programs with more than 2 variables and constraints of degree greater than 3. 
@@ -978,7 +979,7 @@ However, $\fptaylor$ implements special cases to eliminate some error terms, for
 \section{Related Works}
 %
 SMT solvers allow to analyze programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetics. When SAT/SMT solvers output proof witnesses, they can be formally rechecked inside the $\coq$ proof assistant~\cite{smtcoq}. While ensuring soundness, the efficiency of the procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
-
+% The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions
 \section{Conclusion and Perspectives} %0.5p
 %
 Our verification framework allows to over-approximate rounding errors occurring while executing nonlinear programs implemented with finite precision.
@@ -1018,72 +1019,7 @@ P. Q. Smith, and X. Y. Jones. ...reference text...
 \section*{Appendix A: Nonlinear Programs}
 \label{sec:appa}
 %
-{\scriptsize
-\begin{lstlisting}
-let box_doppler1 u v T = [$(-100, 100); (20, 2e4);(-30, 50)$];; 
-let obj_doppler1 u v T = [(
-let $t_1 = 331.4 + 0.6 * T$ in 
-$-t_1*v/((t_1 + u)*(t_1 + u))$, $3e-13$)];;
-\end{lstlisting}
-}
-{\scriptsize
-\begin{lstlisting}
-procedure doppler2(u : real, v : real, T : real) returns (r : real) {
- assume (-125.0 <= u && u <= 125.0 && 15.0 <= v && v <= 25000.0 && -40.0 <= T && T <= 60.0);
-  var t1 := 331.4 + 0.6 * T;
-  r := -t1*v/((t1 + u)*(t1 + u));
-}
-\end{lstlisting}
-}
-{\scriptsize
-\begin{lstlisting}
-procedure doppler3(u : real, v : real, T : real) returns (r : real) {
- assume (-30.0 <= u && u <= 120.0 && 320.0 <= v && v <= 20300.0 && -50.0 <= T && T <= 30.0);
-  var t1 := 331.4 + 0.6 * T;
-  r := -t1*v/((t1 + u)*(t1 + u));
-}
-\end{lstlisting}
-}
-{\scriptsize
-\begin{lstlisting}
-procedure rigidBody1(x1 : real, x2 : real, x3 : real) returns (r : real) {
- assume (-15.0 <= x1 && x1 <= 15.0 && -15.0 <= x2 && x2 <= 15.0 && -15.0 <= x3 && x3 <= 15.0);
-  r := -x1*x2 - 2.0 * x2 * x3 - x1 - x3;
-}
-\end{lstlisting}
-}
-{\scriptsize
-\begin{lstlisting}
-procedure rigidBody2(x1 : real, x2 : real, x3 : real) returns (r : real) {
- assume (-15.0 <= x1 && x1 <= 15.0 && -15.0 <= x2 && x2 <= 15.0 && -15.0 <= x3 && x3 <= 15.0);
-  r := 2.0*x1*x2*x3 + 3.0*x3*x3 - x2*x1*x2*x3 + 3.0*x3*x3 - x2;
-}
-\end{lstlisting}
-}
-{\scriptsize
-\begin{lstlisting}
-procedure sineTaylor(x : real) returns (r : real) {
- assume (-1.57079632679  <= x && x <= 1.57079632679);
-    r := x - (x*x*x)/6.0 + (x*x*x*x*x)/120.0 - (x*x*x*x*x*x*x)/5040.0 ;
-}
-\end{lstlisting}
-}
-{\scriptsize
-\begin{lstlisting}
-procedure sineOrder3(x : real) returns (r : real) {
- assume (-2  <= x && x <= 2);
-  r := 0.954929658551372 * x - 0.12900613773279798*x*x*x ;
-}
-\end{lstlisting}
-}
-{\scriptsize
-\begin{lstlisting}
-procedure sqroot(x : real) returns (r : real) {
- assume (0  <= x && x <= 1);
-  r := 1.0 + 0.5*x - 0.125*x*x + 0.0625*x*x*x - 0.0390625*x*x*x*x;
-}
-\end{lstlisting}
-}
+\input{appendix}
 
 \end{document}
 

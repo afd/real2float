@@ -1,0 +1,66 @@
+{\scriptsize
+\begin{lstlisting}
+let box_doppler1 u v T = [$(-100, 100); (20, 2e4);(-30, 50)$];; 
+let obj_doppler1 u v T = [(
+let $t_1 = 331.4 + 0.6 * T$ in 
+$-t_1*v/((t_1 + u)*(t_1 + u))$, $3e-13$)];;
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure doppler2(u : real, v : real, T : real) returns (r : real) {
+ assume (-125.0 <= u && u <= 125.0 && 15.0 <= v && v <= 25000.0 && -40.0 <= T && T <= 60.0);
+  var t1 := 331.4 + 0.6 * T;
+  r := -t1*v/((t1 + u)*(t1 + u));
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure doppler3(u : real, v : real, T : real) returns (r : real) {
+ assume (-30.0 <= u && u <= 120.0 && 320.0 <= v && v <= 20300.0 && -50.0 <= T && T <= 30.0);
+  var t1 := 331.4 + 0.6 * T;
+  r := -t1*v/((t1 + u)*(t1 + u));
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure rigidBody1(x1 : real, x2 : real, x3 : real) returns (r : real) {
+ assume (-15.0 <= x1 && x1 <= 15.0 && -15.0 <= x2 && x2 <= 15.0 && -15.0 <= x3 && x3 <= 15.0);
+  r := -x1*x2 - 2.0 * x2 * x3 - x1 - x3;
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure rigidBody2(x1 : real, x2 : real, x3 : real) returns (r : real) {
+ assume (-15.0 <= x1 && x1 <= 15.0 && -15.0 <= x2 && x2 <= 15.0 && -15.0 <= x3 && x3 <= 15.0);
+  r := 2.0*x1*x2*x3 + 3.0*x3*x3 - x2*x1*x2*x3 + 3.0*x3*x3 - x2;
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure sineTaylor(x : real) returns (r : real) {
+ assume (-1.57079632679  <= x && x <= 1.57079632679);
+    r := x - (x*x*x)/6.0 + (x*x*x*x*x)/120.0 - (x*x*x*x*x*x*x)/5040.0 ;
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure sineOrder3(x : real) returns (r : real) {
+ assume (-2  <= x && x <= 2);
+  r := 0.954929658551372 * x - 0.12900613773279798*x*x*x ;
+}
+\end{lstlisting}
+}
+{\scriptsize
+\begin{lstlisting}
+procedure sqroot(x : real) returns (r : real) {
+ assume (0  <= x && x <= 1);
+  r := 1.0 + 0.5*x - 0.125*x*x + 0.0625*x*x*x - 0.0390625*x*x*x*x;
+}
+\end{lstlisting}
+}

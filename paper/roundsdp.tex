@@ -916,11 +916,12 @@ Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1
 Now, we present experimental results obtained by applying our general $\boundnlprog$ algorithm (see Section~\ref{sec:fpsdp}, Figure~\ref{alg:bound_nlprog}) to various examples coming from physics, biology, space control and optimization. 
 The  $\boundnlprog$ algorithm is implemented in a tool called $\realtofloat$, built in top of the $\nlcertify$ nonlinear verification package, relying on $\ocaml$ (Version $4.02.1$) and $\coq$ (Version $8.4\text{pl}5$) and interfaced with the semidefinite solver $\sdpa$ (Version $7.3.6$). 
 For more details about the installation and usage of $\realtofloat$, we refer to the dedicated web-page of $\nlcertify$\footnote{\url{http://nl-certify.forge.ocamlcore.org}} and the user manual of $\realtofloat$\footnote{see the \texttt{README.md} file in the top level directory}. 
-All examples are displayed in Appendix A as the corresponding $\realtofloat$ input text files and satisfy our nonlinear program semantics (see Section~\ref{sec:fpbackground}).
-For each example, we compared the quality of the rounding error bounds and corresponding execution times while running our tool $\realtofloat$, $\fptaylor$ (version from May $2015$)~\cite{fptaylor15} and $\rosa$ (version from June $2015$)~\cite{Darulova14Popl}. All benchmark results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz).
+All examples are displayed in Appendix A as the corresponding $\realtofloat$ input text files and satisfy our nonlinear program semantics (see Section~\ref{sec:fpbackground}). Results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz).
 %
 \subsection{Comparison Results}
-For each problem presented in Table~\ref{table:error}, we consider a program involving a nonlinear function $f(\x)$, involving variables $\x$ lying in a set $\X$ contained in a box $[\a, \b]$.
+%For each problem presented in Table~\ref{table:error}, 
+For each example, we compared the quality of the rounding error bounds (Table~\ref{table:error}) and corresponding execution times (Table~\ref{table:cpu}) while running our tool $\realtofloat$, $\fptaylor$ (version from May $2015$)~\cite{fptaylor15} and $\rosa$ (version from  May $2014$)~\cite{Darulova14Popl}.
+A given program implements a nonlinear function $f(\x)$, involving variables $\x$ lying in a set $\X$ contained in a box $[\a, \b]$.
 Applying our rounding model on $f$ yields the nonlinear expression $\hat{f}(\x,\e)$, involving additional error variables $\e$ lying in a set $\E$. 
 At a given semidefinite relaxation order $d$, our tool computes the upper bound $f_d$ of the absolute rounding $\mid f - \hat{f} \mid $ over $\K := \X \times \E$ and verifies that it is less than a requested number $\epsilon_{\text{total}}$. As we keep the relaxation order $d$ as low as possible to ensure tractable SDP programs, it can happen that $f_d > \epsilon_{\text{total}}$. 
  In this case, we subdivide a randomly chosen interval of the box  $[\a, \b]$ in two halves to obtain two sub-sets $\X_1$ and $\X_2$, fulfilling $\X := \X_1 \cup \X_2$, and apply the $\boundnlprog$ algorithm on both sub-sets until we succeed to certify that $\epsilon_{\text{total}}$ is a sound upper bound of the rounding error.
@@ -936,10 +937,6 @@ For the four programs involving transcendental functions, we followed the same p
 
 
 \if{
- function $f$ on a box $K$. The semialgebraic optimization problems are solved at the SOS relaxation order $k$. When the relaxation gap is too high to certify the requested
-bound, then we perform a domain subdivision in order to get tighter bounds:
-we divide the maximal width interval of $K$ in two halves to get two sub-boxes $K_1$ and $K_2$ such that $K = K_1 \cup K_2$. We repeat this subdivision procedure,  by applying $\templateoptim$ on a finite set of sub-boxes,
-until we succeed to certify that $m$ is a lower bound of $f$.
 We note $\nbb$ the total number of sub-boxes generated
 by the algorithm.
 }\fi
@@ -948,92 +945,7 @@ by the algorithm.
 %\small
 \begin{center}
 \caption{Comparison results of upper and lower bounds for absolute rounding errors (the best results are emphasized using \textbf{bold fonts})}
-\begin{tabular}{p{2.3cm}ccccccc}
-\hline
-\multirow{1}{*}{Benchmark} &  \multirow{1}{*}{\texttt{id}} & \multirow{1}{*}{precision} & \multirow{1}{*}{$\realtofloat$} & $\rosa$  & $\fptaylor$  &\multirow{1}{*}{IA} & \multirow{1}{*}{lower bound} \\
-%& & & & \cite{Darulova14Popl} & \cite{fptaylor15} & & \\
-\hline  
-\\      
-\multicolumn{8}{l}{Programs involving polynomial and semialgebraic functions}    \\
-\\
-\hline
-%\multirow{2}{*}{Method 1} & $n^{(1)}$/$m^{(1)}$ &  $40/30$ & $212/111$ & $1039/350 $ & $4211/915$ & $130768/1991$ & $40251/3822$ \\
-\multirow{1}{*}{\texttt{doppler1}} & \texttt{a}
-& (double) & $2.75\text{e--}13$ & $4.97\text{e--}13$ & $\mathbf{1.57\textbf{e--}13}$ & $\nan$ & $7.11\text{e--}14$\\
-\multirow{1}{*}{\texttt{doppler2}} & \texttt{b}
-& (double) & $8.04\text{e--}13$ & $1.29\text{e--}12$ & $\mathbf{2.87\textbf{e--}13}$ & $\nan$ & $1.14\text{e--}13$\\
-\multirow{1}{*}{\texttt{doppler3}} & \texttt{c}
-& (double) & $1.37\text{e--}13$ & $2.03\text{e--}13$ & $\mathbf{8.16\textbf{e--}14}$ & $\nan$ & $4.27\text{e--}14$\\
-%\multirow{1}{*}{doppler1$\star$}
-%& (double) & $5.05\text{e--}05$ & $2.36\text{e--}06$ & $6.40\text{e--}07$ & $3.95\text{e+}02$ & $5.97\text{e--}07$\\
-\multirow{1}{*}{\texttt{rigidBody1}} & \texttt{d}
-& (double) & $\mathbf{3.80\textbf{e--}13}$ & $5.08\text{e--}13$ & $3.87\text{e--}13$ & $\mathbf{3.80\textbf{e--}13}$ & $2.28\text{e--}13$\\
-\multirow{1}{*}{\texttt{rigidBody2}} & \texttt{e}
-& (double) & $\mathbf{3.98\textbf{e--}11}$ & $6.48\text{e--}11$ & $5.24\text{e--}11$ & $\mathbf{3.98\textbf{e--}11}$ & $2.19\text{e--}11$\\
-\multirow{1}{*}{\texttt{verhulst}} & \texttt{f}
-& (double) & $\mathbf{3.40\textbf{e--}16}$ & $6.82\text{e--}16$ & $3.50\text{e--}16$ & $6.22\text{e--}01$ & $2.23\text{e--}16$\\
-\multirow{1}{*}{\texttt{carbonGas}} & \texttt{g}
-& (double) & $\mathbf{1.10\textbf{e--}08}$ & $1.60\text{e--}08$ & $1.25\text{e--}08$ & $3.10\text{e--}03$ & $4.11\text{e--}09$ \\
-%\multirow{1}{*}{jetEngine} & (double) & ? & ? & ? & ? & ? \\
-\multirow{1}{*}{\texttt{predPrey}} & \texttt{h}
-& (double) & $\mathbf{1.57\textbf{e--}16}$ & $1.98\text{e--}16$ & $1.87\text{e--}16$ & $2.02\text{e--}16$ & $1.47\text{e--}16$ \\
-\multirow{1}{*}{\texttt{kepler0}} & \texttt{i}
-& (double) & $\mathbf{8.76\textbf{e--}14}$ & $9.07\text{e--}14$ & $1.04\text{e--}13$ & $1.03\text{e--}13$ & $2.23\text{e--}14$\\
-\multirow{1}{*}{\texttt{kepler1}} & \texttt{j}
-& (double) & $\mathbf{2.96\textbf{e--}13}$ & $4.43\text{e--}13$ & $4.49\text{e--}13$ & $6.52\text{e--}13$ & $7.58\text{e--}14$\\
-\multirow{1}{*}{\texttt{kepler2}} & \texttt{k}
-& (double) & $\mathbf{1.90\textbf{e--}12}$ & $2.16\text{e--}12$ & $2.08\text{e--}12$ & $3.00\text{e--}12$ & $3.03\text{e--}13$\\
-\hline
-\multirow{2}{*}{\texttt{sineTaylor}} & \multirow{2}{*}{\texttt{l}}
-& (double) & $\mathbf{5.53\textbf{e--}16}$ & $9.57\text{e--}16$ & $6.71\text{e--}16$ & $9.39\text{e--}16$ & $4.45\text{e--}16$\\
-& & (float) & $\mathbf{2.97\textbf{e--}07}$ & $1.03\text{e--}06$ & $3.51\text{e--}07$ & $5.07\text{e--}07$ & $1.79\text{e--}07$\\
-\hline 
-\multirow{2}{*}{\texttt{sineOrder3}} & \multirow{2}{*}{\texttt{m}}
-& (double) & $\mathbf{6.68\textbf{e--}16}$ & $1.11\text{e--}15$ & $9.96\text{e--}16$ & $8.82\text{e--}16$ & $3.34\text{e--}16$\\
-& & (float) & $\mathbf{3.58\textbf{e--}07}$ & $1.19\text{e--}06$ & $5.35\text{e--}07$ & $4.74\text{e--}07$ & $2.12\text{e--}07$\\
-\hline
-\multirow{2}{*}{\texttt{sqroot}} & \multirow{2}{*}{\texttt{n}}
-& (double) & $\mathbf{7.56\textbf{e--}16}$ & $8.41\text{e--}16$ & $7.87\text{e--}16$ & $8.48\text{e--}16$ & $4.45\text{e--}16$\\
-& & (float) & $\mathbf{4.06\textbf{e--}07}$ & $9.03\text{e--}07$ & $4.23\text{e--}07$ & $4.56\text{e--}07$ & $2.45\text{e--}07$\\
-%& (16bit) & $3.33\text{e--}3$ & $5.97\text{e--}4$ & ? & $1.58\text{e--}4$\\
-\hline
-\\
-\multicolumn{8}{l}{Programs implementing polynomial functions with polynomial preconditions}\\
-\\
-\hline
-\multirow{1}{*}{\texttt{floudas1}} & \texttt{o}
-& (double) & $\mathbf{2.99\textbf{e--}13}$ & $\mathbf{2.99\textbf{e--}13}$ & $3.90\text{e--}13$ & $6.36\text{e--}13$ & $1.48\text{e--}13$ \\
-\multirow{1}{*}{\texttt{floudas2}} & \texttt{p}
-& (double) &  $\mathbf{9.03\textbf{e--}16}$ & $1.12\text{e--}15$ & $9.96\text{e--}16$ & $1.12\text{e--}15$ & $2.35\text{e--}16$ \\
-\multirow{1}{*}{\texttt{floudas3}} & \texttt{q}
-& (double) & $\mathbf{8.90\textbf{e--}15}$ & $1.00\text{e--}14$ & $1.16\text{e--}14$ & $1.87\text{e--}14$ & $7.31\text{e--}15$ \\
-\hline
-\\
-\multicolumn{8}{l}{Programs implementing transcendental functions}\\
-\\
-\hline
-\multirow{1}{*}{\texttt{logexp}} & \texttt{r}
-& (double) & $\mathbf{1.65\textbf{e--}15}$ & $-$ & $1.71\text{e--}15$ & $8.29\text{e--}13$ & $1.19\text{e--}15$ \\
-\multirow{1}{*}{\texttt{sphere}} & \texttt{s}
-& (double) & $\mathbf{7.78\textbf{e--}15}$ & $-$ & $1.29\text{e--}14$ & $\mathbf{7.78\textbf{e--}15}$ & $5.05\text{e--}15$ \\
-%\multirow{1}{*}{azimuth} %& (double) & ? & $-$ & $1.41\text{e--}14$ & ? & ? \\
-\multirow{1}{*}{\texttt{hartman3}} & \texttt{t}
-& (double) & $3.85\text{e--}13$ & $-$  & $\mathbf{1.34\textbf{e--}14}$ & $3.46\text{e+}05$ & $1.10\text{e--}14$ \\
-\multirow{1}{*}{\texttt{hartman6}} & \texttt{u}
-& (double) & $\mathbf{4.48\textbf{e--}13}$ & $-$ & $\text{OoM}$ & $2.82\text{e+}03$ & $6.50\text{e--}14$ \\
-\hline
-\\
-\multicolumn{8}{l}{Programs involving conditional loops}    \\
-\\
-\hline
-\multirow{1}{*}{\texttt{cav10}} & \texttt{v}
-& (double) & $\mathbf{2.91\textbf{e+}00}$ & $\mathbf{2.91\textbf{e+}00}$ & $-$ & $1.02\text{e+}02$ & $2.90\text{e+}00$ \\
-\multirow{1}{*}{\texttt{perin}} & \texttt{w}
-& (double) & $\mathbf{2.01\textbf{e+}00}$ & $\mathbf{2.01\textbf{e+}00}$ & $-$ & $4.91\text{e+}01$ & $2.00\text{e+}00$ \\
-%\multirow{1}{*}{?} & \texttt{x}
-%& (double) & ? & ? & $-$ & ? & ? \\
-\hline
-\end{tabular}
+\input{error}
 \label{table:error}
 \end{center}
 \end{table*}
@@ -1051,77 +963,16 @@ Figure~\ref{fig:timebound} provides a way to compare both execution times and er
 %\small
 \begin{center}
 \caption{Comparison of execution times (in seconds) for absolute rounding error bounds (the best results are emphasized using \textbf{bold fonts})}
-\begin{tabular}{p{2.3cm}cccc}
-\hline
-\multirow{1}{*}{Benchmark} & \texttt{id} & $\realtofloat$ & $\rosa$  & $\fptaylor$   \\
-\hline
-\multirow{1}{*}{\texttt{doppler1}} & \texttt{a} &
-$7.73$ & $23.7$ & $\mathbf{7.45}$\\
-%\if{
-\multirow{1}{*}{\texttt{doppler2}} & \texttt{b} &
-$\mathbf{4.97}$ & $24.0$ & $7.29$\\
-\multirow{1}{*}{\texttt{doppler3}} & \texttt{c} &
-$7.61$ & $35.4$ & $\mathbf{7.15}$\\
-%\multirow{1}{*}{doppler1$\star$}
-%? & $27.3$ & $8.84$\\
-\multirow{1}{*}{\texttt{rigidBody1}} & \texttt{d} &
-$6.18$ & $\mathbf{0.20}$ & $6.22$ \\
-\multirow{1}{*}{\texttt{rigidBody2}} & \texttt{e} &
-$8.51$ & $11.7$ & $\mathbf{8.37}$ \\
-\multirow{1}{*}{\texttt{verhulst}} & \texttt{f} &
-$\mathbf{2.50}$ & $9.93$ & $3.52$\\
-\multirow{1}{*}{\texttt{carbonGas}} & \texttt{g} &
-$\mathbf{5.05}$ & $39.4$ & $10.1$\\
-%\multirow{1}{*}{jetEngine}
-%? & $328$ & ?\\
-\multirow{1}{*}{\texttt{predPrey}} & \texttt{h} &
-$\mathbf{4.10}$ & $36.2$ & $5.05$\\
-\multirow{1}{*}{\texttt{kepler0}} & \texttt{i} &
-$\mathbf{0.93}$ & $4.28$ & $15.1$\\
-\multirow{1}{*}{\texttt{kepler1}} & \texttt{j} &
-$\mathbf{3.15}$ & $32.9$ & $330$\\
-\multirow{1}{*}{\texttt{kepler2}} & \texttt{k} &
-$\mathbf{21.6}$ & $56.1$ & $939$\\
-\multirow{1}{*}{\texttt{sineTaylor}} & \texttt{l} &
-$\mathbf{0.42}$ & $0.99$ & $9.66$ \\
-\multirow{1}{*}{\texttt{sineOrder3}} & \texttt{m} &
-$\mathbf{0.16}$ & $6.71$ & $5.19$\\
-\multirow{1}{*}{\texttt{sqroot}} & \texttt{n} &
-$\mathbf{0.38}$ & $1.89$ & $10.1$\\
-\multirow{1}{*}{\texttt{floudas1}} & \texttt{o} &
-$19.5$ & $17.8$ & $\mathbf{15.3}$\\
-\multirow{1}{*}{\texttt{floudas2}} & \texttt{p} &
-$\mathbf{0.23}$ & $2.49$ & $1.83$\\
-\multirow{1}{*}{\texttt{floudas3}} & \texttt{q} &
-$\mathbf{0.28}$ & $17.3$ & $4.40$\\
-\multirow{1}{*}{\texttt{logexp}} & \texttt{r} &
-$\mathbf{0.06}$ & $-$ & $2.04$\\
-\multirow{1}{*}{\texttt{sphere}} & \texttt{s} &
-$\mathbf{0.03}$ & $-$ & $4.48$\\
-%\multirow{1}{*}{azimuth} &
-%? & $-$ & $33.0$\\
-\multirow{1}{*}{\texttt{hartman3}} & \texttt{t} &
-$\mathbf{1.52}$ & $-$ & $62.5$ \\
-\multirow{1}{*}{\texttt{hartman6}} & \texttt{u} &
-$\mathbf{10.6}$ & $-$ & $\text{OoM}$ \\
-\multirow{1}{*}{\texttt{cav10}} & \texttt{v} &
-$\mathbf{0.37}$ & $12.3$ & $-$ \\
-\multirow{1}{*}{\texttt{perin}} & \texttt{w} &
-$\mathbf{1.38}$ & $41.4$ & $-$ \\
-%\multirow{1}{*}{?} & \texttt{x} &
-%? & ? & $-$ \\
-\hline
-%}\fi
-\end{tabular}
+\input{time}
 \label{table:cpu}
 \end{center}
 \end{table}
 
 However, $\fptaylor$ implements special cases to eliminate some error terms, for instance when $\op$ is the multiplication and one of the operands is a nonnegative power of two, then the error $e$ is set to zero. 
-% As implemented in the $\fptaylor$ tool, we adjusted the precision $\epsilon_{f_{\R}} = 1.5 \epsilon$ for each special function $f_{\R} \in \{\sin, \cos, \log, \exp \}$.
+
 % The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions
 % also able to handle input variable uncertainties
-% Our tool is limited w.r.t. symbolic manipulations (derivation, normalization of rational functions,...) thus not able to handle azimuth. However we found that FPTaylor upper bound for the azimuth benchmark is \infty after 2240 seconds of computation.
+% Our tool is limited w.r.t. symbolic manipulations (derivation, normalization of rational functions,...) thus not able to handle azimuth.
 % We didn't succeed to find conditional programs with more than 2 variables and constraints of degree greater than 3. 
 
 \section{Related Works}

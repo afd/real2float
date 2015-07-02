@@ -1,9 +1,148 @@
 {\scriptsize
 \begin{lstlisting}
+
+let box_doppler1 $u$ $v$ $T = [(-100, 100);(20, 20e3);(-30, 50)];;$ 
+let obj_doppler1 $u$ $v$ $T = [($let $t_1 = 331.4 + 0.6 * T$ in 
+$-t_1*v/((t_1 + u)*(t_1 + u)), \,2.75\text{e--}13)];;$
+
+let box_doppler2 $u$ $v$ $T = [(-125, 125);(15, 25e3);(-40, 60)];;$ 
+let obj_doppler2 $u$ $v$ $T = [($let $t_1 = 331.4 + 0.6 * T$ in 
+$-t_1*v/((t_1 + u)*(t_1 + u)), \,8.04\text{e--}13)];;$
+
+let box_doppler3 $u$ $v$ $T = [(-30, 120);(320, 20300);(-50, 30)];;$ 
+let obj_doppler3 $u$ $v$ $T = [($let $t_1 = 331.4 + 0.6 * T$ in 
+$-t_1*v/((t_1 + u)*(t_1 + u)), \,1.37\text{e--}13)];;$
+
+let box_rigidbody1 $x_1 \, x_2 \, x_3 = [(-15, 15); (-15, 15); (-15, 15)];;$
+let obj_rigidbody1 $x_1 \, x_2 \, x_3 = [($
+$-x_1*x_2 - 2 * x_2 * x_3 - x_1 - x_3, \,3.80\text{e--}13)];;$
+
+let box_rigidbody2 $x_1 \, x_2 \, x_3 = [(-15, 15); (-15, 15); (-15, 15)];;$
+let obj_rigidbody2 $x_1 \, x_2 \, x_3 = [(2*x_1*x_2*x_3 + 3*x_3*x_3$ 
+$- x_2*x_1*x_2*x_3 + 3*x_3*x_3 - x_2, 3.98\text{e--}11)];;$
+
+let box_verhulst $x = [(0.1, 0.3)];;$
+let obj_verhulst $x = [( 4 * x / (1 + (x/1.11)), \, 3.40\text{e--}16)];;$
+
+let box_carbonGas $v = [(0.1, 0.5)];;$
+let obj_carbonGas $v = [($let $p = 3.5e7$ in let $a = 0.401$ in 
+let $b = 42.7\text{e--}6$ in let $t = 300$ in let $n = 1000$ in
+$(p + a * (n/v)**2) * (v - n * b) - 1.3806503\text{e--}23 * n * t
+,\, 1.10\text{e--}8)];;$
+
+let box_predPrey$ \,x = [(0.1, 0.3)];;$
+let obj_predPrey$\, x = [(4 * x * x/(1 + (x/1.11)**2), \,1.57\text{e--}16)];;$
+
+let box_kepler0 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = $
+$[(4, 6.36); (4, 6.36); (4, 6.36); (4, 6.36); (4, 6.36); (4, 6.36)];;$
+let obj_kepler0 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = [(x_2 * x_5 + x_3 * x_6 - x_2 * x_3$
+$- x_5 * x_6 + x_1 * ( - x_1 + x_2 + x_3 - x_4 + x_5 + x_6), \,8.76\text{e--}14)];;$
+
+let box_kepler1 $x_1 \, x_2 \, x_3 \, x_4 = $
+$[(4, 6.36); (4, 6.36); (4, 6.36); (4, 6.36)];;$
+let obj_kepler1 $x_1 \, x_2 \, x_3 \, x_4 = [( x_1 * x_4 * (- x_1 + x_2 + x_3 - x_4)$
+$+ x_2 * (x_1 - x_2 + x_3 + x_4) + x_3 * (x_1 + x_2 - x_3 + x_4) $
+$- x_2 * x_3 * x_4 - x_1 * x_3 - x_1 * x_2 - x_4, \,2.96\text{e--}13)];; $
+
+let box_kepler2 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = $
+$[(4, 6.36); (4, 6.36); (4, 6.36); (4, 6.36); (4, 6.36); (4, 6.36)];;$
+let obj_kepler2 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = [(x_1 * x_4 * (- x_1 + x_2 + x_3$
+$- x_4 + x_5 + x_6) + x_2 * x_5 * (x_1 - x_2 +x_3 +x_4- x_5 +x_6) $
+$+ x_3* x_6* (x_1 + x_2 - x_3 + x_4 + x_5 - x_6) - x_2* x_3* x_4 $
+$- x_1* x_3* x_5 - x_1* x_2* x_6 - x_4* x_5* x_6, \, 1.90\text{e--}12)];;$
+
+let box_sineTaylor$ \, x = [(-1.57079632679, 1.57079632679)];;$
+let obj_sineTaylor$ \, x = [(x - (x*x*x)/6.0$
+$+ (x*x*x*x*x)/120.0 $
+$- (x*x*x*x*x*x*x)/5040.0,\, 5.53\text{e--}16)];;$
+
+let box_sineOrder3 $z = [(-2, 2)];;$
+let obj_sineOrder3 $z = [(0.954929658551372 * z $
+$-0.12900613773279798*(z*z*z),\, 2.97\text{e--}16)];;$
+
+let box_sqroot $y = [(0,1)];;$
+let obj_sqroot $y = [(1.0 + 0.5*y - 0.125*y*y $
+$+ 0.0625*y*y*y - 0.0390625*y*y*y*y, \,6.68\text{e--}16)];;$
+
+let box_floudas1 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = $
+$[(0, 6); (0, 6); (1, 5); (0, 6); (1, 5); (0, 10)];;$
+let cstr_floudas1 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = $
+$[(x_3 - 3)**2 + x_4 - 4; (x_5 - 3)**2 + x_6 - 4; $
+$2 - x_1 + 3 * x_2; 2 + x_1 - x_2; 6 - x_1 - x_2; x_1 + x_2 - 2];;$
+let obj_floudas1 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = [( -25 * (x_1 - 2)**2 $
+$- (x_2 - 2)**2 - (x_3 - 1)**2 - (x_4 - 4)**2 $
+$- (x_5 - 1)**2 - (x_6 - 4)**2, \, 2.99\text{e--}13)];;$
+
+
+let box_floudas2$\,x_1 \, x_2 = [(0, 3); (0, 4)];;$
+let cstr_floudas2$\,x_1 \, x_2 = [$
+$2 * x_1**4 - 8 * x_1**3 + 8 * x_1*x_1 - x_2; $
+$4 * x_1**4 - 32 * x_1**3 + 88 * x_1*x_1 - 96 * x_1 + 36 - x_2];;$
+let obj_floudas2$\,x_1 \, x_2 = [(-x_1 - x_2, \, 9.03\text{e--}16)];;$
+
+let box_floudas3$\,x_1 \, x_2 = [(0, 2); (0, 3)];;$
+let cstr_floudas3$\,x_1 \, x_2 = [-2 * x_1**4 + 2 - x_2];;$
+let obj_floudas3$\,x_1 \, x_2 = [($
+$-12 * x_1 - 7 * x_2 + x_2*x_2, \, 8.90\text{e--}15)];;$
+
+let box_logexp $x = [(-8,8)];;$
+let obj_logexp $x = [(\log(1 + \exp(x)), \, 1.65\text{e--}15)];;$
+
+let box_sphere $x \, r \, y \, z = [(-10, 10); (0, 10);$
+$(-1.570796, 1.570796); (-3.14159265, 3.14159265)];;$
+let obj_sphere $x \, r \, y \, z = [(x + r * \sin (y) * \cos(z),\,7.78\text{e--}15)];;$
+
+let box_hartman3 $x_1 \, x_2 \, x_3 = [(0, 1); (0, 1);(0, 1)];;$
+let obj_hartman3 $x_1 \, x_2 \, x_3 = [($
+let $e1 = 3.0 * (x_1 - 0.3689) **2 + 10.0 * (x_2 - 0.117) **2$
+$+ 30.0 * (x_3 - 0.2673) **2$ in
+let $e2 = 0.1 * (x_1 - 0.4699) **2 + 10.0 * (x_2 - 0.4387) **2$
+$+ 35.0 * (x_3 - 0.747) **2$ in
+let $e3 = 3.0 * (x_1 - 0.1091) **2 + 10.0 * (x_2 - 0.8732) **2$
+$+ 30.0 * (x_3 - 0.5547) **2$ in
+let $e4 = 0.1 * (x_1 - 0.03815) **2 + 10.0 * (x_2 - 0.5743) **2$
+$+ 35.0 * (x_3 - 0.8828) **2$ in
+$- (1.0 * \exp(-e1) + 1.2 * \exp(-e2)$
+$+ 3.0 * \exp(-e3) + 3.2 * \exp(-e4)), \, 3.85\text{e--}13)];;$
+
+let box_hartman6 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = $
+$[(0, 1); (0, 1);(0, 1);(0, 1);(0, 1);(0, 1)];;$
+let obj_hartman6 $x_1 \, x_2 \, x_3 \, x_4 \, x_5 \, x_6 = [($
+let $e1 = 10.0 * (x_1 - 0.1312)**2 + 3.0 * (x_2 - 0.1696)**2 $
+$+ 17.0 * (x_3 - 0.5569)**2 + 3.5 * (x_4 - 0.0124)**2 $
+$+ 1.7 * (x_5 - 0.8283)**2 + 8.0 * (x_6 - 0.5886)**2$ in
+let $e2 = 0.05 * (x_1 - 0.2329)**2 + 10.0 * (x_2 - 0.4135)**2$ 
+$+ 17.0 * (x_3 - 0.8307)**2 + 0.1 * (x_4 - 0.3736)**2$
+$+ 8.0 * (x_5 - 0.1004)**2 + 14.0 * (x_6 - 0.9991)**2$ in
+let $e3 = 3.0 * (x_1 - 0.2348)**2 + 3.5 * (x_2 - 0.1451)**2$ 
+$+ 1.7 * (x_3 - 0.3522)**2 + 10.0 * (x_4 - 0.2883)**2$
+$+ 17.0 * (x_5 - 0.3047)**2 + 8.0 * (x_6 - 0.665)**2$ in
+let $e4 = 17.0 * (x_1 - 0.4047)**2 + 8.0 * (x_2 - 0.8828)**2$ 
+$+ 0.05 * (x_3 - 0.8732)**2 + 10.0 * (x_4 - 0.5743)**2$
+$+ 0.1 * (x_5 - 0.1091)**2 + 14.0 * (x_6 - 0.0381)**2$ in
+$- (1.0 * \exp(-e1) + 1.2 * \exp(-e2)$
+$+ 3.0 * \exp(-e3) + 3.2 * \exp(-e4)), \, 4.48\text{e--}13)];;$
+
+let box_cav10 $x = [(0, 10)];;$
+let obj_cav10 $x = [($ if $(x*x - x > 0)$ then $x*0.1$ 
+else $x*x+2, \, 2.91)];;$
+
+let box_perin $x \, y = [(1,7); (-2, 7)];;$
+let cstr_perin $x \, y = [x-1; y+2; x-y; 5-y-x];;$
+let obj_perin $x \, y = [($ if $(x*x + y*y \leq 4)$ then $y * x$
+else $0, \, 2.01)];; $
+
+
+\end{lstlisting}
+}
+
+\if{
+{\scriptsize
+\begin{lstlisting}
 let box_doppler1 u v T = [$(-100, 100); (20, 2e4);(-30, 50)$];; 
 let obj_doppler1 u v T = [(
 let $t_1 = 331.4 + 0.6 * T$ in 
-$-t_1*v/((t_1 + u)*(t_1 + u))$, $3e-13$)];;
+$-t_1*v/((t_1 + u)*(t_1 + u))$, $3\text{e--}13$)];;
 \end{lstlisting}
 }
 {\scriptsize
@@ -26,17 +165,17 @@ procedure doppler3(u : real, v : real, T : real) returns (r : real) {
 }
 {\scriptsize
 \begin{lstlisting}
-procedure rigidBody1(x1 : real, x2 : real, x3 : real) returns (r : real) {
- assume (-15.0 <= x1 && x1 <= 15.0 && -15.0 <= x2 && x2 <= 15.0 && -15.0 <= x3 && x3 <= 15.0);
-  r := -x1*x2 - 2.0 * x2 * x3 - x1 - x3;
+procedure rigidBody1(x_1 : real, x_2 : real, x_3 : real) returns (r : real) {
+ assume (-15.0 <= x_1 && x_1 <= 15.0 && -15.0 <= x_2 && x_2 <= 15.0 && -15.0 <= x_3 && x_3 <= 15.0);
+  r := -x_1*x_2 - 2.0 * x_2 * x_3 - x_1 - x_3;
 }
 \end{lstlisting}
 }
 {\scriptsize
 \begin{lstlisting}
-procedure rigidBody2(x1 : real, x2 : real, x3 : real) returns (r : real) {
- assume (-15.0 <= x1 && x1 <= 15.0 && -15.0 <= x2 && x2 <= 15.0 && -15.0 <= x3 && x3 <= 15.0);
-  r := 2.0*x1*x2*x3 + 3.0*x3*x3 - x2*x1*x2*x3 + 3.0*x3*x3 - x2;
+procedure rigidBody2(x_1 : real, x_2 : real, x_3 : real) returns (r : real) {
+ assume (-15.0 <= x_1 && x_1 <= 15.0 && -15.0 <= x_2 && x_2 <= 15.0 && -15.0 <= x_3 && x_3 <= 15.0);
+  r := 2.0*x_1*x_2*x_3 + 3.0*x_3*x_3 - x_2*x_1*x_2*x_3 + 3.0*x_3*x_3 - x_2;
 }
 \end{lstlisting}
 }
@@ -64,3 +203,4 @@ procedure sqroot(x : real) returns (r : real) {
 }
 \end{lstlisting}
 }
+}\fi

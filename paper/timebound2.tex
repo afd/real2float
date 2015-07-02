@@ -64,8 +64,8 @@
 \begin{document} 
 \begin{tikzpicture}[yscale=4, xscale=4]
 
-\draw[->] (-2.5,0) -- (2.5,0) node[above] {Relative Time Difference};
-\draw[->] (0,-1.2) -- (0,1.2) node[above] {Relative Error Bound Difference};
+\draw[->] (-2.5,0) -- (2.5,0) node[above] {Relative efficiency};
+\draw[->] (0,-1.2) -- (0,1.2) node[above] {Relative precision};
 
 \draw (0.486569, 0.807273) node {\circled{a}}; 
 \draw (-0.016023, -0.429091) node {\squared{a}};
@@ -107,7 +107,9 @@
 \draw (1.511047, 0.491018) node {\squared{m}};
 
 \draw (0.696678, 0.112434) node {\circled{n}}; 
-\draw (1.424538, 0.041005) node {\squared{n}};
+
+% slightly modified for presentation purpose \draw (1.424538, 0.041005) node {\squared{n}};
+\draw (1.374538, 0.041005) node {\squared{n}};
 
 \draw (-0.039615, 0.000000) node {\circled{o}}; 
 \draw (-0.105343, 0.304348) node {\squared{o}};
@@ -118,20 +120,18 @@
 \draw (1.790888, 0.123596) node {\circled{q}}; 
 \draw (1.196295, 0.303371) node {\squared{q}};
 
-%\draw (-inf, -1.000000) node {\circled{r}}; 
-\draw (1.531479, 0.036364) node {\squared{r}};
 
-%\draw (-inf, -1.000000) node {\circled{s}}; 
+% slightly modified for presentation purpose \draw (1.531479, 0.036364) node {\squared{r}};
+\draw (1.551479, 0.039364) node {\squared{r}};
+
 \draw (2.174157, 0.658098) node {\squared{s}};
 
-%\draw (-inf, -1.000000) node {\circled{t}}; 
 \draw (1.614036, -0.965195) node {\squared{t}};
 
 \draw (1.521703, 0.000000) node {\circled{v}}; 
-%\draw (-inf, -1.000000) node {\squared{v}};
 
-\draw (1.477121, 0.000000) node {\circled{w}}; 
-%\draw (-inf, -1.000000) node {\squared{w}};
+% slightly modified for presentation purpose \draw (1.477121, 0.000000) node {\circled{w}}; 
+\draw (1.447121, 0.000000) node {\circled{w}}; 
 
 \draw (-0.1,-0.1) node {$0$}; 
 \draw (1,1pt) -- (1,-1pt); \draw (1,-0.1) node {$10$}; 

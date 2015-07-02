@@ -1009,15 +1009,15 @@ Accordingly with the $\fptaylor$ paper~\cite{fptaylor15}, the $\rosa$ real compi
 Program \code{u} can only be tackled with $\realtofloat$ as $\fptaylor$ aborted after running out of memory (meaning of the symbol OoM). A possible failure explanation is the complexity of the corresponding Problem~\textit{Hartman 6}, involving $133$ arithmetic operations and $6$ input variables.
 To the best of our knowledge, $\realtofloat$ is the only academic tool which is able to handle the general class of programs involving either transcendental functions or conditional loops. The $\fptaylor$ (resp.~$\rosa$) does not currently handle conditionals (resp.~transcendental functions), as meant by the symbol $-$ in the corresponding column entries. However, an interface between both software would embed them with their respective missing feature.
 
-The corresponding timings are given in Table~\ref{table:cpu}.
-Figure~\ref{fig:timebound} provides a way to compare both execution times and error bounds obtained with the different tools, and gathers results from Table~\ref{table:error} and Table~\ref{table:cpu}. 
-For each benchmark identified by \code{id}, the point \circled{id} relates to a $\rosa$ while the point \squared{id} relates to $\fptaylor$.
-The x-axis coordinate of \circled{id} is the relative difference between the execution time of $\rosa$ and $\realtofloat$ to compute the bound of the corresponding program. Namely, 
-
-%The x-axis represents the relative difference between the execution time of rosa (resp fptaylor) and realtofloat. In Table2, for a given benchmark indicated at row \code{id}, let t_realtofloat be the corresponding entry of the third column and t_{rosa} be the corresponding entry of the fourth (resp fifth) column
-%then the x-axis coordinate of  is (t_{rosa} - t_{realtofloat}) / t_{real2float} (resp ). 
-%Similarly, the y-axis represents the relative difference between the error bounds.
-
+These error bound comparison results together with their corresponding execution timings (given in Table~\ref{table:cpu}) are used to plot data points shown in Figure~\ref{fig:timebound}.
+%Figure~\ref{fig:timebound} provides a way to compare both execution times and error bounds obtained with the different tools, and gathers results from Table~\ref{table:error} and Table~\ref{table:cpu}. 
+For each benchmark identified by \code{id}, let $t_{\realtofloat}$ (in 3rd column of Table~\ref{table:cpu}) refers to the execution time of $\realtofloat$ to obtain the corresponding upper bound $\epsilon_{\realtofloat}$ (in 4th column of Table~\ref{table:error}). Similarly, let define the execution times $t_{\rosa}$, $t_{\fptaylor}$ and the corresponding error bounds $\epsilon_{\rosa}$, $\epsilon_{\fptaylor}$. Then the x-axis coordinate of the point \circled{id} (resp.~\squared{id}) displayed in Figure~\ref{fig:timebound} corresponds to the relative difference between the execution time of $\rosa$ (resp.~$\fptaylor$) and $\realtofloat$, i.e.~the relative ratio $\frac{t_{\rosa} - t_{\realtofloat}}{t_{\realtofloat}}$ (resp.~$\frac{t_{\fptaylor} - t_{\realtofloat}}{t_{\realtofloat}}$). Similarly, the y-axis coordinate of the point \circled{id} (resp.~\squared{id}) is $\frac{\epsilon_{\rosa} - \epsilon_{\realtofloat}}{\epsilon_{\realtofloat}}$ (resp.~$\frac{\epsilon_{\fptaylor} - \epsilon_{\realtofloat}}{\epsilon_{\realtofloat}}$). 
+Thus, the axes of the coordinate system of Figure~\ref{fig:timebound} divide the plane into four quadrants: 
+the nonnegative quadrant $(+,+)$ contains data points referring to programs for which $\realtofloat$ computes the tightest bound in the fastest time, 
+the second one $(+,-)$ contains points referring to programs for which $\realtofloat$ is slower but more accurate, 
+the non-positive quadrant $(-, -)$ for which $\realtofloat$ yields coarser bounds 
+and 
+the last one $(-,+)$ for which $\realtofloat$ is faster but less accurate. On the quadrant $(+,-)$, one can see that $\realtofloat$ computes bound which are less accurate than $\fptaylor$ on programs \code{a-c} and \code{t}, but much faster for program \code{b}. The quadrant $(-, +)$ indicates that $\rosa$ (resp.~$\fptaylor$) is more efficient but less precise than $\realtofloat$ on program \code{d} (resp.~\code{o}). The presence of the majority of plots on the nonnegative quadrant $(+, +)$ confirms that $\realtofloat$ does not compromise efficiency at the expense of accuracy.
 %
 \begin{figure*}[!ht]
 \begin{center}

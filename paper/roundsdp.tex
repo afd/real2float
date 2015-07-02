@@ -296,22 +296,22 @@ hardware precision tuning; round-off error; numerical accuracy; floating-point a
 \section{Introduction} %3p
 \label{sec:intro}
 %
-Constructing numerical programs which perform accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce rounding errors,  and knowledge of the range of these rounding errors is required to fulfil safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers.
-To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximation tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain precise upper bounds over the error. This problem boils down to finding tight abstractions of non-linearities while being able to bound the resulting approximations in a efficient way.  
+Constructing numerical programs which perform accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce rounding errors,  and knowledge of the range of these rounding errors is required to fulfil safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers. Such a knowledge can be used in general for developing accurate numerical software, but appears to be particularly relevant while considering algorithms migration onto reconfigurable hardware (e.g. FPGAs). The advantage of architectures based on FPGAs is that they allow more flexible choices, rather than choosing either for IEEE standard single or double precision. Indeed, in this case, we benefit from a more flexible number representation while ensuring guaranteed bounds on the program output. 
+
+To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximation tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain precise upper bounds over the error. This problem boils down to finding tight abstractions of linearities or non-linearities while being able to bound the resulting approximations in an efficient way.  
 %
+For computer programs consisting of linear operations, automatic error analysis can be obtained with well-studied optimization techniques based on SAT/SMT solvers~\cite{hgbk2012fmcad}, affine arithmetic~\cite{fluctuat}. However, non-linear operations are key to many interesting computational problems arising in physics, biology, controller implementations and global optimization. 
+Recently, two promising frameworks have been designed to provide upper bounds for rounding errors of nonlinear programs. The corresponding algorithms rely on Taylor-interval methods~\cite{fptaylor15}, implemented in the $\fptaylor$ tool, and on combining SMT with affine arithmetic~\cite{Darulova14Popl}, implemented in the $\rosa$ real compiler.
 
-The aim of this work is to provide such a framework to perform automated precision analysis of computer programs that manipulate finite-precision data using nonlinear operators.
-This framework can be applied in general for developing accurate numerical software, but appears to be particularly relevant while considering algorithms migration onto reconfigurable hardware (e.g. FPGAs). The advantage of architectures based on FPGAs is that they allow more flexible choices, rather than choosing either for IEEE standard single or double precision. Indeed, in this case, one benefits from a more flexible number representation while ensuring guaranteed bounds on the program output. 
+The common drawback of these two frameworks is that they do not fully take into account the correlations between program variables. Thus they may output coarse error bounds or perform analysis within a large amount of time.  The $\rosa$ tool does not provide any formal guarantees. To the best of our knowledge, the $\fptaylor$ software is the only academic tool which can produce formal proof certificates. This is based on the framework developed in~\cite{SolovyevH13} to verify nonlinear inequalities in $\hol$~\cite{hollight} using Taylor-interval methods. However, most of computation performed in the informal optimization procedure end up being redone inside the $\hol$ proof assistant, yielding a formal verification which is computationally demanding.
+%The formal verification of these certificates is computationally expensive. This follows from the fact that most of computation performed in the informal optimization procedure end up being redone inside the proof assistant (see for instance in~\cite{SolovyevH13} the formal verification of nonlinear inequalities in $\hol$~\cite{hollight} using Taylor-interval methods).
 
-For computer programs consisting of linear operations, automatic error analysis can be obtained with well-studied optimization techniques based on SAT/SMT solvers~\cite{Darulova14Popl,hgbk2012fmcad}, Taylor-interval methods~\cite{fptaylor15}, affine arithmetic~\cite{fluctuat} and linear programming relaxations~\cite{Boland10HGR}.
-These techniques can also be applied in the nonlinear setting but do not fully take into account the correlations between program variables. Thus they may output coarse error bounds or perform analysis within a large amount of time.  Another drawback of these tools is that they usually provide no formal guarantees. At best, they can produce proof certificates but the formal verification of these certificates is computationally expensive. This follows from the fact that most of computation performed in the informal optimization procedure end up being redone inside the proof assistant (see for instance in~\cite{SolovyevH13} the formal verification of nonlinear inequalities in $\hol$~\cite{hollight} using Taylor-interval methods).
-
-For computer programs with nonlinear operations, guarantees can be provided with certified programming techniques.
+The aim of this work is to provide a formal framework to perform automated precision analysis of computer programs that manipulate finite-precision data using nonlinear operators. For such programs, guarantees can be provided with certified programming techniques.
 Semidefinite programming (SDP) is relevant to a wide range of mathematical fields, including combinatorial optimization, control theory and matrix completion. In 2001, Lasserre introduced a hierarchy of SDP relaxations~\cite{Lasserre01moments} for approximating polynomial infima. Our method to bound the error is a decision procedure based on an specialized variant of Lasserre hierarchy~\cite{Las06SparseSOS}. The procedure relies on SDP to provide sparse sum-of-squares decompositions of positive polynomials. This framework handles polynomial program analysis (involving the operations $+,\times,-$) but can be extended to the more general class of semialgebraic or transcendental programs (involving $\sqrtsign, /, \min, \max, \arctan, \exp$), following the approximation scheme described in~\cite{Magron15sdp}.
 
 \subsection{Overview of our Method}
 %
-We present an overview of our method, and of the capabilities of related techniques, using an example.
+We present an overview of our method and of the capabilities of related techniques, using an example.
 Consider a program implementing the following polynomial expression $f$:
 \begin{align*}
 f(\x) := x_2 \times x_5 + x_3 \times x_6 - x_2 \times x_3  - x_5 \times x_6 \\
@@ -320,17 +320,18 @@ f(\x) := x_2 \times x_5 + x_3 \times x_6 - x_2 \times x_3  - x_5 \times x_6 \\
 %
 where the six-variable vector $\x :=  (x_1, x_2, x_3, x_4, x_5, x_6)$ is the input of the program. 
 This function $f$ is involved in many inequalities arising from the the proof of Kepler Conjecture~\cite{halesalgo}, yielding challenging global optimization problems.
-Here, let assume that the set $\X$ of possible input values is taken as a product of closed intervals: $\X = [4.00, 6.36]^6$ but could be defined in general with a set of inequality constraints among the variables $x_1, \dots, x_6$. 
+For this example, the set $\X$ of possible input values is a product of closed intervals: $\X = [4.00, 6.36]^6$.
+%but could be defined in general with a set of inequality constraints among the variables $x_1, \dots, x_6$. 
 
 The polynomial expression $f$ is obtained by performing 15 basic operations (1 negation, 3 subtractions, 6 additions and 5 multiplications). 
 When executing this program with a set of floating-point numbers $\hat{\x} :=  (\hat{x}_1, \hat{x}_2, \hat{x}_3, \hat{x}_4, \hat{x}_5, \hat{x}_6) \in \X$, one actually computes a floating-point result $\hat{f}$, where all operations $+, -, \times$ are replaced by the respectively associated floating-point operations $\oplus, \ominus, \otimes$. 
-The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$, where the bound $\epsilon$ is the machine precision (e.g.~$\epsilon = 2^{-24}$ for single precision). One would like to bound the absolute rounding error $|r(\x, \e)| := | \hat{f}(\x, \e) - f (\x) |$ over  all possible input variables $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$. Let us define $\E := [-\epsilon, \epsilon]^{15}$ and $\K := \X \times \E$, then our bound problem can be cast as a nonlinear optimization problem:
+The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$, where the bound $\epsilon$ is the machine precision (e.g.~$\epsilon = 2^{-24}$ for single precision). One would like to bound the absolute rounding error $|r(\x, \e)| := | \hat{f}(\x, \e) - f (\x) |$ over  all possible input variables $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$. Let us define $\E := [-\epsilon, \epsilon]^{15}$ and $\K := \X \times \E$, then our bound problem can be cast as finding the maximum $r^\star$ of $\mid r \mid$ over $\K$, yielding the following nonlinear optimization problem:
 %
 \begin{align}
 \begin{split}
 \label{eq:roptim}
 r^\star := & \max_{(\x, \e) \in \K} | r(\x, \e) | \\
- = & \ \ \max \{-\min_{(\x, \e) \in \K} r(\x, \e), \max_{(\x, \e) \in \K} r(\x,\e)\} \enspace. 
+ = & \ \ \max \{-\min_{(\x, \e) \in \K} r(\x, \e), \max_{(\x, \e) \in \K} r(\x,\e)\} \enspace,
 \end{split}
 \end{align}
 %
@@ -342,14 +343,14 @@ As in~\cite{fptaylor15}, one can also decompose the error term $r$ as the sum of
 r^\star \leq \max_{(\x, \e) \in \K} |l(\x, \e)| + \max_{(\x, \e) \in \K} |h(\x, \e)| \enspace. 
 \end{equation}
 %
-It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x_5 + x_3 x_6) e_3 + \dots + f(\x) e_{15} = \sum_{i=1}^{15} s_i(\x) e_i$. The {\em Symbolic Taylor expansions} method~\cite{fptaylor15} consists of using Taylor-interval optimization to compute a rigorous interval enclosure of each polynomial $s_i$, $i = 1,\dots,15$, over $\X$ and finally obtain an upper bound of $|l| + |h|$ over $\K$.
+It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x_5 + x_3 x_6) e_3 + \dots + f(\x) e_{15} = \sum_{i=1}^{15} s_i(\x) e_i$. The {\em Symbolic Taylor expansions} method~\cite{fptaylor15} consists of using Taylor-interval optimization to compute a rigorous interval enclosure of each polynomial $s_i$, $i = 1,\dots,15$, over $\X$ and finally obtain an upper bound of $|l| + |h|$ over $\K$. Our method uses sparse semidefinite relaxations for polynomial optimization (derived from \cite{Las06SparseSOS}) to bound $l$ as well as basic interval arithmetic to bound $h$. The following results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz).
 % over $\X \times \E$
 \begin{itemize}
 \item A direct attempt to solve the two polynomial problems occurring in Equation~\eqref{eq:roptim} fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory. 
-\item Using sparse semidefinite optimization (derived from \cite{Las06SparseSOS}) to bound $l$ and basic interval arithmetic to bound $h$, one obtains an upper bound of $789 \epsilon$ for $|l| + |h|$ over $\K$. This computation is performed in less than one second on a modern computer.
-\item Using basic interval arithmetic, one obtains more quickly (about 17 times less CPU) a coarser bound of $2023 \epsilon$. 
-\item Symbolic Taylor expansions provide an intermediate bound of $936 \epsilon$ but it takes about 16.3 times more CPU than our method. 
-\item Finally, our bound is also obtained with the $\rosa$ tool~\cite{Darulova14Popl} but it takes about 4.6 times more CPU.
+\item Using our method, one obtains an upper bound of $789 \epsilon$ for $|l| + |h|$ over $\K$ in less than one second.
+\item Using basic interval arithmetic, one obtains 17.1 times more quickly a coarser bound of $2023 \epsilon$. 
+\item Symbolic Taylor expansions implemented in the $\fptaylor$ tool~\cite{fptaylor15} provide an intermediate bound of $936 \epsilon$ but 16.3 times slower than with our implementation. 
+\item Finally, our bound is also obtained with the $\rosa$ real compiler~\cite{Darulova14Popl} but 4.6 times slower than with our implementation.
 \end{itemize}
 
 \if{
@@ -368,7 +369,7 @@ This polynomial $f$ is already of degree 3 and involves 7 variables.
 \subsection{Contributions}
 Our key contributions can be summarized as follows:
 \begin{itemize}
-\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming~\cite{Las06SparseSOS}. By comparison with other methods, our algorithm allows us to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent in SDP solvers~\cite{Todd01semidefiniteoptimization}. We also propose some extensions of our algorithm to programs involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditionals.
+\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming~\cite{Las06SparseSOS}. By comparison with other methods, our algorithm allows us to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent in SDP solvers~\cite{Todd01semidefiniteoptimization}. Our algorithm can currently handle  programs implementing polynomial functions, but also involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditional loops.  Programs containing iterative or while loops are not currently supported.
 %\item 
 \item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available\footnote{\url{https://forge.ocamlcore.org/frs/download.php/1519/real2float.tar.gz}}.
 %\begin{center}
@@ -1055,6 +1056,8 @@ the last one $(-,+)$ for which $\realtofloat$ is faster but less accurate. On th
 \section{Related Works}
 %
 SMT solvers allow to analyze programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetics. When SAT/SMT solvers output proof witnesses, they can be formally rechecked inside the $\coq$ proof assistant~\cite{smtcoq}. While ensuring soundness, the efficiency of the procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
+
+%linear programming relaxations~\cite{Boland10HGR}.
 % The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions
 % Chap 26 [Higham]
 \section{Conclusion and Perspectives} %0.5p

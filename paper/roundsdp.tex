@@ -296,12 +296,12 @@ hardware precision tuning; round-off error; numerical accuracy; floating-point a
 \section{Introduction} %3p
 \label{sec:intro}
 %
-Constructing numerical programs which output accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce rounding errors, whose range knowledge is required to fulfil safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers.
-To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximation tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain tight upper bounds over the error. This problem boils down to finding tight abstractions of non-linearities while being able to bound the resulting approximations in a efficient way.  
+Constructing numerical programs which perform accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce rounding errors,  and knowledge of the range of these rounding errors is required to fulfil safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers.
+To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximation tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain precise upper bounds over the error. This problem boils down to finding tight abstractions of non-linearities while being able to bound the resulting approximations in a efficient way.  
 %
 
 
-The aim of this work is to provide such a framework to perform automated precision analysis of computer programs consisting of nonlinear operations. 
+The aim of this work is to provide such a framework to perform automated precision analysis of computer programs that manipulate finite-precision data using nonlinear operators
 This framework can be applied in general for developing accurate numerical software, but appears to be particularly relevant while considering algorithms migration onto reconfigurable hardware (e.g. FPGAs). The advantage of architectures based on FPGAs is that they allow more flexible choices, rather than choosing either for IEEE standard single or double precision. Indeed, in this case, one benefits from a more flexible number representation while ensuring guaranteed bounds on the program output. 
 
 For computer programs consisting of linear operations, automatic error analysis can be obtained with well-studied optimization techniques based on SAT/SMT solvers~\cite{Darulova14Popl,hgbk2012fmcad}, Taylor-interval methods~\cite{fptaylor15}, affine arithmetic~\cite{fluctuat} and linear programming relaxations~\cite{Boland10HGR}.
@@ -312,19 +312,20 @@ Semidefinite programming (SDP) is relevant to a wide range of mathematical field
 
 \subsection{Overview of our Method}
 %
+We present an overview of our method, and of the capabilities of related techniques, using an example.
 Consider a program implementing the following polynomial expression $f$:
 \begin{align*}
 f(\x) := x_2 \times x_5 + x_3 \times x_6 - x_2 \times x_3  - x_5 \times x_6 \\
 + x_1 \times ( - x_1 +  x_2 +  x_3  - x_4 +  x_5 +  x_6) \,,
 \end{align*}
 %
-where the six variable vector $\x :=  (x_1, x_2, x_3, x_4, x_5, x_6)$ is the input of the program. 
+where the six-variable vector $\x :=  (x_1, x_2, x_3, x_4, x_5, x_6)$ is the input of the program. 
 This function $f$ is involved in many inequalities arising from the the proof of Kepler Conjecture~\cite{halesalgo}, yielding challenging global optimization problems.
 Here, let assume that the set $\X$ of possible input values is taken as a product of closed intervals: $\X = [4.00, 6.36]^6$ but could be defined in general with a set of inequality constraints among the variables $x_1, \dots, x_6$. 
 
 The polynomial expression $f$ is obtained by performing 15 basic operations (1 negation, 3 subtractions, 6 additions and 5 multiplications). 
 When executing this program with a set of floating-point numbers $\hat{\x} :=  (\hat{x}_1, \hat{x}_2, \hat{x}_3, \hat{x}_4, \hat{x}_5, \hat{x}_6) \in \X$, one actually computes a floating-point result $\hat{f}$, where all operations $+, -, \times$ are replaced by the respectively associated floating-point operations $\oplus, \ominus, \otimes$. 
-The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$, where the bound $\epsilon$ is the machine precision (e.g.~$2^{-24}$ for single precision). One would like to bound the absolute rounding error $|r(\x, \e)| := | \hat{f}(\x, \e) - f (\x) |$ over  all possible input variables $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$. Let define $\E := [-\epsilon, \epsilon]^{15}$ and $\K := \X \times \E$, then note that our bound problem can be cast as a nonlinear optimization problem:
+The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$, where the bound $\epsilon$ is the machine precision (e.g.~$\epsilon = 2^{-24}$ for single precision). One would like to bound the absolute rounding error $|r(\x, \e)| := | \hat{f}(\x, \e) - f (\x) |$ over  all possible input variables $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$. Let define $\E := [-\epsilon, \epsilon]^{15}$ and $\K := \X \times \E$, then our bound problem can be cast as a nonlinear optimization problem:
 %
 \begin{align}
 \begin{split}
@@ -353,7 +354,7 @@ It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x
 \end{itemize}
 
 \if{
-For instance, given a four variable vector $\x := (x_1, x_2, x_3, x_4)$, consider the  determinant computation of the $2 \times 2$ matrix  $\begin{pmatrix}
+For instance, given a four-variable vector $\x := (x_1, x_2, x_3, x_4)$, consider the  determinant computation of the $2 \times 2$ matrix  $\begin{pmatrix}
 x_1 & x_2 \\
 x_3 & x_4 \\
 \end{pmatrix}$.

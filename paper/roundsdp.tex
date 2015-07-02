@@ -972,7 +972,7 @@ Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1
 \label{sec:benchs}
 %
 Now, we present experimental results obtained by applying our general $\boundnlprog$ algorithm (see Section~\ref{sec:fpsdp}, Figure~\ref{alg:bound_nlprog}) to various examples coming from physics, biology, space control and optimization. 
-The  $\boundnlprog$ algorithm is implemented in a tool called $\realtofloat$, built in top of the $\nlcertify$ nonlinear verification package, relying on $\ocaml$ (Version $4.02.1$) and $\coq$ (Version $8.4\text{pl}5$) and interfaced with the semidefinite solver $\sdpa$ (Version $7.3.6$). 
+The  $\boundnlprog$ algorithm is implemented in a tool called $\realtofloat$, built in top of the $\nlcertify$ nonlinear verification package, relying on $\ocaml$ (Version $4.02.1$) and $\coq$ (Version $8.4\text{pl}5$) and interfaced with the SDP solver $\sdpa$ (Version $7.3.6$). The SDP solver output numerical SOS certificates, which are converted into rational SOS using the {\sc Zarith} $\ocaml$ library (Version $1.2$), implementing arithmetic operations over arbitrary-precision integers.
 For more details about the installation and usage of $\realtofloat$, we refer to the dedicated web-page of $\nlcertify$\footnote{\url{http://nl-certify.forge.ocamlcore.org}} and the user manual of $\realtofloat$\footnote{see the \texttt{README.md} file in the top level directory}. 
 All examples are displayed in Appendix A as the corresponding $\realtofloat$ input text files and satisfy our nonlinear program semantics (see Section~\ref{sec:fpbackground}). Results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz).
 %
@@ -985,14 +985,6 @@ At a given semidefinite relaxation order $d$, our tool computes the upper bound 
  In this case, we subdivide a randomly chosen interval of the box  $[\a, \b]$ in two halves to obtain two sub-sets $\X_1$ and $\X_2$, fulfilling $\X := \X_1 \cup \X_2$, and apply the $\boundnlprog$ algorithm on both sub-sets until we succeed to certify that $\epsilon_{\text{total}}$ is a sound upper bound of the rounding error.
 
 The number $\epsilon_{\text{total}}$ is compared with the upper bounds computed by $\fptaylor$ which relies on Taylor Symbolic expansions~\cite{fptaylor15}, $\rosa$ which relies on SMT and affine arithmetic~\cite{Darulova14Popl}, as well as a third procedure IA relying on interval arithmetic. We designed IA to follow the same steps than $\boundnlprog$ together with the sub-procedure $\bound$ but to compute an interval enclosure of $l$ using basic interval arithmetic instead of calling the $\sdpbound$ procedure (see Line~\lineref{line:sdpbound} of the algorithm depicted in Figure~\ref{alg:bound}). For comparison purpose, we also ran simulation tests through instantiation of input variables to random inputs, yielding lower bounds of the absolute error (the technique is the same as in the $\rosa$ paper~\cite{Darulova14Popl}).
-
-For the sake of further presentation, we associate an alphabet character (from \code{a} to \code{w}) to identify each of the $\nbenchs$ nonlinear programs:
-\begin{itemize}
-\item The $14$ first programs implement polynomial and semialgebraic functions: \code{a-e} come from physics, \code{f} and \code{h} from biology, \code{g} from control, \code{i-k} are derived from expressions involved in the proof of Kepler Conjecture (for more details, see~\cite{halesalgo} and the related formalisation project~\cite{Flyspeck06}) and \code{l-n} implement polynomial approximations of the sine and square root functions. At the exception of \code{i-k}, all these programs are used to compare $\fptaylor$ and $\rosa$ in~\cite{fptaylor15}. 
-\item The $3$ programs \code{o-q} come from the global optimization literature and correspond respectively to Problem 3.3, 4.6 and 4.7 in~\cite{Floudas90}. They implement polynomial functions and involve polynomial preconditions (i.e. $\X$ is not a simple box but rather a set defined with conjunction of nonlinear polynomial inequalities).
-\item The $4$ programs \code{r-u} involve transcendental functions. The two programs \code{r} and \code{s} are used in the $\fptaylor$ paper~\cite{fptaylor15} and correspond respectively to the program \code{logexp} (see Example~\ref{ex:logexp}) and the program \code{sphere} taken from NASA World Wind Java SDK~\cite{NASA}. The $2$ programs \code{t} and \code{q} respectively implement the functions coming from the optimization problems \textit{Hartman 3} and \textit{Hartman 6} in~\cite{Ali05}, involving both sums of exponential functions composed with quadratic polynomials.
-\item The $2$ last programs \code{v-w} involve conditional loops and come from the static analysis literature. They correspond to the two respective running examples of~\cite{Zonotope10} and~\cite{Marechal14}. The first program \code{v} is used in the $\rosa$ paper~\cite{Darulova14Popl} for the analysis of divergence path error.
-\end{itemize}
 %
 \begin{table*}[!ht]
 %\small
@@ -1002,6 +994,15 @@ For the sake of further presentation, we associate an alphabet character (from \
 \label{table:error}
 \end{center}
 \end{table*}
+%
+For the sake of further presentation, we associate an alphabet character (from \code{a} to \code{w}) to identify each of the $\nbenchs$ nonlinear programs:
+%
+\begin{itemize}
+\item The $14$ first programs implement polynomial and semialgebraic functions: \code{a-e} come from physics, \code{f} and \code{h} from biology, \code{g} from control, \code{i-k} are derived from expressions involved in the proof of Kepler Conjecture (for more details, see~\cite{halesalgo} and the related formalisation project~\cite{Flyspeck06}) and \code{l-n} implement polynomial approximations of the sine and square root functions. At the exception of \code{i-k}, all these programs are used to compare $\fptaylor$ and $\rosa$ in~\cite{fptaylor15}. 
+\item The $3$ programs \code{o-q} come from the global optimization literature and correspond respectively to Problem 3.3, 4.6 and 4.7 in~\cite{Floudas90}. They implement polynomial functions and involve polynomial preconditions (i.e. $\X$ is not a simple box but rather a set defined with conjunction of nonlinear polynomial inequalities).
+\item The $4$ programs \code{r-u} involve transcendental functions. The two programs \code{r} and \code{s} are used in the $\fptaylor$ paper~\cite{fptaylor15} and correspond respectively to the program \code{logexp} (see Example~\ref{ex:logexp}) and the program \code{sphere} taken from NASA World Wind Java SDK~\cite{NASA}. The $2$ programs \code{t} and \code{q} respectively implement the functions coming from the optimization problems \textit{Hartman 3} and \textit{Hartman 6} in~\cite{Ali05}, involving both sums of exponential functions composed with quadratic polynomials.
+\item The $2$ last programs \code{v-w} involve conditional loops and come from the static analysis literature. They correspond to the two respective running examples of~\cite{Zonotope10} and~\cite{Marechal14}. The first program \code{v} is used in the $\rosa$ paper~\cite{Darulova14Popl} for the analysis of divergence path error.
+\end{itemize}
 %
 The three tools $\realtofloat$, $\rosa$ and $\fptaylor$ can handle input variable uncertainties as well as multi-precision, but for the sake of conciseness, we only considered to compare their performance on programs implemented in single ($\epsilon = 2^{-24}$) or double ($\epsilon = 2^{-53}$) precision floating-point.
 For the programs involving transcendental functions, we followed the same procedure as in $\fptaylor$ while adjusting the precision $\epsilon \,  (f_{\R}) = 1.5 \epsilon$ for each special function $f_{\R} \in \{\sin, \cos, \log, \exp \}$. Each univariate transcendental function is approximated from below (resp.~from above) using suprema (resp.~infima) of linear or quadratic polynomials (see Example~\ref{ex:logexp} for the case of program \code{logexp}). 

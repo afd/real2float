@@ -53,6 +53,7 @@
 %\usepackage{caption}
 \usepackage{multirow}
 \usepackage{tikz, pgfplots}
+\pgfplotsset{compat=1.8}
 %\usepackage{natbib} %for bibliography via bibtex
 %\usepackage{enumitem}
 %\lstMakeShortInline{$}
@@ -121,7 +122,7 @@
 \newcommand{\flamstarj}[1]{f_{#1}^*({\lambda})}
 \newcommand{\Mcal}{\mathcal{M}}
 \newcommand{\nsdp}{n_{\text{sdp}}}
-\newcommand{\nan}{\text{NaN}}
+\newcommand{\divzero}{\text{Div0}}
 \newcommand{\nlift}{n_{\text{lift}}}
 \newcommand{\Slift}{\S_{\text{lift}}}
 \renewcommand{\prec}{\text{prec}}
@@ -987,17 +988,10 @@ For the sake of further presentation, we associate an alphabet character (from \
 
 The three tools $\realtofloat$, $\rosa$ and $\fptaylor$ can handle input variable uncertainties as well as multi-precision, but for the sake of conciseness, we only considered to compare their performance on programs implemented in single ($\epsilon = 2^{-24}$) or double ($\epsilon = 2^{-53}$) floating-point precision.
 For the programs involving transcendental functions, we followed the same procedure as in $\fptaylor$ while adjusting the precision $\epsilon \,  (f_{\R}) = 1.5 \epsilon$ for each special function $f_{\R} \in \{\sin, \cos, \log, \exp \}$. Each univariate transcendental function is approximated from below (resp.~from above) using suprema (resp.~infima) of linear or quadratic polynomials (see Example~\ref{ex:logexp} for the case of program \code{logexp}). 
-
+%
 \subsection{Comparison Results}
-
-Comparison results for error bound computation are presented in Table~\ref{table:error}. Our $\realtofloat$ tool computes the tightest upper bounds for $19$ out of $\nbenchs$ benchmarks. For the $3$ programs \code{a-c} involving rational functions 
-
-% - not able to handle either transcendental or conditionals
-% NaN the procedure IA fails to compute an interval enclosure of the denominator which does not contain zero
-% OoM 
-% Our tool is limited w.r.t. symbolic manipulations (derivation, normalization of rational functions,...) thus not able to handle azimuth.
-
-As mentioned in the $\fptaylor$ paper, 
+%
+Comparison results for error bound computation are presented in Table~\ref{table:error}. 
 
 \begin{table*}[!ht]
 %\small
@@ -1007,7 +1001,15 @@ As mentioned in the $\fptaylor$ paper,
 \label{table:error}
 \end{center}
 \end{table*}
-%
+
+Our $\realtofloat$ tool computes the tightest upper bounds for $19$ out of $\nbenchs$ benchmarks. For the $3$ programs \code{a-c} involving rational functions and the program \code{t} encoding Problem~\textit{Hartman 3}, $\fptaylor$ computes the tightest bounds. The symbol $\divzero$ means that the IA procedure aborts with a division by zero exception, which typically occurs when computing too coarse interval enclosures of rational function denominators.
+One current limitation of $\realtofloat$ is its ability to manipulate symbolic expressions, e.g. computing rational function derivatives or yielding reduction to the same denominator. Performance of $\fptaylor$ are better in this case, as it handles properly these operations through the interface with the \textsc{Maxima} computer algebra system~\cite{maxima}.
+Accordingly with the $\fptaylor$ paper~\cite{fptaylor15}, the $\rosa$ real compiler often provides coarser bounds, except for the two conditional programs \code{v} and \code{w} and the polynomial program \code{o}. 
+
+Program \code{u} can only be tackled with $\realtofloat$ as $\fptaylor$ aborted after running out of memory (meaning of the symbol OoM). A possible failure explanation is the complexity of the corresponding Problem~\textit{Hartman 6}, involving $133$ arithmetic operations and $6$ input variables.
+To the best of our knowledge, $\realtofloat$ is the only academic tool which is able to handle the general class of programs involving either transcendental functions or conditional loops. The $\fptaylor$ (resp.~$\rosa$) does not currently handle conditionals (resp.~transcendental functions), as meant by the symbol $-$ in the corresponding column entries. However, an interface between both software would embed them with their respective missing feature.
+
+The corresponding timings are given in Table~\ref{table:cpu}.
 Figure~\ref{fig:timebound} provides a way to compare both execution times and error bounds obtained with the different tools, and gathers results from Table~\ref{table:error} and Table~\ref{table:cpu}. 
 For each benchmark identified by \code{id}, the point \circled{id} relates to a $\rosa$ while the point \squared{id} relates to $\fptaylor$.
 The x-axis coordinate of \circled{id} is the relative difference between the execution time of $\rosa$ and $\realtofloat$ to compute the bound of the corresponding program. Namely, 
@@ -1062,7 +1064,7 @@ Finally, we plan to combine this optimization framework with the procedure in~\c
 This work was partly funded by the Engineering and Physical Sciences Research Council (EPSRC) Challenging Engineering Grant (EP/I020457/1).
 % Thank John Wickerson, Alexey Solovyev, Eva Darulova
 % We recommend abbrvnat bibliography style.
-%\newpage
+\newpage
 \bibliographystyle{abbrvnat}
 \bibliography{roundsdp}
 % The bibliography should be embedded for final submission.

@@ -1074,6 +1074,8 @@ First note that all points have nonnegative y-axis coordinates, thus our tool fo
 \section{Related Works}
 %
 SMT solvers allow to analyze programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetics. When SAT/SMT solvers output proof witnesses, they can be formally rechecked inside the $\coq$ proof assistant~\cite{smtcoq}. While ensuring soundness, the efficiency of the procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
+%Informal: SAT/SMT + Global optim (Taylor) + Bernstein (Zumkeller) + Gao (curse of dim) + Fluctuat + Handleman approach for positive polynomials (coarse bounds)
+%Certified/Formal: SAT/SMT but not formalized yet (could be!) + Gappa (Flocq, coq-interval) + FPTaylor
 
 %linear programming relaxations~\cite{Boland10HGR}.
 % The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions
@@ -1081,26 +1083,23 @@ SMT solvers allow to analyze programs with various semantics or specifications b
 \section{Conclusion and Perspectives} %0.5p
 %
 Our verification framework allows us to over-approximate rounding errors occurring while executing nonlinear programs implemented with finite precision.
-The framework relies on semidefinite optimization, ensuring tight and certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables.
+The framework relies on semidefinite optimization, ensuring tight and certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables. Experimental results indicate that the optimization algorithm implemented in our $\realtofloat$ tool produces tight error bounds. In addition, the tool produces sums of squares certificates which guarantee the correctness of these upper bounds and can can be efficiently verified inside the $\coq$ proof assistant.
 
 This work yields several directions for further investigation of research. 
-First, we intend to increase the size of graspable instances by exploiting symmetry patterns of certain program sub-classes to use specific SDP hierarchies~\cite{Riener2013SymmetricSDP}. Next, we plan to improve the efficiency of the formal polynomial checker inside Coq by using the interval libraries available inside the proof assistant, rather than using exact polynomial arithmetic in the current framework. 
-We also intend to provide rounding error bounds for more general programs, involving either finite or infinite loops. Such extensions has been made realistic that recent efforts to approximate inductive invariants with semidefinite relaxations.
+First, we intend to increase the size of graspable instances by exploiting symmetry patterns of certain program sub-classes to use specific SDP hierarchies~\cite{Riener2013SymmetricSDP}. We could also provide rounding error bounds for more general programs, involving either finite or infinite conditional loops. A preliminary mandatory step is to be able to generate inductive invariants with SDP relaxations. Another interesting direction would be to apply the method used in~\cite{Lasserre11} to derive sequences of lower rounding error bounds together with SDP-based certificates.
+On the formal proof side, we could benefit from floating-point/interval arithmetic libraries available $\coq$, first to improve the efficiency of the formal polynomial checker, currently relying on exact arithmetic, then to extend the formal verification to non-polynomial programs.
+%
+%to improve the efficiency of the formal polynomial checker inside Coq by using the interval libraries available inside the proof assistant, rather than using exact polynomial arithmetic as in the current framework. We also plan to use these interval libraries extend our formal verification framework to the non-polynomial programs.
+%Such extensions have become realistic as recent works allow to approximate inductive invariants with semidefinite relaxations.
 Finally, we plan to combine this optimization framework with the procedure in~\cite{Gao15FPGA} to improve the automatic reordering of arithmetic expressions, thus allowing more efficient optimization of FPGA implementations.
-
-%1) lower bounds with other hierarchies
-%2) fixed precision
-%3) while loops
-%4) Formalization of maxplus (cf JFR)
-
 
 \acks
 This work was partly funded by the Engineering and Physical Sciences Research Council (EPSRC) Challenging Engineering Grant (EP/I020457/1).
 % Thank John Wickerson, Alexey Solovyev, Eva Darulova
 % We recommend abbrvnat bibliography style.
 \newpage
-~
-\newpage
+%~
+%\newpage
 \bibliographystyle{abbrvnat}
 \bibliography{roundsdp}
 % The bibliography should be embedded for final submission.

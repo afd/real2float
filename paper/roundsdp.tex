@@ -395,7 +395,7 @@ Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear 
 
 \subsection{Program Semantics and Floating-point Arithmetic}
 \label{sec:fpbackground}
-We adopt the standard practice~\cite{higham2002accuracy} to approximate a real float $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ being less than the machine precision $\epsilon$. This model is only valid when neglecting both overflow and denormal range values.
+We adopt the standard practice~\cite{higham2002accuracy} to approximate a real number $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ being less than the machine precision $\epsilon$. This model is only valid when neglecting both overflow and denormal range values.
 The operator $\hat{\cdot}$ is called the rounding operator and can be selected among rounding to nearest, rounding toward zero (resp.~$\infty$).
 The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig \in [1, 2)$ (resp.~$[1, 10)$) and an {\em exponent} $exp$, so that its numerical evaluation yields $(-1)^{s} \times sig \times 2^{exp}$ (resp.~$(-1)^{s} \times sig \times 10^{exp}$). 
 
@@ -421,15 +421,15 @@ The value of the relative error bound $\epsilon (f_\R)$ differs from the machine
 We consider generic programs encoded in an ML-like language:
 \begin{lstlisting}
 let box_prog    $x_1 \dots x_n = [(a_1, b_1); \dots ; (a_n, b_n)]$;;
-let obj_prog    $x_1 \dots x_n = [(f(\x), \epsilon_{\text{total}})]$;;
+let obj_prog    $x_1 \dots x_n = [(f(\x), \epsilon_{\realtofloat})]$;;
 let cstr_prog   $x_1 \dots x_n = [g_1 (\x), \dots, g_k(\x)]$;;
 let uncert_prog $x_1 \dots x_n = [u_1, \dots, u_n]$;;
 \end{lstlisting}
 Here, the first line encodes interval constraints for input variables, namely $\x := (x_1, \dots, x_n) \in [a_1, b_1]\times \dots \times [a_n, b_n]$.
-The second line provides the function $f(\x)$ as well as the total rounding error bound $\epsilon_{\text{total}}$.
+The second line provides the function $f(\x)$ as well as the total rounding error bound $\epsilon_{\realtofloat}$.
 Then, one encodes polynomial nonnegativity constraints over the input variables, namely $g_1(\x) \geq 0, \dots, g_k(\x) \geq 0$. Finally, the last line allows the user to specify a numerical constant $u_i$ to associate a given uncertainty to the variable $x_i$, for each $i= 1, \dots, n$.
 
-The type of numerical constants is denoted by \code{C}. In our current implementation, the user can choose either 64 bits floating-point or arbitrary-size rational numbers. This type \code{C} is used for the terms $\epsilon_{\text{total}}$, $u_1, \dots, u_n$, $a_1, \dots, a_n$, $b_1, \dots, b_n$.
+The type of numerical constants is denoted by \code{C}. In our current implementation, the user can choose either 64 bits floating-point or arbitrary-size rational numbers. This type \code{C} is used for the terms $\epsilon_{\realtofloat}$, $u_1, \dots, u_n$, $a_1, \dots, a_n$, $b_1, \dots, b_n$.
 
 The inductive type of polynomial expressions with coefficients in \code{C} is \code{polC} defined as follows:
 \begin{lstlisting}
@@ -981,10 +981,10 @@ All examples are displayed in Appendix A as the corresponding $\realtofloat$ inp
 For each example, we compared the quality of the rounding error bounds (Table~\ref{table:error}) and corresponding execution times (Table~\ref{table:cpu}) while running our tool $\realtofloat$, $\fptaylor$ (version from May $2015$)~\cite{fptaylor15} and $\rosa$ (version from  May $2014$)~\cite{Darulova14Popl}.
 A given program implements a nonlinear function $f(\x)$, involving variables $\x$ lying in a set $\X$ contained in a box $[\a, \b]$.
 Applying our rounding model on $f$ yields the nonlinear expression $\hat{f}(\x,\e)$, involving additional error variables $\e$ lying in a set $\E$. 
-At a given semidefinite relaxation order $d$, our tool computes the upper bound $f_d$ of the absolute rounding $\mid f - \hat{f} \mid $ over $\K := \X \times \E$ and verifies that it is less than a requested number $\epsilon_{\text{total}}$. As we keep the relaxation order $d$ as low as possible to ensure tractable SDP programs, it can happen that $f_d > \epsilon_{\text{total}}$. 
- In this case, we subdivide a randomly chosen interval of the box  $[\a, \b]$ in two halves to obtain two sub-sets $\X_1$ and $\X_2$, fulfilling $\X := \X_1 \cup \X_2$, and apply the $\boundnlprog$ algorithm on both sub-sets until we succeed to certify that $\epsilon_{\text{total}}$ is a sound upper bound of the rounding error.
+At a given semidefinite relaxation order $d$, our tool computes the upper bound $f_d$ of the absolute rounding $\mid f - \hat{f} \mid $ over $\K := \X \times \E$ and verifies that it is less than a requested number $\epsilon_{\realtofloat}$. As we keep the relaxation order $d$ as low as possible to ensure tractable SDP programs, it can happen that $f_d > \epsilon_{\realtofloat}$. 
+ In this case, we subdivide a randomly chosen interval of the box  $[\a, \b]$ in two halves to obtain two sub-sets $\X_1$ and $\X_2$, fulfilling $\X := \X_1 \cup \X_2$, and apply the $\boundnlprog$ algorithm on both sub-sets until we succeed to certify that $\epsilon_{\realtofloat}$ is a sound upper bound of the rounding error.
 
-The number $\epsilon_{\text{total}}$ is compared with the upper bounds computed by $\fptaylor$ which relies on Taylor Symbolic expansions~\cite{fptaylor15}, $\rosa$ which relies on SMT and affine arithmetic~\cite{Darulova14Popl}, as well as a third procedure IA relying on interval arithmetic. We designed IA to follow the same steps than $\boundnlprog$ together with the sub-procedure $\bound$ but to compute an interval enclosure of $l$ using basic interval arithmetic instead of calling the $\sdpbound$ procedure (see Line~\lineref{line:sdpbound} of the algorithm depicted in Figure~\ref{alg:bound}). For comparison purpose, we also ran simulation tests through instantiation of input variables to random inputs, yielding lower bounds of the absolute error (the technique is the same as in the $\rosa$ paper~\cite{Darulova14Popl}).
+The number $\epsilon_{\realtofloat}$ is compared with the upper bounds computed by $\fptaylor$ which relies on Taylor Symbolic expansions~\cite{fptaylor15}, $\rosa$ which relies on SMT and affine arithmetic~\cite{Darulova14Popl}, as well as a third procedure IA relying on interval arithmetic. We designed IA to follow the same steps than $\boundnlprog$ together with the sub-procedure $\bound$ but to compute an interval enclosure of $l$ using basic interval arithmetic instead of calling the $\sdpbound$ procedure (see Line~\lineref{line:sdpbound} of the algorithm depicted in Figure~\ref{alg:bound}). For comparison purpose, we also ran simulation tests through instantiation of input variables to random inputs, yielding lower bounds of the absolute error (the technique is the same as in the $\rosa$ paper~\cite{Darulova14Popl}).
 %
 \begin{table*}[!ht]
 %\small

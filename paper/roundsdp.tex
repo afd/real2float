@@ -1015,12 +1015,12 @@ Our $\realtofloat$ tool computes the tightest upper bounds for $18$ out of $\nbe
 One current limitation of $\realtofloat$ is its ability to manipulate symbolic expressions, e.g. computing rational function derivatives or yielding reduction to the same denominator. Performance of $\fptaylor$ are better in this case, as it handles properly these operations through the interface with the \textsc{Maxima} computer algebra system~\cite{maxima}.
 Accordingly with the $\fptaylor$ paper~\cite{fptaylor15}, the $\rosa$ real compiler often provides coarser bounds, except for the two conditional programs \code{v} and \code{w} and the polynomial program \code{o}.
 %
-\begin{figure*}[!ht]
+\begin{figure}[!ht]
 \begin{center}
-\includegraphics[scale=0.8]{timebound2.pdf}
+\includegraphics[scale=0.76]{timebound2.pdf}
 \caption{Comparisons of execution times and upper bounds of rounding errors obtained with $\realtofloat$, $\rosa$ and $\fptaylor$}\label{fig:timebound}
 \end{center}
-\end{figure*}
+\end{figure}
 %
 \begin{table}[!ht]
 %\small
@@ -1046,7 +1046,13 @@ the non-positive quadrant $(-, -)$ for which $\realtofloat$ is slower and comput
 and 
 the last one $(-,+)$ for which $\realtofloat$ is faster but less accurate. On the quadrant $(+,-)$, one can see that $\realtofloat$ computes bound which are less accurate than $\fptaylor$ on programs \code{a-c} and \code{t}, but much faster for program \code{b}. The quadrant $(-, +)$ indicates that $\rosa$ (resp.~$\fptaylor$) is more efficient but less precise than $\realtofloat$ on program \code{d} (resp.~\code{o}). The presence of the majority of plots on the nonnegative quadrant $(+, +)$ confirms that $\realtofloat$ does not compromise efficiency at the expense of accuracy.
 %
-
+\begin{figure}[!ht]
+\begin{center}
+\includegraphics[scale=0.76]{formal.pdf}
+\caption{Comparisons of informal and formal execution times to certify bounds of rounding errors obtained with $\realtofloat$ and $\fptaylor$}
+\label{fig:formal}
+\end{center}
+\end{figure}
 %
 
 

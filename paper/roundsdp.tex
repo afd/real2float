@@ -1082,25 +1082,25 @@ The tool uses affine arithmetic to provide sound over-approximations of rounding
 At the moment, the $\rosa$ tool does not formally verifies the output bound provided by the SMT solver but such a feature could be embedded through an interface with the $\smtcoq$ framework~\cite{smtcoq}. This latter tool allows to recheck formally the proof witnesses output by SMT solvers inside $\coq$. While ensuring soundness, the efficiency of this procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
 %
 \paragraph{Abstract Domains}
-Abstract Interpretation~\cite{CousotCousot77} has been extensively used in the context of static analysis to provide sound over-approximations, called {\em abstractions} of the set of reachable values of the program variables. The effects of variable assignments, guards and conditional loops statements are handled with several domain specific operators (e.g. inclusion, meet and join). Well studied abstract domains include intervals~\cite{Moore62} as well as more complicated frameworks based on affine arithmetic~\cite{?54?}, octogons~\cite{octogons}, zonotopes~\cite{Zonotope10}, polyhedra~\cite{polyhedra08}, interval polyhedra~\cite{IntervalPoly09}.  Using such abstract domains allows to provide sound over-approximations of program expressions and to compute rounding error upper bounds. The {\sc Gappa} tool~\cite{Daumas10} relies on interval abstract domains with an extension to affine domains~\cite{Linderman10}. As demonstrated in~\cite{fptaylor15}, the bounds obtained inside {\sc Gappa} are often coarser than other methods which take into account the variable correlations. Formal guarantees can be provided as {\sc Gappa} benefits from an interface with $\coq$ while making use of interval libraries~\cite{Melquiond201214} relying on formalized floating-points~\cite{BM11Flocq}.
-%
-
-% Interval domains Gappa formalized inCoq with Flocq, Coq-interval
-% Affine octogons zonotopes in Fluctuat
-\cite{Blanchet03,Apron09}
+Abstract Interpretation~\cite{CousotCousot77} has been extensively used in the context of static analysis to provide sound over-approximations, called {\em abstractions} of the set of reachable values of the program variables. The effects of variable assignments, guards and conditional loops statements are handled with several domain specific operators (e.g. inclusion, meet and join). Well studied abstract domains include intervals~\cite{Moore62} as well as more complicated frameworks based on affine arithmetic~\cite{Stolfi03}, octogons~\cite{octogons}, zonotopes~\cite{Zonotope10}, polyhedra~\cite{polyhedra08}, interval polyhedra~\cite{IntervalPoly09} and some of them are implemented inside a tool called {\sc Apron}~\cite{Apron09}. Using such abstract domains allows to provide sound over-approximations of program expressions and to compute rounding error upper bounds. The {\sc Gappa} tool~\cite{Daumas10} relies on interval abstract domains with an extension to affine domains~\cite{Linderman10}. As demonstrated in~\cite{fptaylor15}, the bounds obtained inside {\sc Gappa} are often coarser than other methods which take into account the variable correlations. Formal guarantees can be provided as {\sc Gappa} benefits from an interface with $\coq$ while making use of interval libraries~\cite{Melquiond201214} relying on formalized floating-points~\cite{BM11Flocq}. The static analysis tool {\sc Fluctuat} relies on affine abstract domains~\cite{Blanchet03}. {\sc Gappa} and {\sc Fluctuat} tools use a different rounding model (also available as an option inside $\fptaylor$) based on a piecewise constant relative error bound. This is more precise than our current rounding model but requires extensive use of a branch and bound algorithm as each interval has to be subdivided in intervals $[2^n, 2^{n+1}]$ for several values of the integer $n$.  As a side effect, the corresponding optimization procedure is computationally demanding, as noticed in~\cite{fptaylor15}.
 
 \paragraph{Related Optimization Frameworks}
-% Bernstein (Zumkeller)
-\cite{ZumkellerPhD}
-%  Global optim (Taylor)   
-\cite{fptaylor15} \cite{SolovyevH13}
+Computing sound bounds of nonlinear expressions is mandatory to perform formal analysis of finite precision implementations and can be performed with various optimization tools. 
+In the polynomial case, alternative approaches to semidefinite relaxations are based on the formal verification of bounds obtained with polynomial decomposition in the multivariate Bernstein basis. Several formalization effort has been pursued in the thesis of Zumkeller~\cite{ZumkellerPhD} and by Mun\~oz and Narkawicz~\cite{MN13} in the PVS theorem prover~\cite{PVS}. We are not aware of any work based on these techniques which can quantify rounding errors. 
+
+%Instead of SDP relaxation, existing methods such as 
+%Handleman approach for positive polynomials (coarse bounds) linear programming relaxations~\cite{Boland10HGR}.
+% \cite{dReal13}
+
+%  Global optim (Taylor)  \cite{fptaylor15} \cite{SolovyevH13}
 % Handleman approach for positive polynomials (coarse bounds) linear programming relaxations~\cite{Boland10HGR}.
-% The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions
 % Chap 26 [Higham]
 % Affine arithmetic Messine
-\cite{dReal13}
 
-\newpage
+%~\cite{GMKC13}
+
+
+%\newpage
 \section{Conclusion and Perspectives} %0.5p
 %
 Our verification framework allows us to over-approximate rounding errors occurring while executing nonlinear programs implemented with finite precision.

@@ -281,7 +281,7 @@ The ability to reason about rounding is especially important if one wants to exp
 Existing solutions to reasoning are limited in presence of nonlinear correlations between variables, leading to either imprecise bounds or high analysis time. Furthermore, while it is easy to implement a straightforward method such as interval arithmetic, sophisticated techniques are less straightforward to implement in a formal setting. Thus there is a need for methods which output certificates that can be formally  validated inside a proof assistant.
 
 We present a framework to provide upper bounds of absolute rounding errors. This framework is based on optimization techniques employing  semidefinite programming and sums of squares certificates, which can be formally checked inside the Coq theorem prover.
-Our tool covers a wide range of nonlinear programs, including polynomials and transcendental operations as well as conditional loops.                                                             We illustrate the efficiency and  precision of this tool on non-trivial programs coming from biology, optimization and space control.
+Our tool covers a wide range of nonlinear programs, including polynomials and transcendental operations as well as conditional statements.                                                             We illustrate the efficiency and  precision of this tool on non-trivial programs coming from biology, optimization and space control.
 \end{abstract}
 
 \category{CR-number}{subcategory}{third-level}
@@ -303,13 +303,17 @@ To obtain lower bounds over rounding errors, one can rely on testing approaches,
 For computer programs consisting of linear operations, automatic error analysis can be obtained with well-studied optimization techniques based on SAT/SMT solvers~\cite{hgbk2012fmcad}, affine arithmetic~\cite{fluctuat}. However, non-linear operations are key to many interesting computational problems arising in physics, biology, controller implementations and global optimization. 
 Recently, two promising frameworks have been designed to provide upper bounds for rounding errors of nonlinear programs. The corresponding algorithms rely on Taylor-interval methods~\cite{fptaylor15}, implemented in the $\fptaylor$ tool, and on combining SMT with affine arithmetic~\cite{Darulova14Popl}, implemented in the $\rosa$ real compiler.
 
-The common drawback of these two frameworks is that they do not fully take into account the correlations between program variables. Thus they may output coarse error bounds or perform analysis within a large amount of time.  The $\rosa$ tool does not provide any formal guarantees. To the best of our knowledge, the $\fptaylor$ software is the only academic tool which can produce formal proof certificates. This is based on the framework developed in~\cite{SolovyevH13} to verify nonlinear inequalities in $\hol$~\cite{hollight} using Taylor-interval methods. However, most of computation performed in the informal optimization procedure end up being redone inside the $\hol$ proof assistant, yielding a formal verification which is computationally demanding.
+The common drawback of these two frameworks is that they do not fully take into account the correlations between program variables. Thus they may output coarse error bounds or perform analysis within a large amount of time.  
+
+While the $\rosa$ tool is based on theoretical results that should provide sounds over-approximations of error bounds, the tool does not produce formal proof certificates to allow independent soundness checking.  The complexity of the mathematics underlying techniques for nonlinear reasoning, and the intricacies associated with constructing an efficient implementation, are such that a means for independent formal validation of results is particularly desirable.  
+%The $\rosa$ tool does not provide any formal guarantees. 
+To the best of our knowledge, the $\fptaylor$ software is the only academic tool which can produce formal proof certificates. This is based on the framework developed in~\cite{SolovyevH13} to verify nonlinear inequalities in $\hol$~\cite{hollight} using Taylor-interval methods. However, most of computation performed in the informal optimization procedure end up being redone inside the $\hol$ proof assistant, yielding a formal verification which is computationally demanding.
 %The formal verification of these certificates is computationally expensive. This follows from the fact that most of computation performed in the informal optimization procedure end up being redone inside the proof assistant (see for instance in~\cite{SolovyevH13} the formal verification of nonlinear inequalities in $\hol$~\cite{hollight} using Taylor-interval methods).
 
 The aim of this work is to provide a formal framework to perform automated precision analysis of computer programs that manipulate finite-precision data using nonlinear operators. For such programs, guarantees can be provided with certified programming techniques.
 Semidefinite programming (SDP) is relevant to a wide range of mathematical fields, including combinatorial optimization, control theory and matrix completion. In 2001, Lasserre introduced a hierarchy of SDP relaxations~\cite{Lasserre01moments} for approximating polynomial infima. Our method to bound the error is a decision procedure based on an specialized variant of Lasserre hierarchy~\cite{Las06SparseSOS}. The procedure relies on SDP to provide sparse sum-of-squares decompositions of positive polynomials. This framework handles polynomial program analysis (involving the operations $+,\times,-$) but can be extended to the more general class of semialgebraic or transcendental programs (involving $\sqrtsign, /, \min, \max, \arctan, \exp$), following the approximation scheme described in~\cite{Magron15sdp}.
-
-\subsection{Overview of our Method}
+%
+\subsubsection*{\textit{Overview of our Method}} 
 %
 We present an overview of our method and of the capabilities of related techniques, using an example.
 Consider a program implementing the following polynomial expression $f$:
@@ -343,7 +347,7 @@ As in~\cite{fptaylor15}, one can also decompose the error term $r$ as the sum of
 r^\star \leq \max_{(\x, \e) \in \K} |l(\x, \e)| + \max_{(\x, \e) \in \K} |h(\x, \e)| \enspace. 
 \end{equation}
 %
-It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x_5 + x_3 x_6) e_3 + \dots + f(\x) e_{15} = \sum_{i=1}^{15} s_i(\x) e_i$. The {\em Symbolic Taylor expansions} method~\cite{fptaylor15} consists of using Taylor-interval optimization to compute a rigorous interval enclosure of each polynomial $s_i$, $i = 1,\dots,15$, over $\X$ and finally obtain an upper bound of $|l| + |h|$ over $\K$. Our method uses sparse semidefinite relaxations for polynomial optimization (derived from \cite{Las06SparseSOS}) to bound $l$ as well as basic interval arithmetic to bound $h$. The following results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz).
+It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x_5 + x_3 x_6) e_3 + \dots + f(\x) e_{15} = \sum_{i=1}^{15} s_i(\x) e_i$. The {\em Symbolic Taylor expansions} method~\cite{fptaylor15} consists of using Taylor-interval optimization to compute a rigorous interval enclosure of each polynomial $s_i$, $i = 1,\dots,15$, over $\X$ and finally obtain an upper bound of $|l| + |h|$ over $\K$. Our method uses sparse semidefinite relaxations for polynomial optimization (derived from \cite{Las06SparseSOS}) to bound $l$ as well as basic interval arithmetic to bound $h$. The following results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz). All execution times have been computed by averaging over five runs.
 % over $\X \times \E$
 \begin{itemize}
 \item A direct attempt to solve the two polynomial problems occurring in Equation~\eqref{eq:roptim} fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory. 
@@ -352,26 +356,15 @@ It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x
 \item Symbolic Taylor expansions implemented in the $\fptaylor$ tool~\cite{fptaylor15} provide an intermediate bound of $936 \epsilon$ but 16.3 times slower than with our implementation. 
 \item Finally, our bound is also obtained with the $\rosa$ real compiler~\cite{Darulova14Popl} but 4.6 times slower than with our implementation.
 \end{itemize}
-
-\if{
-For instance, given a four-variable vector $\x := (x_1, x_2, x_3, x_4)$, consider the  determinant computation of the $2 \times 2$ matrix  $\begin{pmatrix}
-x_1 & x_2 \\
-x_3 & x_4 \\
-\end{pmatrix}$.
 %
-Then, the polynomial $f$ which represents the absolute floating-point error is given by $f(\x, \epsilonb) := [x_1 x_4 (1 + \epsilon_1) - x_3 x_2 (1 + \epsilon_2)] (1 + \epsilon_3) - x_1 x_4 + x_3 x_2$.
-This polynomial $f$ is already of degree 3 and involves 7 variables.
-}\fi
-
-
-
-
-\subsection{Contributions}
+\subsubsection*{\textit{Contributions}} 
+%
 Our key contributions can be summarized as follows:
 \begin{itemize}
-\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming~\cite{Las06SparseSOS}. By comparison with other methods, our algorithm allows us to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent in SDP solvers~\cite{Todd01semidefiniteoptimization}. Our algorithm can currently handle  programs implementing polynomial functions, but also involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditional loops.  Programs containing iterative or while loops are not currently supported.
+\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming~\cite{Las06SparseSOS}. By comparison with other methods, our algorithm allows us to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent in SDP solvers~\cite{Todd01semidefiniteoptimization}. Our algorithm can currently handle  programs implementing polynomial functions, but also involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditional statements.  Programs containing iterative or while loops are not currently supported.
 %\item 
-\item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available\footnote{\url{https://forge.ocamlcore.org/frs/download.php/1519/real2float.tar.gz}}.
+\item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available\footnote{\url{https://forge.ocamlcore.org/
+frs/download.php/1519/real2float.tar.gz} (\textbf{not anonymized})}.
 %\begin{center}
 %
 %\end{center}
@@ -395,8 +388,8 @@ Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear 
 
 \subsection{Program Semantics and Floating-point Arithmetic}
 \label{sec:fpbackground}
-We adopt the standard practice~\cite{higham2002accuracy} to approximate a real number $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ being less than the machine precision $\epsilon$. This model is only valid when neglecting both overflow and denormal range values.
-The operator $\hat{\cdot}$ is called the rounding operator and can be selected among rounding to nearest, rounding toward zero (resp.~$\infty$).
+We adopt the standard practice~\cite{higham2002accuracy} to approximate a real number $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ being less than the machine precision $\epsilon$. The validity of this model is ensured as we neglect both overflow and denormal range values.
+The operator $\hat{\cdot}$ is called the rounding operator and can be selected among rounding to nearest, rounding toward zero (resp.~$\pm\infty$).
 The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig \in [1, 2)$ (resp.~$[1, 10)$) and an {\em exponent} $exp$, so that its numerical evaluation yields $(-1)^{s} \times sig \times 2^{exp}$ (resp.~$(-1)^{s} \times sig \times 10^{exp}$). 
 
 The value of $\epsilon$ actually gives the upper bound of the relative floating-point error and is equal to $2^{-\prec}$, where $\prec$ is called the {\em precision}, referring to the number of significand bits used. For single precision floating-point, one has $\prec = 24$. For double (resp.~quadruple) precision, one has $\prec = 53$ (resp.~$\prec=113$). Let us define $\R$ the set of real numbers and $\F$ the set of binary floating-point numbers.
@@ -418,7 +411,10 @@ The value of the relative error bound $\epsilon (f_\R)$ differs from the machine
 %In a similar fashion, 
 \subsubsection*{\textit{Program semantics}}
 %
-We consider generic programs encoded in an ML-like language:
+%In 2.1 you talk about "generic programs".  But our programs are not really generic, as they are subject to pretty severe restrictions: no loops, no procedure calls.  Can you be upfront about this, explaining that we support conditional code but nothing more complex?  Can you also argue that this is still interesting, in that many important numerical calculations can be expressed in a loop-free manner (assuming that's true!)
+We support conditional code without procedure calls nor loops. Despite these restrictions, we can consider a wide range of nonlinear programs while assuming that many important numerical calculations can be expressed in a loop-free manner. 
+Our programs are encoded in an ML-like language:
+% We consider generic programs encoded in an ML-like language:
 \begin{lstlisting}
 let box_prog    $x_1 \dots x_n = [(a_1, b_1); \dots ; (a_n, b_n)]$;;
 let obj_prog    $x_1 \dots x_n = [(f(\x), \epsilon_{\realtofloat})]$;;
@@ -714,7 +710,7 @@ for polynomial functions $g_1, \dots, g_k$.
 %
 Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|rounding| procedure (see Section~\ref{sec:fpbackground}), introducing the introduction of error variables $\e$. 
 
-The algorithm \code{bound}, depicted in Figure~\ref{alg:bound}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. Here we assume that our program implementing $f$ does not involve conditionals (this case will be discussed later in Section~\ref{sec:nonpolsdp}). For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an interval enclosure $I_d$ of the absolute error $\mid \hat{f}(\x,\e) - f(\x) \mid$ over $\K$. 
+The algorithm \code{bound}, depicted in Figure~\ref{alg:bound}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. Here we assume that our program implementing $f$ does not involve conditional statements (this case will be discussed later in Section~\ref{sec:nonpolsdp}). For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an interval enclosure $I_d$ of the absolute error $\mid \hat{f}(\x,\e) - f(\x) \mid$ over $\K$. 
 From this interval $I_d:= [\underline{f_d}, \overline{f_d}]$, one can compute $f_d := \max \{- \underline{f_d}, \overline{f_d} \}$, which is a sound upper bound of the maximal absolute error $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
 
 \begin{figure}[!ht]
@@ -822,7 +818,7 @@ Lemma~\ref{th:cvg_sdppoly} guarantees asymptotic convergence to the exact enclos
 %
 \subsection{Non-polynomial and Conditional Programs}
 \label{sec:nonpolsdp}
-We now present how the general optimization procedure $\sdpbound$ can be extended to other classes of nonlinear programs, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional loops.
+We now present how the general optimization procedure $\sdpbound$ can be extended to other classes of nonlinear programs, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional statements.
 %
 \subsubsection*{\textit{Semialgebraic programs}} 
 Here we assume that the function $l$ is semialgebraic, that is involves non-polynomial components such as divisions or square roots.
@@ -964,17 +960,18 @@ In addition, our algorithm \code{bound_nlprog} integrates several features to re
 We can also simplify error term products, thanks to the following lemma.
 \begin{lemma}[\protect{Higham~\cite[Lemma 3.3]{higham2002accuracy}}]
 \label{th:redproduct}
-Let $\epsilon < \frac{1}{k}$ and $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\displaystyle \prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
+Let $\epsilon < \frac{1}{k}$ and $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
 \end{lemma}
+%
 Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Our algorithm has an option to automatically derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
 %
-\section{Implementation Benchmarks}
+\section{Experimental Evaluation}
 \label{sec:benchs}
 %
 Now, we present experimental results obtained by applying our general $\boundnlprog$ algorithm (see Section~\ref{sec:fpsdp}, Figure~\ref{alg:bound_nlprog}) to various examples coming from physics, biology, space control and optimization. 
 The  $\boundnlprog$ algorithm is implemented in a tool called $\realtofloat$, built in top of the $\nlcertify$ nonlinear verification package, relying on $\ocaml$ (Version $4.02.1$) and $\coq$ (Version $8.4\text{pl}5$) and interfaced with the SDP solver $\sdpa$ (Version $7.3.6$). The SDP solver output numerical SOS certificates, which are converted into rational SOS using the {\sc Zarith} $\ocaml$ library (Version $1.2$), implementing arithmetic operations over arbitrary-precision integers.
-For more details about the installation and usage of $\realtofloat$, we refer to the dedicated web-page of $\nlcertify$\footnote{\url{http://nl-certify.forge.ocamlcore.org}} and the user manual of $\realtofloat$\footnote{see the \texttt{README.md} file in the top level directory}. 
-All examples are displayed in Appendix A as the corresponding $\realtofloat$ input text files and satisfy our nonlinear program semantics (see Section~\ref{sec:fpbackground}). Results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz).
+For more details about the installation and usage of $\realtofloat$, we refer to the dedicated web-page of $\nlcertify$\footnote{\url{http://nl-certify.forge.ocamlcore.org} (\textbf{not anonymized})} and the user manual of $\realtofloat$\footnote{see the \texttt{README.md} file in the top level directory}. 
+All examples are displayed in Appendix A as the corresponding $\realtofloat$ input text files and satisfy our nonlinear program semantics (see Section~\ref{sec:fpbackground}). All results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz). Execution timings have been computed by averaging over five runs.
 %
 \subsection{Benchmark Presentation}
 %For each problem presented in Table~\ref{table:error}, 
@@ -1001,7 +998,7 @@ For the sake of further presentation, we associate an alphabet character (from \
 \item The first $14$ programs implement polynomial and semialgebraic functions: \code{a-e} come from physics, \code{f} and \code{h} from biology, \code{g} from control, \code{i-k} are derived from expressions involved in the proof of Kepler Conjecture (for more details, see~\cite{halesalgo} and the related formalisation project~\cite{Flyspeck06}) and \code{l-n} implement polynomial approximations of the sine and square root functions. With the exception of \code{i-k}, all these programs are used to compare $\fptaylor$ and $\rosa$ in~\cite{fptaylor15}. 
 \item The three programs \code{o-q} come from the global optimization literature and correspond respectively to Problem 3.3, 4.6 and 4.7 in~\cite{Floudas90}. They implement polynomial functions and involve polynomial preconditions (i.e. $\X$ is not a simple box but rather a set defined with conjunction of nonlinear polynomial inequalities).
 \item The four programs \code{r-u} involve transcendental functions. The two programs \code{r} and \code{s} are used in the $\fptaylor$ paper~\cite{fptaylor15} and correspond respectively to the program \code{logexp} (see Example~\ref{ex:logexp}) and the program \code{sphere} taken from NASA World Wind Java SDK~\cite{NASA}. The $2$ programs \code{t} and \code{q} respectively implement the functions coming from the optimization problems \textit{Hartman 3} and \textit{Hartman 6} in~\cite{Ali05}, involving both sums of exponential functions composed with quadratic polynomials.
-\item The last two programs \code{v-w} involve conditional loops and come from the static analysis literature. They correspond to the two respective running examples of~\cite{Zonotope10} and~\cite{Marechal14}. The first program \code{v} is used in the $\rosa$ paper~\cite{Darulova14Popl} for the analysis of divergence path error.
+\item The last two programs \code{v-w} involve conditional statements and come from the static analysis literature. They correspond to the two respective running examples of~\cite{Zonotope10} and~\cite{Marechal14}. The first program \code{v} is used in the $\rosa$ paper~\cite{Darulova14Popl} for the analysis of divergence path error.
 \end{itemize}
 %
 The three tools $\realtofloat$, $\rosa$ and $\fptaylor$ can handle input variable uncertainties as well as multi-precision, but for the sake of conciseness, we only considered to compare their performance on programs implemented in single ($\epsilon = 2^{-24}$) or double ($\epsilon = 2^{-53}$) precision floating-point.
@@ -1032,7 +1029,7 @@ Accordingly with the $\fptaylor$ paper~\cite{fptaylor15}, the $\rosa$ real compi
 \end{table}
 %
 Program \code{u} can only be tackled with $\realtofloat$ as $\fptaylor$ aborted after running out of memory (meaning of the symbol OoM). A possible failure explanation is the complexity of the corresponding Problem~\textit{Hartman 6}, involving $133$ arithmetic operations and $6$ input variables.
-To the best of our knowledge, $\realtofloat$ is the only academic tool which is able to handle the general class of programs involving either transcendental functions or conditional loops. The $\fptaylor$ (resp.~$\rosa$) does not currently handle conditionals (resp.~transcendental functions), as meant by the symbol $-$ in the corresponding column entries. However, an interface between both software would embed them with their respective missing feature.
+To the best of our knowledge, $\realtofloat$ is the only academic tool which is able to handle the general class of programs involving either transcendental functions or conditional statements. The $\fptaylor$ (resp.~$\rosa$) does not currently handle conditionals (resp.~transcendental functions), as meant by the symbol $-$ in the corresponding column entries. However, an interface between both software would embed them with their respective missing feature.
 
 These error bound comparison results together with their corresponding execution timings (given in Table~\ref{table:cpu}) are used to plot the data points shown in Figure~\ref{fig:timebound}.
 
@@ -1075,7 +1072,7 @@ First note that all points have nonnegative y-axis coordinates, thus our tool fo
 %
 SMT solvers allow to analyze programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetics. When SAT/SMT solvers output proof witnesses, they can be formally rechecked inside the $\coq$ proof assistant~\cite{smtcoq}. While ensuring soundness, the efficiency of the procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
 %Informal: SAT/SMT + Global optim (Taylor) + Bernstein (Zumkeller) + Gao (curse of dim) + Fluctuat + Handleman approach for positive polynomials (coarse bounds)
-%Certified/Formal: SAT/SMT but not formalized yet (could be!) + Gappa (Flocq, coq-interval) + FPTaylor
+%Certified/Formal: SAT/SMT but not formalized yet (could be Rosa + SMTCoq) + Gappa (Flocq, coq-interval) + FPTaylor
 
 %linear programming relaxations~\cite{Boland10HGR}.
 % The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions

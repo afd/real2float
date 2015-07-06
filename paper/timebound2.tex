@@ -11,7 +11,8 @@
 \def\samplepar{10}
 \def\sampleatn{30}
 \def\samplesamp{35}
-
+\newcommand{\rosa}{\mathtt{Rosa}}
+\newcommand{\fptaylor}{\mathtt{FPTaylor}}
 
 \makeatletter
 \newcommand*{\circled}{\@ifstar\circledstar\circlednostar}
@@ -61,13 +62,40 @@
     ](C) {\texttt{#1}};%
 }
 
+% argument #1: any options
+\newenvironment{customlegend}[1][]{%
+    \begingroup
+    % inits/clears the lists (which might be populated from previous
+    % axes):
+    \csname pgfplots@init@cleared@structures\endcsname
+    \pgfplotsset{#1}%
+}{%
+    % draws the legend:
+    \csname pgfplots@createlegend\endcsname
+    \endgroup
+}%
+
+% makes \addlegendimage available (typically only available within an
+% axis environment):
+\def\addlegendimage{\csname pgfplots@addlegendimage\endcsname}
+
+%%--------------------------------
+
+% definition to insert numbers
+\pgfkeys{/pgfplots/number in legend/.style={%
+        /pgfplots/legend image code/.code={%
+            \node at (0.295,-0.0225){#1};
+        },%
+    },
+}
+
 \begin{document} 
 \begin{tikzpicture}[yscale=4, xscale=4]
 
 \draw[->] (-0.5,0) -- (2.3,0) node[above] {}; \draw (1.8,-0.2) node {Relative efficiency}; 
 \draw[->] (0,-1.2) -- (0,1.2) node[above] {Relative precision};
 
-
+\draw (0.486569, 0.807273) node {\circled{a}}; 
 
 \draw (0.486569, 0.807273) node {\circled{a}}; 
 \draw (-0.016023, -0.429091) node {\squared{a}};
@@ -134,6 +162,20 @@
 
 %\draw (1.477121, 0.000000) node {\circled{w}}; 
 \draw (1.447121, 0.000000) node {\circled{w}};
+
+
+\begin{customlegend}[
+legend entries={ % <= in the following there are the entries
+comparison with $\rosa$,
+ \hspace{0.65cm} comparison with $\fptaylor$
+},
+legend style={at={(2,-0.4)}}] % <= to define position and font legend
+% the following are the "images" and numbers in the legend
+\addlegendimage{black,fill=white,only marks, mark=o}
+%\addlegendimage{black,fill=white,circle}
+\addlegendimage{black,fill=white,only marks, mark=square}
+%\addlegendimage{rectangle,  minimum size=1.em, inner sep=0.5pt }
+\end{customlegend}
 
 \if{
 

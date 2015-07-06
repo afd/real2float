@@ -47,7 +47,7 @@
 \let\endproof\relax
 \usepackage{amsthm}
 %\usepackage{ntheorem}
-\usepackage[draft]{hyperref}
+\usepackage{hyperref}
 \usepackage{subfigure}
 \usepackage{enumerate}
 %\usepackage{caption}
@@ -158,6 +158,7 @@
 %\newcommand{\erev}{\color{black}}
 \newcommand{\sthreefp}{\mathtt{s3fp}}
 \newcommand{\realtofloat}{\mathtt{Real2Float}}
+\newcommand{\dreal}{\mathtt{dReal}}
 \newcommand{\hol}{\text{\sc Hol-light}}
 \newcommand{\op}{\mathtt{op}}
 \newcommand{\bop}{\mathtt{bop}}
@@ -1074,13 +1075,25 @@ First note that all points have nonnegative y-axis coordinates, thus our tool fo
 
 \section{Related Works}
 %
-SMT solvers allow to analyze programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetics. When SAT/SMT solvers output proof witnesses, they can be formally rechecked inside the $\coq$ proof assistant~\cite{smtcoq}. While ensuring soundness, the efficiency of the procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
-%Informal: SAT/SMT + Global optim (Taylor) + Bernstein (Zumkeller) + Gao (curse of dim) + Fluctuat + Handleman approach for positive polynomials (coarse bounds)
-%Certified/Formal: SAT/SMT but not formalized yet (could be Rosa + SMTCoq) + Gappa (Flocq, coq-interval) + FPTaylor
+\paragraph{Satisfiability Modulo Theories (SMT)}
+SMT solvers allow to analyse programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetic. Satisfiability (SAT)/SMT solvers can output proof witnesses which can be formally rechecked inside the $\coq$ proof assistant~\cite{smtcoq}. While ensuring soundness, the efficiency of the procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
+% Certified/Formal: SAT/SMT but not formalized yet (could be Rosa + SMTCoq)  + Gao
+\cite{dReal13}
+\paragraph{Abstract Domains}
+% Interval domains Gappa (Flocq, coq-interval) 
+% zonotopes octogons Fluctuat + Min\'e
+% parametric polyhedra domains
+\cite{Blanchet03,IntervalPoly09,Apron09}
 
-%linear programming relaxations~\cite{Boland10HGR}.
+\paragraph{Related Optimization Frameworks}
+% Bernstein (Zumkeller)
+\cite{ZumkellerPhD}
+%  Global optim (Taylor)   
+\cite{fptaylor15} \cite{SolovyevH13}
+% Handleman approach for positive polynomials (coarse bounds) linear programming relaxations~\cite{Boland10HGR}.
 % The software $\fptaylor$, Gappa and Fluctuat implement another rounding model, corresponding to FPTaylor (b). This implies to subdivide each interval in \cup [2^n, 2^{n+1}] to be able to optimize the functions
 % Chap 26 [Higham]
+
 \section{Conclusion and Perspectives} %0.5p
 %
 Our verification framework allows us to over-approximate rounding errors occurring while executing nonlinear programs implemented with finite precision.

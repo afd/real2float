@@ -319,7 +319,7 @@ To the best of our knowledge, the $\fptaylor$ software is the only academic tool
 The aim of this work is to provide a formal framework to perform automated precision analysis of computer programs that manipulate finite-precision data using nonlinear operators. For such programs, guarantees can be provided with certified programming techniques.
 Semidefinite programming (SDP) is relevant to a wide range of mathematical fields, including combinatorial optimization, control theory and matrix completion. In 2001, Lasserre introduced a hierarchy of SDP relaxations~\cite{Lasserre01moments} for approximating polynomial infima. Our method to bound the error is a decision procedure based on an specialized variant of Lasserre hierarchy~\cite{Las06SparseSOS}. The procedure relies on SDP to provide sparse sum-of-squares decompositions of positive polynomials. This framework handles polynomial program analysis (involving the operations $+,\times,-$) but can be extended to the more general class of semialgebraic or transcendental programs (involving $\sqrtsign, /, \min, \max, \arctan, \exp$), following the approximation scheme described in~\cite{Magron15sdp}.
 %
-\subsubsection*{\textit{Overview of our Method}} 
+\paragraph{Overview of our Method}
 %
 We present an overview of our method and of the capabilities of related techniques, using an example.
 Consider a program implementing the following polynomial expression $f$:
@@ -364,7 +364,7 @@ It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x
 \end{itemize}
 %
 %real2float 0.93 fptaylor 15.1 coq 0.333  hol 73.771
-\subsubsection*{\textit{Contributions}} 
+\paragraph{Contributions}
 %
 Our key contributions can be summarized as follows:
 \begin{itemize}
@@ -1089,7 +1089,8 @@ Abstract Interpretation~\cite{CousotCousot77} has been extensively used in the c
 
 \paragraph{Related Optimization Frameworks}
 Computing sound bounds of nonlinear expressions is mandatory to perform formal analysis of finite precision implementations and can be performed with various optimization tools. 
-In the polynomial case, alternative approaches to semidefinite relaxations are based on the formal verification of bounds obtained with polynomial decomposition in the multivariate Bernstein basis. Several formalization effort has been pursued in the thesis of Zumkeller~\cite{ZumkellerPhD} and by Mun\~oz and Narkawicz~\cite{MN13} in the PVS theorem prover~\cite{PVS}. We are not aware of any work based on these techniques which can quantify rounding errors. 
+In the polynomial case, alternative approaches to semidefinite relaxations are based on decomposition in the multivariate Bernstein basis. Formal verification of bounds obtained with this decomposition has been investigated in the thesis of Zumkeller~\cite{ZumkellerPhD} and by Mun\~oz and Narkawicz~\cite{MN13} in the PVS theorem prover~\cite{PVS}. We are not aware of any work based on these techniques which can quantify rounding errors. 
+%are based on the formal verification of bounds obtained with polynomial decomposition in the multivariate Bernstein basis. Several formalization effort has been pursued in the thesis of Zumkeller~\cite{ZumkellerPhD} and by Mun\~oz and Narkawicz~\cite{MN13} in the PVS theorem prover~\cite{PVS}. We are not aware of any work based on these techniques which can quantify rounding errors. 
 
 %Instead of SDP relaxation, existing methods such as 
 %Handleman approach for positive polynomials (coarse bounds) linear programming relaxations~\cite{Boland10HGR}.

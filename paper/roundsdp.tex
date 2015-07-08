@@ -420,7 +420,7 @@ The value of the relative error bound $\epsilon (f_\R)$ differs from the machine
 \subsubsection*{\textit{Program semantics}}
 %
 %In 2.1 you talk about "generic programs".  But our programs are not really generic, as they are subject to pretty severe restrictions: no loops, no procedure calls.  Can you be upfront about this, explaining that we support conditional code but nothing more complex?  Can you also argue that this is still interesting, in that many important numerical calculations can be expressed in a loop-free manner (assuming that's true!)
-We support conditional code without procedure calls nor loops. Despite these restrictions, we can consider a wide range of nonlinear programs while assuming that many important numerical calculations can be expressed in a loop-free manner. 
+We support conditional code without procedure calls nor loops. Despite these restrictions, we can consider a wide range of nonlinear programs while assuming that  important numerical calculations can be expressed in a loop-free manner. 
 Our programs are encoded in an ML-like language:
 % We consider generic programs encoded in an ML-like language:
 \begin{lstlisting}
@@ -833,6 +833,7 @@ Lemma~\ref{th:cvg_sdppoly} guarantees asymptotic convergence to the exact enclos
 \label{sec:nonpolsdp}
 We now present how the general optimization procedure $\sdpbound$ can be extended to other classes of nonlinear programs, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional statements.
 %
+\vspace*{-0.1cm}
 \subsubsection*{\textit{Semialgebraic programs}} 
 Here we assume that the function $l$ is semialgebraic, that is involves non-polynomial components such as divisions or square roots.
 Following~\cite{LasPut10}, we explain how to transform the optimization problem $\inf_{(\x,\e) \in \K} l (\x, \e)$ into a polynomial optimization problem, so that we can use the sparse SDP program~\eqref{eq:lscalesdp2}. One way to perform this reformulation consists of introducing lifting variables to represent non-polynomial operations.
@@ -884,6 +885,7 @@ For the sake of consistency, we omit the other cases (\code{Neg}, \code{Add}, \c
 Finally, notice that the final set of variables $\y\poly$ can be decomposed as $(\x\poly, \e)$, where $\x\poly$ gathers the input variables together with the lifting variables.  
 Denoting by $n\poly$ the cardinality of $\x\poly$, one easily shows that the sets $\{1, \dots, n\poly, e_1\},\dots,\{1, \dots, n\poly, e_m\}$ satisfy the RIP, thus ensuring to solve efficiently the corresponding instances of Problem~\eqref{eq:lscalesdp2}.
 %
+\vspace*{-0.1cm}
 \subsubsection*{\textit{Transcendental programs}}
 Here we assume that the function $l$ is transcendental,~i.e.~involves univariate non-semialgebraic components such as $\exp$ or $\sin$. For each univariate transcendental function $f_{\R}$ in our dictionary set $\setD$, one assumes that $f_{\R}$ is twice differentiable, so that the univariate function $g := f_{\R} + \frac{\gamma}{2} |\cdot|^2$ is convex on $I$ for large enough $\gamma > 0$ (for more details, see the references~\cite{agk04, mceneaney-livre}). It follows that there exists a constant $\gamma \leq \sup_{x\in I} -f_{\R}''(x)$ such that for all $x_i \in I$:
 \begin{align}
@@ -920,6 +922,7 @@ One first obtains (coarse) interval enclosures $I_2 = \iaboundfun{s_1}{\K}$ and 
 Then, the interval enclosure of $l$ over $\K$ is equal to the interval enclosure of $l\sa(\x,\e) := x_2 e_1 + e_2 + x_3 e_3$ over the set $\K\sa:= \{(x_1,\e) \in \K \,, (x_2, x_3) \in I_2 \times I_3 \,, s_1^-(x_1) \leq x_2 \leq s_1^+(x_1) \,, s_3^-(x_1) \leq x_3 \leq s_3^+(x_1) \}$.
 \end{example}
 %
+\vspace*{-0.2cm}
 \subsubsection*{\textit{Programs with conditionals}}
 Finally, we explain how to extend our bounding procedure to nonlinear programs involving conditionals through the recursive algorithm given in Figure~\ref{alg:bound_nlprog}.
 The $\boundnlprog$ algorithm relies on the $\bound$ procedure (see Figure~\ref{alg:bound} in Section~\ref{sec:transcsdp}) to compute rounding error bounds of programs implementing transcendental functions (Line~\lineref{line:noncnd}).
@@ -932,16 +935,8 @@ f (\x) :=
      \end{cases}
 \]
 The first branch output is $g$ while the second one is $h$.
-
-A preliminary step consists of computing the rounding error enclosure $I_d^p := [\underline{p_d}, \overline{p_d}]$ (Line~\lineref{line:polcnd}) for the program implementing the polynomial $p$. 
-Then the procedure computes bounds related to the divergence path error, that is the maximal value between the four following errors: 
-\begin{itemize}[noitemsep,nolistsep]
-\item (Line~\lineref{line:I1}) the error obtained while computing the rounded result $\hat{h}$ of the second branch instead of computing the exact result $g$ of the first one, occurring for the set of variables $(\x,\e)$ such that $\hat{p}(\x,\e) \leq 0 \leq p(\x)$. For scalability and numerical issues, we consider an over-approximation $\X_1$ (Line~\lineref{line:X1}) of this set, where the variables $\x$ satisfy the relaxed constraints $0 \leq p(\x) \leq \overline{p_d}$.
-\item (Line~\lineref{line:I2}) the error obtained while computing the rounded result $\hat{g}$ of the first branch instead of computing the exact result $h$ of the second one, occurring for the set of variables $(\x,\e)$ such that $p(\x) \leq 0 \leq \hat{p}(\x,\e)$. We also consider an over-approximation $\X_2$ (Line~\lineref{line:X2}) of this set, where the variables $\x$ satisfy the relaxed constraints $\underline{p_d} \leq p(\x) \leq 0$.
-\item (Line~\lineref{line:I3}) the rounding error corresponding to the program implementation of $g$.
-\item(Line~\lineref{line:I4}) the rounding error corresponding to the program implementation of $h$.
-\end{itemize}
 %
+\vspace*{-0.05cm}
 \begin{figure}[!ht]
 \begin{algorithmic}[1]
 \Require input variables $\x$, input constraints $\X$, nonlinear expression $f$, rounded expression $\hat{f}$, error variables $\e$, error constraints $\E$, relaxation order $d$
@@ -958,13 +953,23 @@ Then the procedure computes bounds related to the divergence path error, that is
 \State $I_d^3 := \boundnlprogfun{\x}{\X_3}{g}{\hat{g}}{\e}{\E}{d}$\label{line:I3}
 \State $I_d^4 := \boundnlprogfun{\x}{\X_4}{h}{\hat{h}}{\e}{\E}{d}$\label{line:I4}
 \State \Return $I_d := I_d^1 \cup I_d^2 \cup I_d^3 \cup I_d^4$ \label{line:endcnd}
-\Else \State \Return $I_d := \boundfun{\x}{\X}{f}{\hat{f}}{\e}{\E}{d}$ \label{line:noncnd}
+\Else ~ \Return $I_d := \boundfun{\x}{\X}{f}{\hat{f}}{\e}{\E}{d}$ \label{line:noncnd}
 \EndIf
 %
 \end{algorithmic}
-\caption{\code{bound_nlprog}: our algorithm to compute rounding errors bounds of nonlinear programs with conditional statements}
+\caption{\code{bound_nlprog}: our algorithm to compute rounding error bounds of  programs with conditional statements}
 \label{alg:bound_nlprog}
 \end{figure}
+%
+
+A preliminary step consists of computing the rounding error enclosure $I_d^p := [\underline{p_d}, \overline{p_d}]$ (Line~\lineref{line:polcnd}) for the program implementing the polynomial $p$. 
+Then the procedure computes bounds related to the divergence path error, that is the maximal value between the four following errors: 
+\begin{itemize}[noitemsep,nolistsep]
+\item (Line~\lineref{line:I1}) the error obtained while computing the rounded result $\hat{h}$ of the second branch instead of computing the exact result $g$ of the first one, occurring for the set of variables $(\x,\e)$ such that $\hat{p}(\x,\e) \leq 0 \leq p(\x)$. For scalability and numerical issues, we consider an over-approximation $\X_1$ (Line~\lineref{line:X1}) of this set, where the variables $\x$ satisfy the relaxed constraints $0 \leq p(\x) \leq \overline{p_d}$.
+\item (Line~\lineref{line:I2}) the error obtained while computing the rounded result $\hat{g}$ of the first branch instead of computing the exact result $h$ of the second one, occurring for the set of variables $(\x,\e)$ such that $p(\x) \leq 0 \leq \hat{p}(\x,\e)$. We also consider an over-approximation $\X_2$ (Line~\lineref{line:X2}), where the variables $\x$ satisfy the relaxed constraints $\underline{p_d} \leq p(\x) \leq 0$.
+\item (Line~\lineref{line:I3}) the rounding error corresponding to the program implementation of $g$.
+\item(Line~\lineref{line:I4}) the rounding error corresponding to the program implementation of $h$.
+\end{itemize}
 %
 \subsubsection*{\textit{Simplification of error terms}}
 %
@@ -1065,7 +1070,7 @@ and
 the last one $(-,+)$ for which $\realtofloat$ is faster but less accurate. On the quadrant $(+,-)$, one can see that $\realtofloat$ computes bound which are less accurate than $\fptaylor$ on programs \code{a-c} and \code{t}, but much faster for program \code{b}. The quadrant $(-, +)$ indicates that $\rosa$ (resp.~$\fptaylor$) is more efficient but less precise than $\realtofloat$ on program \code{d} (resp.~\code{o}). The presence of the majority of plots on the nonnegative quadrant $(+, +)$ confirms that $\realtofloat$ does not compromise efficiency at the expense of accuracy.
 %
 
-For each program implementing a polynomial function, our tool has an option to provide formal guarantees regarding the corresponding rounding error bound $\epsilon_{\realtofloat}$. Using the formal mechanism described in Section~\ref{sec:coqbackground}, the $\realtofloat$ tool formally checks inside $\coq$ the SOS certificates generated by the SDP solver. 
+For each program implementing polynomials, our tool has an option to provide formal guarantees for the corresponding rounding error bound $\epsilon_{\realtofloat}$. Using the formal mechanism described in Section~\ref{sec:coqbackground}, $\realtofloat$  formally checks inside $\coq$ the SOS certificates generated by the SDP solver. 
 
 %
 \begin{figure}[!ht]
@@ -1081,7 +1086,7 @@ The $\fptaylor$ software has a similar option to provide formal scripts which ca
 Next, we describe the formal proof results obtained while verifying the bounds for the eight polynomial programs \code{d-f} and \code{i-n}. 
 Figure~\ref{fig:formal} allows to compare the execution times of $\realtofloat$ and  $\fptaylor$ required to analyze the eight programs in both informal (i.e. without verification inside $\coq$ or $\hol$) and formal settings. The x-axis coordinate of each point \squared{id} displayed in Figure~\ref{fig:timebound} is the same as on Figure~\ref{fig:timebound}. The dotted line represents the bisector of the first quadrant angle.
 The y-axis coordinate of the point \squared{id} corresponds to the relative difference between the execution time $t_{\hol}$ to obtain a $\hol$ formal proof with $\fptaylor$ and the execution time $t_{\coq}$ to obtain a $\coq$ formal proof with $\realtofloat$, i.e.~the ratio $\frac{t_{\hol} - t_{\coq}}{t_{\coq}}$. 
-Note that all points have nonnegative y-axis coordinates, thus our tool formally checks all program bounds more efficiently than $\fptaylor$ (more than hundred times faster for the three programs \code{i}, \code{m-n}). The figure shows that the speedup ratio in the formal setting is higher than the one in the informal setting for the four programs \code{i} and \code{l-n}, as the corresponding points are above the first bisector. This emphasizes the benefit of using SOS certificates for formal verification rather than optimization methods based on Taylor interval approximations. The latter performs almost as well as the former to analyze program \code{k} but yields a coarser bound.
+Note that all points have nonnegative y-axis coordinates, as our tool formally checks all program bounds more efficiently than $\fptaylor$ (more than hundred times faster for the three programs \code{i}, \code{m-n}). The figure shows that the speedup ratio in the formal setting is higher than in the informal setting for the four programs \code{i} and \code{l-n}, as the corresponding points are above the first bisector. This emphasizes the benefit of using SOS certificates for formal verification rather than optimization methods based on Taylor approximations. The latter performs almost as well as the former to analyze program \code{k} but yields a coarser bound.
 %
 %However, $\fptaylor$ implements special cases to eliminate some error terms, for instance when $\op$ is the multiplication and one of the operands is a nonnegative power of two, then the error $e$ is set to zero. 
 % We didn't succeed to find conditional programs with more than 2 variables and constraints of degree greater than 3. 
@@ -1123,7 +1128,7 @@ Finally, we plan to combine this optimization framework with the procedure in~\c
 This work was partly funded by the Engineering and Physical Sciences Research Council (EPSRC) Challenging Engineering Grant (EP/I020457/1).
 % Thank John Wickerson, Alexey Solovyev, Eva Darulova
 % We recommend abbrvnat bibliography style.
-\newpage
+%\newpage
 %~
 %\newpage
 \bibliographystyle{abbrvnat}

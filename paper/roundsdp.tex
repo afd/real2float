@@ -393,14 +393,14 @@ Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear 
 \section{Preliminaries}
 \label{sec:background}
 
-\subsection{Program Semantics and Floating-point Arithmetic}
+\subsection{Program Semantics and Floating-point Numbers}
 \label{sec:fpbackground}
-We adopt the standard practice~\cite{higham2002accuracy} to approximate a real number $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ being less than the machine precision $\epsilon$. The validity of this model is ensured as we neglect both overflow and denormal range values.
+We adopt the standard practice~\cite{higham2002accuracy} to approximate a real number $x$ with its closest floating-point representation $\hat{x} = x (1 + e)$, with $|e|$ is less than the machine precision $\epsilon$. The validity of this model is ensured as we neglect both overflow and denormal range values.
 The operator $\hat{\cdot}$ is called the rounding operator and can be selected among rounding to nearest, rounding toward zero (resp.~$\pm\infty$).
-The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig \in [1, 2)$ (resp.~$[1, 10)$) and an {\em exponent} $exp$, so that its numerical evaluation yields $(-1)^{s} \times sig \times 2^{exp}$ (resp.~$(-1)^{s} \times sig \times 10^{exp}$). 
+The scientific notation of a binary (resp.~decimal) floating-point number $\hat{x}$ is a triple $(s, sig, exp)$ consisting of a sign bit $s$, a {\em significand} $sig \in [1, 2)$ (resp.~$[1, 10)$) and an {\em exponent} $exp$, yielding numerical evaluation $(-1)^{s} \, sig \, 2^{exp}$ (resp.~$(-1)^{s} \, sig \, 10^{exp}$). 
 
 The value of $\epsilon$ actually gives the upper bound of the relative floating-point error and is equal to $2^{-\prec}$, where $\prec$ is called the {\em precision}, referring to the number of significand bits used. For single precision floating-point, one has $\prec = 24$. For double (resp.~quadruple) precision, one has $\prec = 53$ (resp.~$\prec=113$). Let us define $\R$ the set of real numbers and $\F$ the set of binary floating-point numbers.
-For each real-valued operation $\bop_\R \in \{+, -, \times, \slash \}$ complying with IEEE 754 standard arithmetic~\cite{IEEE}, the result of the corresponding floating-point operation $\bop_\F \in \{\oplus, \ominus, \otimes, \oslash \}$ satisfies the following:
+For each real-valued operation $\bop_\R \in \{+, -, \times, \slash \}$, the result of the corresponding floating-point operation $\bop_\F \in \{\oplus, \ominus, \otimes, \oslash \}$ satisfies the following when complying with IEEE 754 standard arithmetic~\cite{IEEE}:
 \begin{equation}
 \label{eq:roundbop}
 \bop_\F \, (\hat{x}, \hat{y}) = \bop_\R \, (x, y) \, (1 + e) \enspace, \quad \mid e \mid \leq \epsilon = 2^{-\prec} \enspace.
@@ -416,10 +416,9 @@ f_\F (\hat{x}) = f_\R (x) (1 + e) \enspace, \quad \mid e \mid \leq \epsilon (f_\
 The value of the relative error bound $\epsilon (f_\R)$ differs from the machine precision $\epsilon$ in Equation~\eqref{eq:roundbop} and has to be properly adjusted. We refer the interested reader to~\cite{VerifCADTransc} for relative error bound verification of transcendental functions (see also~\cite{VerifHOLTransc} for formalization in $\hol$).
 %
 %In a similar fashion, 
-\vspace*{-0.2cm}
-\subsubsection*{\textit{Program semantics}}
+%\vspace*{-0.2cm}
+\paragraph{Program semantics}
 %
-%In 2.1 you talk about "generic programs".  But our programs are not really generic, as they are subject to pretty severe restrictions: no loops, no procedure calls.  Can you be upfront about this, explaining that we support conditional code but nothing more complex?  Can you also argue that this is still interesting, in that many important numerical calculations can be expressed in a loop-free manner (assuming that's true!)
 We support conditional code without procedure calls nor loops. Despite these restrictions, we can consider a wide range of nonlinear programs while assuming that  important numerical calculations can be expressed in a loop-free manner. 
 Our programs are encoded in an ML-like language:
 % We consider generic programs encoded in an ML-like language:
@@ -469,10 +468,13 @@ Finally, one obtains rounded nonlinear expressions using an inductive procedure~
 %One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.
 \subsection{SDP relaxations for polynomial optimization}
 \label{sec:sdpbackground}
-Here, we recall mandatory background about the method that we use to handle the optimization problem of Equation~\eqref{eq:roptim}, when the nonlinear function $r$ is a polynomial.
-\vspace*{-0.2cm}
-\subsubsection*{\textit{Sums of squares certificates and SDP}}
-We note basic facts about generation of sums of squares (SOS) certificates for polynomial optimization, using semidefinite programming.
+The sums of squares method involves approximation of polynomial inequality constraints by sums of squares (SOS) equality constraints. Here we recall mandatory background about SOS. We apply this method in Section~\ref{sec:fpsdp} to solve the problems of Equation~\eqref{eq:roptim} when the nonlinear function $r$ is a polynomial.
+%Here, we recall mandatory background about the method that we use to handle the optimization problems of Equation~\eqref{eq:roptim}, when the nonlinear function $r$ is a polynomial.  We apply this method in Section~\ref{sec:fpsdp} to solve the problems of Equation~\eqref{eq:roptim}.
+%Our main contribution, presented in Section~\ref{sec:fpsdp} is to apply this method to solve Problem~\eqref{eq:roptim}.  
+%
+\paragraph{Sums of squares certificates and SDP}
+%
+First we remind basic acts about generation of SOS certificates for polynomial optimization, using semidefinite programming.
 Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the restriction of $\R[\x]$ to polynomials of degree at most $2 d$. Let us define the set of SOS polynomials:
 \begin{equation}
 \label{eq:cone_sos}
@@ -481,7 +483,7 @@ Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the res
 %
 as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \bigcap \R_{2 d}[\x]$ to polynomials of degree at most $2 d$. For instance, the following bivariate polynomial  $\sigma (\x) := 1 + (x_1^2 - x_2^2)^2$ lies in $\Sigma_4[\x] \subseteq \R_4[\x]$.
 
-At some point, optimization methods based on SOS use the implication $p \in \Sigma[\x] \implies \forall \x \in \R^n, \, p(\x) \geq 0$, i.e. the inclusion of $\Sigma[\x]$ in the set of nonnegative polynomials.
+Optimization methods based on SOS use the implication $p \in \Sigma[\x] \implies \forall \x \in \R^n, \, p(\x) \geq 0$, i.e. the inclusion of $\Sigma[\x]$ in the set of nonnegative polynomials.
 %
 Given $r \in \R[\x]$, one considers the following polynomial minimization problem:
 \begin{equation}
@@ -507,8 +509,9 @@ One can rewrite Problem~\eqref{eq:minpop} as the equivalent maximization problem
 r^*  :=  \sup_{\x \in \R^n, \mu \in \R} \{ \, \mu \, : \, r (\x) - \mu \geq 0 \,, \ \x \in \K \, \} \,.
 \end{equation}
 %
-Given a nonnegative polynomial $p \in \R[\x]$, the existence of a sums of squares decomposition $p = \sum_i q_i^2$ valid
-over $\R^n$ is ensured by the existence of a symmetric real matrix $Q$, solution of the following linear matrix feasibility problem:
+Now we outline how to handle the nonnegativity constraint $r - \mu \geq 0$.
+Given a nonnegative polynomial $p \in \R[\x]$, the existence of an SOS decomposition $p = \sum_i q_i^2$ valid
+over $\R^n$ is ensured by the existence of a symmetric real matrix $Q$, a solution of the following linear matrix feasibility problem:
 \begin{align}
 \label{eq:sdp}
 p(\x) = \m_d(\x)^\intercal \, \Q \, \m_d(\x) \,, \quad \forall \x \in \R^n, \,
@@ -522,9 +525,10 @@ where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the mat
 Let us define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$. It is enough to prove that $p$ is nonnegative.
 \end{example}
 %
-\vspace*{-0.2cm}
-\subsubsection*{\textit{Dense SDP relaxations for polynomial optimization}}
-We first explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the  optimization problems $(\P_d)$:
+\paragraph{Dense SDP relaxations for polynomial optimization}
+%
+In order to solve our goal problem (Problem~\eqref{eq:roptim}), we are trying to solve Problem~\eqref{eq:minpop}, recast as
+Problem~\eqref{eq:maxpop}.  This problem is still intractable, so we first explain how to obtain tractable approximations of this problem. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the  optimization problems $(\P_d)$:
 \[
 (\P_d):\left\{			
 \begin{array}{rlr}
@@ -558,8 +562,8 @@ First, symmetries in SDP relaxations for polynomial optimization problems can be
 several smaller SDPs~\cite{Riener2013SymmetricSDP}. Notice that it is possible only if the multivariate polynomials of the initial problem are invariant under the action of a finite subgroup $G$ of the group $GL_{n}(\R)$. 
 }\fi
 %
-
-\subsubsection*{\textit{Exploiting sparsity}} 
+\paragraph{Exploiting sparsity}
+%
 Here we remind how to exploit the structured sparsity of the
 problem to replace one SDP problem~$(\P_d)$ by an SDP problem~$(\S_d)$ of
 size $O (\kappa^ {2 d})$ where $\kappa$ is the average size
@@ -677,9 +681,10 @@ This difference becomes significant while considering that the time complexity o
 %
 \subsection{Computer proofs for polynomial optimization}
 \label{sec:coqbackground}
-Here, we briefly recall some existing features of the $\coq$ proof assistant to handle formal polynomial optimization.
+Here, we briefly recall some existing features of the $\coq$ proof assistant to handle formal polynomial optimization, when using SDP relaxations.
+The advantage of such relaxations is that they provide SOS certificates, which can be formally checked \textit{a-posteriori}.
 %about the mechanisms of formal polynomial optimization within the $\coq$ proof assistant.
-For more details on the $\coq$ system, we recommend the
+For more details on $\coq$, we recommend the
 documentation available in~\cite{bertot2004interactive}.
 Giving a polynomial $r$ and a set of constraints $\K$, one can obtain a lower bound of $r$ by solving any instance of Problem~$(\P_d)$. Then, one can verify formally the correctness of the lower bound $r_d^\star$, using the SOS certificate output $\sigma_0, \dots, \sigma_k$. Indeed it is enough to prove the polynomial equality $r(\x) - r_d^\star = \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ inside $\coq$. Such equalities can be efficiently proved using $\coq$'s ring tactic~\cite{ring05} via the mechanism of computational reflection~\cite{Boutin97usingreflection}.
 For the sake of clarity, let consider the unconstrained case, i.e.~$\K = \R^n$. One encodes an SOS certificate $\sigma_0(\x) = \sum_{i=1}^m q_i^2$  with the sequence of polynomials $[q_1; \dots; q_m]$, with each $q_i$ being of type \code{polC} (see Section~\ref{sec:fpbackground}). To prove the equality $r = \sigma_0$, our version of the ring tactic normalizes both $r$ and the sequence $[q_1; \dots; q_m]$ and compares the two normalization results. This mechanism is illustrated in Figure~\ref{fig:reflexion} with the polynomial $p := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ (see Example~\ref{ex:sdp}) being encoded by \code{p : polC}  and the polynomials $1/2$ and $x_1^2 - x_2^2$ being encoded respectively by $\mathtt{q_1}$ and $\mathtt{q_2}$. 
@@ -702,7 +707,7 @@ $\mu_k^-$ $\leq$ $\evalexpr{\fpop}$.
 %
 In the general case, this computational step is done through a \code{checker_sos} procedure which returns a Boolean value. If this value is true, one applies a correctness lemma, whose conclusion yields the nonnegativity of $r - r_d^\star$ over $\K$.
 In practice, the SDP solvers are implemented in floating-point precision, thus the above equality between $r - r_d^\star$ and the SOS certificate does not hold. However, following Remark~\ref{rk:arch}, each variable lies in a closed interval, thus one can bound the remainder polynomial $\epsilon(\x) := r(\x) - r_d^\star - \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ using basic interval arithmetic, so that the lower bound $\epsilon^\star$ of $\epsilon$ yields the valid inequality: $\forall \x \in \K, r(\x) \geq r_d^\star + \epsilon^\star$.
-For more explanation, we refer the interested reader to the formal framework developed in~\cite{jfr14}. Note that this formal verification remains valid when considering the sparse variant~$(\S_d)$.
+For more explanation, we refer the interested reader to the formal framework~\cite{jfr14}. Note that this formal verification remains valid when considering the sparse variant~$(\S_d)$.
 %
 \vspace*{-0.2cm}
 \section{Guaranteed Roundoff Error Bounds using SDP Relaxations}
@@ -833,8 +838,8 @@ Lemma~\ref{th:cvg_sdppoly} guarantees asymptotic convergence to the exact enclos
 \label{sec:nonpolsdp}
 We now present how the general optimization procedure $\sdpbound$ can be extended to other classes of nonlinear programs, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional statements.
 %
-\vspace*{-0.1cm}
-\subsubsection*{\textit{Semialgebraic programs}} 
+%\vspace*{-0.1cm}
+\paragraph{Semialgebraic programs}
 Here we assume that the function $l$ is semialgebraic, that is involves non-polynomial components such as divisions or square roots.
 Following~\cite{LasPut10}, we explain how to transform the optimization problem $\inf_{(\x,\e) \in \K} l (\x, \e)$ into a polynomial optimization problem, so that we can use the sparse SDP program~\eqref{eq:lscalesdp2}. One way to perform this reformulation consists of introducing lifting variables to represent non-polynomial operations.
 %
@@ -885,8 +890,8 @@ For the sake of consistency, we omit the other cases (\code{Neg}, \code{Add}, \c
 Finally, notice that the final set of variables $\y\poly$ can be decomposed as $(\x\poly, \e)$, where $\x\poly$ gathers the input variables together with the lifting variables.  
 Denoting by $n\poly$ the cardinality of $\x\poly$, one easily shows that the sets $\{1, \dots, n\poly, e_1\},\dots,\{1, \dots, n\poly, e_m\}$ satisfy the RIP, thus ensuring to solve efficiently the corresponding instances of Problem~\eqref{eq:lscalesdp2}.
 %
-\vspace*{-0.1cm}
-\subsubsection*{\textit{Transcendental programs}}
+\paragraph{Transcendental programs}
+%
 Here we assume that the function $l$ is transcendental,~i.e.~involves univariate non-semialgebraic components such as $\exp$ or $\sin$. For each univariate transcendental function $f_{\R}$ in our dictionary set $\setD$, one assumes that $f_{\R}$ is twice differentiable, so that the univariate function $g := f_{\R} + \frac{\gamma}{2} |\cdot|^2$ is convex on $I$ for large enough $\gamma > 0$ (for more details, see the references~\cite{agk04, mceneaney-livre}). It follows that there exists a constant $\gamma \leq \sup_{x\in I} -f_{\R}''(x)$ such that for all $x_i \in I$:
 \begin{align}
 \begin{split}
@@ -922,8 +927,8 @@ One first obtains (coarse) interval enclosures $I_2 = \iaboundfun{s_1}{\K}$ and 
 Then, the interval enclosure of $l$ over $\K$ is equal to the interval enclosure of $l\sa(\x,\e) := x_2 e_1 + e_2 + x_3 e_3$ over the set $\K\sa:= \{(x_1,\e) \in \K \,, (x_2, x_3) \in I_2 \times I_3 \,, s_1^-(x_1) \leq x_2 \leq s_1^+(x_1) \,, s_3^-(x_1) \leq x_3 \leq s_3^+(x_1) \}$.
 \end{example}
 %
-\vspace*{-0.2cm}
-\subsubsection*{\textit{Programs with conditionals}}
+\paragraph{Programs with conditionals}
+%
 Finally, we explain how to extend our bounding procedure to nonlinear programs involving conditionals through the recursive algorithm given in Figure~\ref{alg:bound_nlprog}.
 The $\boundnlprog$ algorithm relies on the $\bound$ procedure (see Figure~\ref{alg:bound} in Section~\ref{sec:transcsdp}) to compute rounding error bounds of programs implementing transcendental functions (Line~\lineref{line:noncnd}).
 From Line~\lineref{line:cnd} to Line~\lineref{line:endcnd}, the algorithm handles the case when the program implements a function $f$ defined as follows:
@@ -971,7 +976,7 @@ Then the procedure computes bounds related to the divergence path error, that is
 \item(Line~\lineref{line:I4}) the rounding error corresponding to the program implementation of $h$.
 \end{itemize}
 %
-\subsubsection*{\textit{Simplification of error terms}}
+\paragraph{Simplification of error terms}
 %
 In addition, our algorithm \code{bound_nlprog} integrates several features to reduce the number of error variables. First, it memorizes all sub-expressions of the nonlinear expression tree to perform common sub-expressions elimination. 
 %associate  the same error variable to the same operation when the operands are identical. 

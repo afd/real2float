@@ -356,7 +356,7 @@ r^\star \leq \max_{(\x, \e) \in \K} |l(\x, \e)| + \max_{(\x, \e) \in \K} |h(\x, 
 %
 It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x_5 + x_3 x_6) e_3 + \dots + f(\x) e_{15} = \sum_{i=1}^{15} s_i(\x) e_i$. The {\em Symbolic Taylor expansions} method~\cite{fptaylor15} consists of using Taylor-interval optimization to compute a rigorous interval enclosure of each polynomial $s_i$, $i = 1,\dots,15$, over $\X$ and finally obtain an upper bound of $|l| + |h|$ over $\K$. Our method uses sparse semidefinite relaxations for polynomial optimization (derived from \cite{Las06SparseSOS}) to bound $l$ as well as basic interval arithmetic to bound $h$. The following results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz). All execution times have been computed by averaging over five runs.
 % over $\X \times \E$
-\begin{itemize}[noitemsep]
+\begin{itemize}[noitemsep,nolistsep]
 \item A direct attempt to solve the two polynomial problems occurring in Equation~\eqref{eq:roptim} fails as the SDP solver (in our case $\sdpa$~\cite{sdpa7}) runs out of memory. 
 \item Using our method implemented in the $\realtofloat$ tool, one obtains an upper bound of $788 \epsilon$ for $|l| + |h|$ over $\K$ in less than one second. This bound is provided together with a certificate which can be formally checked inside the $\coq$ proof assistant in $0.34$ seconds.
 \item Using basic interval arithmetic, one obtains 17.1 times more quickly a coarser bound of $2023 \epsilon$. 
@@ -368,7 +368,7 @@ It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x
 \paragraph{Contributions}
 %
 Our key contributions can be summarized as follows:
-\begin{itemize}[noitemsep]
+\begin{itemize}[noitemsep,nolistsep]
 \item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming~\cite{Las06SparseSOS}. By comparison with other methods, our algorithm allows us to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent in SDP solvers~\cite{Todd01semidefiniteoptimization}. Our algorithm can currently handle  programs implementing polynomial functions, but also involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditional statements.  Programs containing iterative or while loops are not currently supported.
 %\item 
 \item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available\footnote{\url{https://forge.ocamlcore.org/frs/download.php/1519/real2float.tar.gz} (\textbf{not anonymized})}.
@@ -407,7 +407,7 @@ For each real-valued operation $\bop_\R \in \{+, -, \times, \slash \}$ complying
 \end{equation}
 %
 Other operations include special functions taken from a {\em dictionary} $\setD$, containing the unary functions
-$\tan$, $\arctan$, $\cos$, $\arccos$, $\sin$, $\arcsin$, $\exp$, $\log$, $(\cdot)^{r}$ with $r\in \R\setminus\{0\}$. For each $f_\R \in \setD$, the corresponding floating-point evaluation satisfies 
+$\tan$, $\arctan$, $\cos$, $\arccos$, $\sin$, $\arcsin$, $\exp$, $\log$, $(\cdot)^{r}$ with $r\in \R\setminus\{0\}$. For $f_\R \in \setD$, the corresponding floating-point evaluation satisfies 
 \begin{equation}
 \label{eq:roundtransc}
 f_\F (\hat{x}) = f_\R (x) (1 + e) \enspace, \quad \mid e \mid \leq \epsilon (f_\R) \enspace.
@@ -416,6 +416,7 @@ f_\F (\hat{x}) = f_\R (x) (1 + e) \enspace, \quad \mid e \mid \leq \epsilon (f_\
 The value of the relative error bound $\epsilon (f_\R)$ differs from the machine precision $\epsilon$ in Equation~\eqref{eq:roundbop} and has to be properly adjusted. We refer the interested reader to~\cite{VerifCADTransc} for relative error bound verification of transcendental functions (see also~\cite{VerifHOLTransc} for formalization in $\hol$).
 %
 %In a similar fashion, 
+\vspace*{-0.2cm}
 \subsubsection*{\textit{Program semantics}}
 %
 %In 2.1 you talk about "generic programs".  But our programs are not really generic, as they are subject to pretty severe restrictions: no loops, no procedure calls.  Can you be upfront about this, explaining that we support conditional code but nothing more complex?  Can you also argue that this is still interesting, in that many important numerical calculations can be expressed in a loop-free manner (assuming that's true!)
@@ -433,7 +434,7 @@ The second line provides the function $f(\x)$ as well as the total rounding erro
 Then, one encodes polynomial nonnegativity constraints over the input variables, namely $g_1(\x) \geq 0, \dots, g_k(\x) \geq 0$. Finally, the last line allows the user to specify a numerical constant $u_i$ to associate a given uncertainty to the variable $x_i$, for each $i= 1, \dots, n$.
 
 The type of numerical constants is denoted by \code{C}. In our current implementation, the user can choose either 64 bits floating-point or arbitrary-size rational numbers. This type \code{C} is used for the terms $\epsilon_{\realtofloat}$, $u_1, \dots, u_n$, $a_1, \dots, a_n$, $b_1, \dots, b_n$.
-
+%
 The inductive type of polynomial expressions with coefficients in \code{C} is \code{polC} defined as follows:
 \begin{lstlisting}
 type polC = | Pc of C | Px of positive 
@@ -468,11 +469,11 @@ Finally, one obtains rounded nonlinear expressions using an inductive procedure~
 %One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.
 \subsection{SDP relaxations for polynomial optimization}
 \label{sec:sdpbackground}
-Here, we recall mandatory background about the method that we use to handle the optimization problem of Equation~\eqref{eq:roptim}, when the nonlinear function $r$ is a polynomial expression.
-
+Here, we recall mandatory background about the method that we use to handle the optimization problem of Equation~\eqref{eq:roptim}, when the nonlinear function $r$ is a polynomial.
+\vspace*{-0.2cm}
 \subsubsection*{\textit{Sums of squares certificates and SDP}}
-We note basic facts about generation of sums of squares certificates for polynomial optimization, using semidefinite programming.
-Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the restriction of $\R[\x]$ to polynomials of degree at most $2 d$. Let us define the set of sums of squares:
+We note basic facts about generation of sums of squares (SOS) certificates for polynomial optimization, using semidefinite programming.
+Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the restriction of $\R[\x]$ to polynomials of degree at most $2 d$. Let us define the set of SOS polynomials:
 \begin{equation}
 \label{eq:cone_sos}
 \Sigma[\x] := \Bigl\{\sum_i q_i^2, \, \text{ with } q_i \in \R[\x] \Bigr\}\enspace,
@@ -480,7 +481,7 @@ Denote by $\R[\x]$ the vector space of polynomials and by $\R_{2 d}[\x]$ the res
 %
 as well as its restriction $\Sigma_{2 d}[\x] := \Sigma[\x] \bigcap \R_{2 d}[\x]$ to polynomials of degree at most $2 d$. For instance, the following bivariate polynomial  $\sigma (\x) := 1 + (x_1^2 - x_2^2)^2$ lies in $\Sigma_4[\x] \subseteq \R_4[\x]$.
 
-At some point, optimization methods based on sums of squares use the implication $p \in \Sigma[\x] \implies \forall \x \in \R^n, \, p(\x) \geq 0$, i.e. the inclusion of $\Sigma[\x]$ in the set of nonnegative polynomials.
+At some point, optimization methods based on SOS use the implication $p \in \Sigma[\x] \implies \forall \x \in \R^n, \, p(\x) \geq 0$, i.e. the inclusion of $\Sigma[\x]$ in the set of nonnegative polynomials.
 %
 Given $r \in \R[\x]$, one considers the following polynomial minimization problem:
 \begin{equation}
@@ -521,6 +522,7 @@ where $\m_d(\x) := (1, x_1, \dots, x_n, x_1^2,x_1 x_2,\dots, x_n^d)$ and the mat
 Let us define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2 (\x) = (1, x_1, x_2, x_1^2, x_1 x_2, x_2^2)$, one solves the linear matrix feasibility problem $p(\x) = \m_2 (\x)^\intercal \, \Q \, \m_2(\x)$. One can show that the solution writes $\Q = \L^\intercal \D \L$ for a $6 \times 6$ matrix $\L$ and a diagonal matrix $\D$ with entries $(\frac{1}{2},0,0,1,0,0)$, yielding the SOS decomposition: $p(\x) = (\frac{1}{2})^2 + (x_1^2 - x_2^2)^2 =: \sigma(\x)$. It is enough to prove that $p$ is nonnegative.
 \end{example}
 %
+\vspace*{-0.2cm}
 \subsubsection*{\textit{Dense SDP relaxations for polynomial optimization}}
 We first explain how to obtain tractable appoximations of Problem~\eqref{eq:maxpop}. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the  optimization problems $(\P_d)$:
 \[
@@ -834,7 +836,7 @@ We now present how the general optimization procedure $\sdpbound$ can be extende
 \subsubsection*{\textit{Semialgebraic programs}} 
 Here we assume that the function $l$ is semialgebraic, that is involves non-polynomial components such as divisions or square roots.
 Following~\cite{LasPut10}, we explain how to transform the optimization problem $\inf_{(\x,\e) \in \K} l (\x, \e)$ into a polynomial optimization problem, so that we can use the sparse SDP program~\eqref{eq:lscalesdp2}. One way to perform this reformulation consists of introducing lifting variables to represent non-polynomial operations.
-
+%
 We first illustrate the extension to semialgebraic programs with the following example.
 \begin{example}
 Let consider the program implementing the rational function $f : [0, 1] \to \R$ defined by $f(x_1) := \frac{x_1}{1 + x_1}$. Applying the rounding procedure (with machine $\epsilon$) yields $\hat{f}(x_1,\e) := \frac{x _1(1 + e_2)}{(1 + x_1)(1 + e_1)}$ and the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1\,e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + h(x_1,\e)$. One has $s_1(x_1) = \frac{\partial r(x_1,\e)} {\partial e_1} (x_1,0) = -\frac{x_1}{1 + x_1}$ and $s_2(x_1) = - s_1(x_1)$.
@@ -894,14 +896,16 @@ Here we assume that the function $l$ is transcendental,~i.e.~involves univariate
 implying that for all $x \in I$, $f_{\R} (x)  \geq \max_{x_i \in I} f_{x_i}^-(x)$. Similarly, one obtains an upper-approximation $\min_{x_i \in I} f_{x_i}^+(x)$.
 Figure~\ref{fig:logexp} provides such approximations for the function $f_{\R}(x) := \log (1 + \exp(x))$ on the interval $I := [-8, 8]$.
 %
-For transcendental programs, our procedure $\sdpbound$ calls the auxiliary procedure $\sdptransc$. Given input variables $(\x,\e)$, constraints $\K$ and a transcendental function $l$, $\sdptransc$ first computes a semialgebraic lower (resp.~upper)  approximation $l^-$ (resp.~$l^+$) of $l$ over $\K$. For more details in the context of global optimization, we refer the reader to~\cite{Magron15sdp}. Then, calling the procedure $\sdpsa$ allows us to get interval enclosures of $l^-$ as well as $l^+$.
-We illustrate the procedure to handle transcendental programs with an example.
 \begin{figure}[!ht]
 \begin{center}
-\includegraphics[scale=0.8]{logexp.pdf}
+\includegraphics[scale=0.7]{logexp.pdf}
 \caption{Maxplus Approximations for $x \mapsto \log(1 + \exp{x})$: $\max \{ f_0^- (x), f_8^- (x)\} \leq  \log(1 + \exp{x}) \leq \min \{ f_0^+ (x), f_8^+ (x)\} $}\label{fig:logexp}
 \end{center}
 \end{figure}
+%
+
+For transcendental programs, our procedure $\sdpbound$ calls the auxiliary procedure $\sdptransc$. Given input variables $(\x,\e)$, constraints $\K$ and a transcendental function $l$, $\sdptransc$ first computes a semialgebraic lower (resp.~upper)  approximation $l^-$ (resp.~$l^+$) of $l$ over $\K$. For more details in the context of global optimization, we refer the reader to~\cite{Magron15sdp}. Then, calling the procedure $\sdpsa$ allows us to get interval enclosures of $l^-$ as well as $l^+$.
+We illustrate the procedure to handle transcendental programs with an example.
 %
 \begin{example}
 \label{ex:logexp}
@@ -931,7 +935,7 @@ The first branch output is $g$ while the second one is $h$.
 
 A preliminary step consists of computing the rounding error enclosure $I_d^p := [\underline{p_d}, \overline{p_d}]$ (Line~\lineref{line:polcnd}) for the program implementing the polynomial $p$. 
 Then the procedure computes bounds related to the divergence path error, that is the maximal value between the four following errors: 
-\begin{itemize}[noitemsep]
+\begin{itemize}[noitemsep,nolistsep]
 \item (Line~\lineref{line:I1}) the error obtained while computing the rounded result $\hat{h}$ of the second branch instead of computing the exact result $g$ of the first one, occurring for the set of variables $(\x,\e)$ such that $\hat{p}(\x,\e) \leq 0 \leq p(\x)$. For scalability and numerical issues, we consider an over-approximation $\X_1$ (Line~\lineref{line:X1}) of this set, where the variables $\x$ satisfy the relaxed constraints $0 \leq p(\x) \leq \overline{p_d}$.
 \item (Line~\lineref{line:I2}) the error obtained while computing the rounded result $\hat{g}$ of the first branch instead of computing the exact result $h$ of the second one, occurring for the set of variables $(\x,\e)$ such that $p(\x) \leq 0 \leq \hat{p}(\x,\e)$. We also consider an over-approximation $\X_2$ (Line~\lineref{line:X2}) of this set, where the variables $\x$ satisfy the relaxed constraints $\underline{p_d} \leq p(\x) \leq 0$.
 \item (Line~\lineref{line:I3}) the rounding error corresponding to the program implementation of $g$.
@@ -1006,7 +1010,8 @@ The number $\epsilon_{\realtofloat}$ is compared with the upper bounds computed 
 %
 For the sake of further presentation, we associate an alphabet character (from \code{a} to \code{w}) to identify each of the $\nbenchs$ nonlinear programs:
 %
-\begin{itemize}[noitemsep]
+%\vspace*{-0.5cm}
+\begin{itemize}[noitemsep,nolistsep]
 \item The first $14$ programs implement polynomial and semialgebraic functions: \code{a-e} come from physics, \code{f} and \code{h} from biology, \code{g} from control, \code{i-k} are derived from expressions involved in the proof of Kepler Conjecture (for more details, see~\cite{halesalgo} and the related formalisation project~\cite{Flyspeck06}) and \code{l-n} implement polynomial approximations of the sine and square root functions. With the exception of \code{i-k}, all these programs are used to compare $\fptaylor$ and $\rosa$ in~\cite{fptaylor15}. 
 \item The three polynomial programs \code{o-q} come from the global optimization literature and correspond respectively to Problem 3.3, 4.6 and 4.7 in~\cite{Floudas90}. We selected them as they typically involve nontrivial polynomial preconditions (i.e. $\X$ is not a simple box but rather a set defined with conjunction of nonlinear polynomial inequalities).
 \item The four programs \code{r-u} involve transcendental functions. The two programs \code{r} and \code{s} are used in the $\fptaylor$ paper~\cite{fptaylor15} and correspond respectively to the program \code{logexp} (see Example~\ref{ex:logexp}) and the program \code{sphere} taken from NASA World Wind Java SDK~\cite{NASA}. The $2$ programs \code{t} and \code{q} respectively implement the functions coming from the optimization problems \textit{Hartman 3} and \textit{Hartman 6} in~\cite{Ali05}, involving both sums of exponential functions composed with quadratic polynomials.
@@ -1076,7 +1081,7 @@ The $\fptaylor$ software has a similar option to provide formal scripts which ca
 Next, we describe the formal proof results obtained while verifying the bounds for the eight polynomial programs \code{d-f} and \code{i-n}. 
 Figure~\ref{fig:formal} allows to compare the execution times of $\realtofloat$ and  $\fptaylor$ required to analyze the eight programs in both informal (i.e. without verification inside $\coq$ or $\hol$) and formal settings. The x-axis coordinate of each point \squared{id} displayed in Figure~\ref{fig:timebound} is the same as on Figure~\ref{fig:timebound}. The dotted line represents the bisector of the first quadrant angle.
 The y-axis coordinate of the point \squared{id} corresponds to the relative difference between the execution time $t_{\hol}$ to obtain a $\hol$ formal proof with $\fptaylor$ and the execution time $t_{\coq}$ to obtain a $\coq$ formal proof with $\realtofloat$, i.e.~the ratio $\frac{t_{\hol} - t_{\coq}}{t_{\coq}}$. 
-First note that all points have nonnegative y-axis coordinates, thus our tool formally checks all program bounds more efficiently than $\fptaylor$ (more than hundred times faster for the three programs \code{i}, \code{m-n}). Then, the figure shows that the speedup ratio in the formal setting is higher than the one in the informal setting for the four programs \code{i} and \code{l-n}, as the corresponding points are above the first bisector. This emphasizes the benefit of using SOS certificates for formal verification rather than optimization methods based on Taylor interval approximations. The latter performs almost as well as the former to analyze program \code{k} but yields a coarser bound.
+Note that all points have nonnegative y-axis coordinates, thus our tool formally checks all program bounds more efficiently than $\fptaylor$ (more than hundred times faster for the three programs \code{i}, \code{m-n}). The figure shows that the speedup ratio in the formal setting is higher than the one in the informal setting for the four programs \code{i} and \code{l-n}, as the corresponding points are above the first bisector. This emphasizes the benefit of using SOS certificates for formal verification rather than optimization methods based on Taylor interval approximations. The latter performs almost as well as the former to analyze program \code{k} but yields a coarser bound.
 %
 %However, $\fptaylor$ implements special cases to eliminate some error terms, for instance when $\op$ is the multiplication and one of the operands is a nonnegative power of two, then the error $e$ is set to zero. 
 % We didn't succeed to find conditional programs with more than 2 variables and constraints of degree greater than 3. 

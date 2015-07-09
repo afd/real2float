@@ -736,7 +736,7 @@ From this interval $I_d:= [\underline{f_d}, \overline{f_d}]$, one can compute $f
 \label{alg:bound}
 \end{figure}
 
-After computing the absolute rounding error $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of an expression $l$ which is affine w.r.t.~the error variable $\e$ and a remainder $h$ (Line~\lineref{line:h}). One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of \textit{a priori} much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). 
+After computing the absolute rounding error $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of an expression $l$ which is affine w.r.t.~the error variable $\e$ and a remainder $h$. One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of \textit{a priori} much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). 
 %
 \vspace*{-0.2cm}
 \subsection{Polynomial Programs}
@@ -805,12 +805,14 @@ A feasible solution of Problem~\eqref{eq:lscalesdp1} ensures the existence of $\
 An upper bound $\overline{l_d'}$ can be obtained by replacing $\sup$ with $\inf$ and $l' - \mu$ by $\mu - l'$ in Problem~\eqref{eq:lscalesdp2}.
 Our optimization procedure $\sdppoly$ computes the lower bound $\underline{l_d'}$ as well as an upper bound $\overline{l_d'}$ of $l'$ over $\K'$ then returns the interval $I_d^l := [\epsilon \, \underline{l_d'}, \epsilon \, \overline{l_d'}] $, which is a sound enclosure of the values of $l$ over $\K$.
 %
-\begin{remark}
+%\begin{remark}
+
 We emphasize two advantages of the decomposition $r := l + h$ and more precisely of the linear dependency of $l$ w.r.t.~$\e$: scalability and robustness to SDP numerical issues.
 First, no computation is required to determine the correlation sparsity pattern of $l$, by comparison to the general case. Thus, it becomes much easier to handle the optimization of $l$ with the sparse SDP Problem~\eqref{eq:lscalesdp2} rather than with the corresponding instance of the dense relaxation~$(\P_d)$. While the latter involves $\binom{n + m+ 2 d}{2 d}$ SDP variables, the former involves only $m \, \binom{n + 1 + 2 d}{2 d}$ variables, ensuring the scalability of our framework.
-
+%
 In addition, the linear dependency of $l$ w.r.t.~$\e$ allows us to scale the error variables and optimize over a set of variables lying in $\K' := \X \times [-1, 1]$. It ensures that the range of input variables does not significantly differ from the range of error variables. This condition is mandatory while considering SDP relaxations because most SDP solvers (e.g.~{\sc Mosek}~\cite{mosek}, {\sc SDPA}~\cite{sdpa7}) are implemented using double precision floating-point. It is impossible to optimize $l$ over $\K$ (rather than $l'$ over $\K'$) when the maximal value $\epsilon$ of error variables is less than $2^{-53}$, due to the fact that SDP solvers would treat each error variable term as 0, and consequently $l$ as the zero polynomial. Hence, this decomposition insures our framework from the numerical issues related to finite-precision implementation of SDP solvers.
-\end{remark}
+%\end{remark}
+
 %
 Let us define the interval enclosure $I^l := [\underline{l}, \overline{l}]$, with $\underline{l} := \inf_{(\x,\e) \in \K} l(\x,\e)$ and $\overline{l} := \sup_{(\x,\e) \in \K} l(\x,\e)$.
 The next lemma states that one can approximate $I^l$ as closely as desired using the $\sdppoly$ procedure.
@@ -829,14 +831,15 @@ Lemma~\ref{th:cvg_sdppoly} guarantees asymptotic convergence to the exact enclos
 %
 \subsection{Non-polynomial and Conditional Programs}
 \label{sec:nonpolsdp}
-We now present how the general optimization procedure $\sdpbound$ can be extended to other classes of nonlinear programs, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional statements.
+Other classes of programs do not only involve polynomials but also semialgebraic and transcendental functions as well as conditional statements. Such programs are of particular interest as they often occur in real-world applications such as biology modeling, space control or global optimization. We present how the general optimization procedure $\sdpbound$ can be extended to these nonlinear programs.
+%, including semialgebraic and transcendental functions. Then, we treat the case of programs involving conditional statements. We emphasize the interest of these programs, as they occur numerously in real-world applications such as biology modeling or space control. 
 %
 %\vspace*{-0.1cm}
 \paragraph{Semialgebraic programs}
 Here we assume that the function $l$ is semialgebraic, that is involves non-polynomial components such as divisions or square roots.
-Following~\cite{LasPut10}, we explain how to transform the optimization problem $\inf_{(\x,\e) \in \K} l (\x, \e)$ into a polynomial optimization problem, so that we can use the sparse SDP program~\eqref{eq:lscalesdp2}. One way to perform this reformulation consists of introducing lifting variables to represent non-polynomial operations.
+Following~\cite{LasPut10}, we explain how to transform the optimization problem $\inf_{(\x,\e) \in \K} l (\x, \e)$ into a polynomial optimization problem, then use the sparse SDP program~\eqref{eq:lscalesdp2}. One way to perform this reformulation consists of introducing lifting variables to represent non-polynomial operations.
 %
-We first illustrate the extension to semialgebraic programs with the following example.
+We first illustrate the extension to semialgebraic programs with an example.
 \begin{example}
 Let consider the program implementing the rational function $f : [0, 1] \to \R$ defined by $f(x_1) := \frac{x_1}{1 + x_1}$. Applying the rounding procedure (with machine $\epsilon$) yields $\hat{f}(x_1,\e) := \frac{x _1(1 + e_2)}{(1 + x_1)(1 + e_1)}$ and the decomposition $r(x_1, \e) := \hat{f}(x_1,\e) - f(x_1) = l(x_1,\e) + h(x_1\,e) = s_1 (x_1) e_1 + s_2 (x_1) e_2 + h(x_1,\e)$. One has $s_1(x_1) = \frac{\partial r(x_1,\e)} {\partial e_1} (x_1,0) = -\frac{x_1}{1 + x_1}$ and $s_2(x_1) = - s_1(x_1)$.
 
@@ -934,7 +937,7 @@ f (\x) :=
 \]
 The first branch output is $g$ while the second one is $h$.
 %
-\vspace*{-0.05cm}
+%\vspace*{-0.05cm}
 \begin{figure}[!ht]
 \begin{algorithmic}[1]
 \Require input variables $\x$, input constraints $\X$, nonlinear expression $f$, rounded expression $\hat{f}$, error variables $\e$, error constraints $\E$, relaxation order $d$
@@ -982,7 +985,7 @@ Let $\epsilon < \frac{1}{k}$ and $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$
 %
 Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Our algorithm has an option to automatically derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
 %
-\vspace*{-0.2cm}
+%\vspace*{-0.2cm}
 \section{Experimental Evaluation}
 \label{sec:benchs}
 %
@@ -991,7 +994,7 @@ The  $\boundnlprog$ algorithm is implemented in a tool called $\realtofloat$, bu
 For more details about the installation and usage of $\realtofloat$, we refer to the dedicated web-page\footnote{\url{http://nl-certify.forge.ocamlcore.org/real2float.html} (\textbf{not anonymized})} and the setup instructions\footnote{see the \texttt{README.md} file in the top level directory}. 
 All examples are displayed in Appendix A as the corresponding $\realtofloat$ input text files and satisfy our nonlinear program semantics (see Section~\ref{sec:fpbackground}). All results have been obtained on an Intel Core i5 CPU ($2.40\, $GHz). Execution timings have been computed by averaging over five runs.
 %
-\vspace*{-0.2cm}
+%\vspace*{-0.2cm}
 \subsection{Benchmark Presentation}
 %For each problem presented in Table~\ref{table:error}, 
 For each example, we compared the quality of the rounding error bounds (Table~\ref{table:error}) and corresponding execution times (Table~\ref{table:cpu}) while running our tool $\realtofloat$, $\fptaylor$ (version from May $2015$)~\cite{fptaylor15} and $\rosa$ (version from  May $2014$)~\cite{Darulova14Popl}.
@@ -1024,7 +1027,7 @@ For the sake of further presentation, we associate an alphabet character (from \
 The three tools $\realtofloat$, $\rosa$ and $\fptaylor$ can handle input variable uncertainties as well as multi-precision programs, but for the sake of conciseness, we only considered to compare their performance on programs implemented in single ($\epsilon = 2^{-24}$) or double ($\epsilon = 2^{-53}$) precision floating-point.
 For the programs involving transcendental functions, we followed the same procedure as in $\fptaylor$ while adjusting the precision $\epsilon \,  (f_{\R}) = 1.5 \epsilon$ for each special function $f_{\R} \in \{\sin, \cos, \log, \exp \}$. Each univariate transcendental function is approximated from below (resp.~from above) using suprema (resp.~infima) of linear or quadratic polynomials (see Example~\ref{ex:logexp} for the case of program \code{logexp}). 
 %
-\vspace*{-0.2cm}
+%\vspace*{-0.2cm}
 \subsection{Comparison Results}
 %
 Comparison results for error bound computation are presented in Table~\ref{table:error}. 
@@ -1090,7 +1093,7 @@ Note that all points have nonnegative y-axis coordinates, as our tool formally c
 % We didn't succeed to find conditional programs with more than 2 variables and constraints of degree greater than 3. 
 %}\fi
 %\newpage
-\vspace*{-0.2cm}
+%\vspace*{-0.2cm}
 \section{Related Works}
 %
 \paragraph{Satisfiability Modulo Theories (SMT)}
@@ -1128,7 +1131,7 @@ This work was partly funded by the Engineering and Physical Sciences Research Co
 % We recommend abbrvnat bibliography style.
 %\newpage
 %~
-%\newpage
+\newpage
 \bibliographystyle{abbrvnat}
 \bibliography{roundsdp}
 % The bibliography should be embedded for final submission.

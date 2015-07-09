@@ -20,7 +20,7 @@
 %-----------------------------------------------------------------------------
 
 
-\documentclass[preprint]{sigplanconf}
+\documentclass[preprint,fleqn,nocopyrightspace]{sigplanconf}
 
 % The following \documentclass options may be useful:
 
@@ -28,7 +28,6 @@
 % 10pt          To set in 10-point type instead of 9-point.
 % 11pt          To set in 11-point type instead of 9-point.
 % authoryear    To obtain author/year citation style instead of numeric.
-\usepackage{times}
 \usepackage{listings}
 \def\lstlanguagefiles{defManOcaml.tex}
 \lstset{language = Ocaml}
@@ -242,10 +241,6 @@
 
 \begin{document}
 
-\special{papersize=8.5in,11in}
-\setlength{\pdfpageheight}{\paperheight}
-\setlength{\pdfpagewidth}{\paperwidth}
-
 \conferenceinfo{CONF 'yy}{Month d--d, 20yy, City, ST, Country} 
 \copyrightyear{20yy} 
 \copyrightdata{978-1-nnnn-nnnn-n/yy/mm} 
@@ -269,12 +264,10 @@
 
 %\subtitle{Subtitle Text, if any}
 
-\authorinfo{Name1}
-           {Affiliation1}
-           {Email1}
-\authorinfo{Name2\and Name3}
-           {Affiliation2/3}
-           {Email2/3}
+\authorinfo{}{}{}
+%\authorinfo{Name2\and Name3}
+%           {Affiliation2/3}
+%           {Email2/3}
 
 \maketitle
 

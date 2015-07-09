@@ -425,8 +425,8 @@ Our programs are encoded in an ML-like language:
 \begin{lstlisting}
 let box_prog    $x_1 \dots x_n = [(a_1, b_1); \dots ; (a_n, b_n)]$;;
 let obj_prog    $x_1 \dots x_n = [(f(\x), \epsilon_{\realtofloat})]$;;
-let cstr_prog   $x_1 \dots x_n = [g_1 (\x), \dots, g_k(\x)]$;;
-let uncert_prog $x_1 \dots x_n = [u_1, \dots, u_n]$;;
+let cstr_prog   $x_1 \dots x_n = [g_1 (\x); \dots; g_k(\x)]$;;
+let uncert_prog $x_1 \dots x_n = [u_1; \dots; u_n]$;;
 \end{lstlisting}
 Here, the first line encodes interval constraints for input variables, namely $\x := (x_1, \dots, x_n) \in [a_1, b_1]\times \dots \times [a_n, b_n]$.
 The second line provides the function $f(\x)$ as well as the total rounding error bound $\epsilon_{\realtofloat}$.

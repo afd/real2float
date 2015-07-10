@@ -364,7 +364,7 @@ Our key contributions can be summarized as follows:
 \begin{itemize}[noitemsep,nolistsep]
 \item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming~\cite{Las06SparseSOS}. By comparison with other methods, our algorithm allows us to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent in SDP solvers~\cite{Todd01semidefiniteoptimization}. Our algorithm can currently handle  programs implementing polynomial functions, but also involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditional statements.  Programs containing iterative or while loops are not currently supported.
 %\item 
-\item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available\footnote{\url{https://forge.ocamlcore.org/frs/download.php/1526/real2float.tar.gz} (\textbf{not anonymized})}.
+\item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available\footnote{\url{forge.ocamlcore.org/frs/?group_id=351} (\textbf{not anonymized})}.
 %\begin{center}
 %
 %\end{center}
@@ -521,7 +521,7 @@ Let us define $p(\x) := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$. With $\m_2
 \paragraph{Dense SDP relaxations for polynomial optimization}
 %
 In order to solve our goal problem (Problem~\eqref{eq:roptim}), we are trying to solve Problem~\eqref{eq:minpop}, recast as
-Problem~\eqref{eq:maxpop}.  This problem is still intractable, so we first explain how to obtain tractable approximations of this problem. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the  optimization problems $(\P_d)$:
+Problem~\eqref{eq:maxpop}. We first explain how to obtain tractable approximations of this difficult problem. Define $g_0 := 1$. The hierarchy of SDP relaxations developed by Lasserre \cite{Lasserre01moments} provides lower bounds of $r^*$, through solving the  optimization problems $(\P_d)$:
 \[
 (\P_d):\left\{			
 \begin{array}{rlr}

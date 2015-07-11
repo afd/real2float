@@ -291,7 +291,7 @@ Our tool covers a wide range of nonlinear programs, including polynomials and tr
 %term1, term2
 
 \keywords
-hardware precision tuning; round-off error; numerical accuracy; floating-point arithmetic; fixed-precision arithmetic; semidefinite programming; sums of squares; correlation sparsity pattern; proof assistant; formal verification.
+hardware precision tuning; roundoff error; numerical accuracy; floating-point arithmetic; fixed-precision arithmetic; semidefinite programming; sums of squares; correlation sparsity pattern; proof assistant; formal verification.
 %\if{
 \section{Introduction} %3p
 \label{sec:intro}
@@ -362,9 +362,9 @@ It follows for this example that $l(\x,\e) = x_2 x_5 e_1 + x_3 x_6 e_2 +  (x_2 x
 %
 Our key contributions can be summarized as follows:
 \begin{itemize}[noitemsep,nolistsep]
-\item We present an optimization algorithm providing certified over-approximations for round-off errors of nonlinear programs. This algorithm is based on sparse sums of squares programming~\cite{Las06SparseSOS}. By comparison with other methods, our algorithm allows us to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent in SDP solvers~\cite{Todd01semidefiniteoptimization}. Our algorithm can currently handle  programs implementing polynomial functions, but also involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditional statements.  Programs containing iterative or while loops are not currently supported.
+\item We present an optimization algorithm providing certified over-approximations for roundoff errors of nonlinear programs. This algorithm is based on sparse sums of squares programming~\cite{Las06SparseSOS}. By comparison with other methods, our algorithm allows us to obtain tighter upper bounds, while overcoming scalability and numerical issues inherent in SDP solvers~\cite{Todd01semidefiniteoptimization}. Our algorithm can currently handle  programs implementing polynomial functions, but also involving non-polynomial components, including either semialgebraic or transcendental operations (e.g. $/, \sqrtsign, \arctan, \exp$), as well as conditional statements.  Programs containing iterative or while loops are not currently supported.
 %\item 
-\item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of round-off error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available\footnote{\url{forge.ocamlcore.org/frs/?group_id=351} (\textbf{not anonymized})}.
+\item Our framework is fully implemented in the $\realtofloat$ tool.  Among several features, the tool can optionally perform formal verification of roundoff error bounds for polynomial programs, inside the $\coq$ proof assistant~\cite{CoqProofAssistant}. The last software release of $\realtofloat$ provides $\ocaml$~\cite{OCaml} and $\coq$ libraries and is freely available\footnote{\url{forge.ocamlcore.org/frs/?group_id=351} (\textbf{not anonymized})}.
 %\begin{center}
 %
 %\end{center}
@@ -500,7 +500,7 @@ In general, the objective function $r$ and the set of constraints $\K$ can be no
 One can rewrite Problem~\eqref{eq:minpop} as the equivalent maximization problem:
 \begin{equation}
 \label{eq:maxpop}
-r^*  :=  \sup_{\x \in \R^n, \mu \in \R} \{ \, \mu \, : \, r (\x) - \mu \geq 0 \,, \ \x \in \K \, \} \,.
+r^*  :=  \sup_{\x \in \R^n, \mu \in \R} \{ \, \mu \, : \, r (\x) - \mu \geq 0 \,, \ \forall \x \in \K \, \} \,.
 \end{equation}
 %
 Now we outline how to handle the nonnegativity constraint $r - \mu \geq 0$.
@@ -527,7 +527,7 @@ Problem~\eqref{eq:maxpop}. We first explain how to obtain tractable approximatio
 (\P_d):\left\{			
 \begin{array}{rlr}
 p_d^\star := \sup\limits_{\sigma_j, \mu} & \mu \enspace, \\			 
-\text{s.t.} & \forall \x \,,\  r (\x) - \mu = \sum_{j = 0}^{k} \sigma_j(\x) g_j(\x) \,,  \\
+\text{s.t.} &   r (\x) - \mu = \sum_{j = 0}^{k} \sigma_j(\x) g_j(\x) \,, \forall \x \,,\ \\
 \\
 & \mu\in \R \,, \sigma_j \in \Sigma[\x] \,, \quad \  \quad  \ j = 0,\dots,k \,, \\
 \\
@@ -538,12 +538,12 @@ p_d^\star := \sup\limits_{\sigma_j, \mu} & \mu \enspace, \\
 The next theorem is a consequence of the assumption mentioned in Remark~\ref{rk:arch}.
 \begin{theorem}[Lasserre~\cite{Lasserre01moments}]
 \label{th:densesdp}
-Let $p_d^{\star}$ be the optimal value of the sparse SDP relaxation~$(\P_d)$.
+Let $p_d^{\star}$ be the optimal value of the SDP relaxation~$(\P_d)$.
 Then, the sequence of optimal values $(p_d^\star)_{d \in \N}$ is nondecreasing and converges to $r^\star$.
 \end{theorem}
 %
-The size of the truncated SDP variables
-grows polynomially with the SDP-relaxation order $d$.
+The number of SDP variables
+grows polynomially with the integer $d$, called the {\em relaxation order}.
 Indeed, at fixed $n$, the relaxation~$(\P_d)$ involves $O((2 d)^{n})$ SDP
 variables and $(k + 1)$ linear matrix inequalities (LMIs) of size
 $O(d^n)$. When $d$ increases, then more accurate lower bounds of $r^\star$ can be obtained, at an increasing computational cost.
@@ -681,7 +681,7 @@ The advantage of such relaxations is that they provide SOS certificates, which c
 For more details on $\coq$, we recommend the
 documentation available in~\cite{bertot2004interactive}.
 Giving a polynomial $r$ and a set of constraints $\K$, one can obtain a lower bound of $r$ by solving any instance of Problem~$(\P_d)$. Then, one can verify formally the correctness of the lower bound $r_d^\star$, using the SOS certificate output $\sigma_0, \dots, \sigma_k$. Indeed it is enough to prove the polynomial equality $r(\x) - r_d^\star = \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ inside $\coq$. Such equalities can be efficiently proved using $\coq$'s ring tactic~\cite{ring05} via the mechanism of computational reflection~\cite{Boutin97usingreflection}. Any polynomial of type \code{pexprC} (see Section~\ref{sec:fpbackground}) can be normalized to a unique polynomial of type \code{polC} (see~\cite{ring05} for more details on the constructors of this type).
-For the sake of clarity, let consider the unconstrained case, i.e.~$\K = \R^n$. One encodes an SOS certificate $\sigma_0(\x) = \sum_{i=1}^m q_i^2$  with the sequence of polynomials $[q_1; \dots; q_m]$, with each $q_i$ being of type \code{polC} . To prove the equality $r = \sigma_0$, our version of the ring tactic normalizes both $r$ and the sequence $[q_1; \dots; q_m]$ and compares the two normalization results. This mechanism is illustrated in Figure~\ref{fig:reflexion} with the polynomial $p := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ (see Example~\ref{ex:sdp}) being encoded by \code{p}  and the polynomials $1/2$ and $x_1^2 - x_2^2$ being encoded respectively by $\mathtt{q_1}$ and $\mathtt{q_2}$. 
+For the sake of clarity, let consider the unconstrained case, i.e.~$\K = \R^n$. One encodes an SOS certificate $\sigma_0(\x) = \sum_{i=1}^m q_i^2$  with the sequence of polynomials $[q_1; \dots; q_m]$, each $q_i$ being of type \code{polC} . To prove the equality $r = \sigma_0$, our version of the ring tactic normalizes both $r$ and the sequence $[q_1; \dots; q_m]$ and compares the two normalization results. This mechanism is illustrated in Figure~\ref{fig:reflexion} with the polynomial $p := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ (see Example~\ref{ex:sdp}) being encoded by \code{p}  and the polynomials $1/2$ and $x_1^2 - x_2^2$ being encoded respectively by $\mathtt{q_1}$ and $\mathtt{q_2}$. 
 
 \if{
 In the general case, one applies a correctness lemma:
@@ -706,7 +706,7 @@ For more explanation, we refer the interested reader to the formal framework~\ci
 %\vspace*{-0.2cm}
 \section{Guaranteed Roundoff Error Bounds using SDP Relaxations}
 \label{sec:fpsdp}
-In this section, we present our new algorithm to bound roundoff errors of nonlinear transcendental programs, relying on sparse SDP relaxations. After stating our general algorithm (Section~\ref{sec:transcsdp}), we detail how this procedure can handle polynomial programs (Section~\ref{sec:polsdp}) and then present extensions to the non-polynomial case (Section~\ref{sec:nonpolsdp}).
+In this section, we present our new algorithm, relying on sparse SDP relaxations, to bound roundoff errors of nonlinear programs. After stating our general algorithm (Section~\ref{sec:transcsdp}), we detail how this procedure can handle polynomial programs (Section~\ref{sec:polsdp}) and then present extensions to the non-polynomial case (Section~\ref{sec:nonpolsdp}).
 %\vspace*{-0.2cm}
 \subsection{The General Optimization Framework}
 \label{sec:transcsdp}
@@ -903,7 +903,7 @@ Figure~\ref{fig:logexp} provides such approximations for the function $f_{\R}(x)
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[scale=0.7]{logexp.pdf}
-\caption{Maxplus Approximations for $x \mapsto \log(1 + \exp{x})$: $\max \{ f_0^- (x), f_8^- (x)\} \leq  \log(1 + \exp{x}) \leq \min \{ f_0^+ (x), f_8^+ (x)\} $}\label{fig:logexp}
+\caption{Semialgebraic Approximations for $x \mapsto \log(1 + \exp(x))$: $\max \{ f_0^- (x), f_8^- (x)\} \leq  \log(1 + \exp (x)) \leq \min \{ f_0^+ (x), f_8^+ (x)\} $}\label{fig:logexp}
 \end{center}
 \end{figure}
 %
@@ -1110,7 +1110,7 @@ The $\smtcoq$ framework uses tactics based on {\em computational reflection} to 
 %While ensuring soundness, the efficiency of this procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
 %
 \paragraph{Abstract Domains}
-Abstract interpretation~\cite{CousotCousot77} has been extensively used in the context of static analysis to provide sound over-approximations, called {\em abstractions}, of the sets of values the variables of a program may take at each program point. The effects of variable assignments, guards and conditional loops statements are handled with several domain specific operators (e.g. inclusion, meet and join). Well studied abstract domains include intervals~\cite{Moore62} as well as more complicated frameworks based on affine arithmetic~\cite{Stolfi03}, octogons~\cite{octogons}, zonotopes~\cite{Zonotope10}, polyhedra~\cite{polyhedra08}, interval polyhedra~\cite{IntervalPoly09}, some of them being implemented inside a tool called {\sc Apron}~\cite{Apron09}. Abstract domains provide sound over-approximations of program expressions, and allow upper bounds on roundoff error to be computed. 
+Abstract interpretation~\cite{CousotCousot77} has been extensively used in the context of static analysis to provide sound over-approximations, called {\em abstractions}, of the sets of values taken by program variables. The effects of variable assignments, guards and conditional loops statements are handled with several domain specific operators (e.g. inclusion, meet and join). Well studied abstract domains include intervals~\cite{Moore62} as well as more complicated frameworks based on affine arithmetic~\cite{Stolfi03}, octogons~\cite{octogons}, zonotopes~\cite{Zonotope10}, polyhedra~\cite{polyhedra08}, interval polyhedra~\cite{IntervalPoly09}, some of them being implemented inside a tool called {\sc Apron}~\cite{Apron09}. Abstract domains provide sound over-approximations of program expressions, and allow upper bounds on roundoff error to be computed. 
 The {\sc Gappa} tool~\cite{Daumas10} relies on interval abstract domains with an extension to affine domains~\cite{Linderman10}, to reason about roundoff errors.
 As demonstrated in~\cite{fptaylor15}, the bounds obtained inside {\sc Gappa} are often coarser than other methods which take into account the variable correlations. Formal guarantees can be provided as {\sc Gappa} benefits from an interface with $\coq$ while making use of interval libraries~\cite{Melquiond201214} relying on formalized floating-points~\cite{BM11Flocq}. The static analysis tool {\sc Fluctuat} relies on affine abstract domains~\cite{Blanchet03}. {\sc Gappa} and {\sc Fluctuat} tools use a different rounding model (also available as an option inside $\fptaylor$) based on a piecewise constant relative error bound. This is more precise than our current rounding model but requires extensive use of a branch and bound algorithm as each interval has to be subdivided in intervals $[2^n, 2^{n+1}]$ for several values of the integer $n$.  As a side effect, the corresponding optimization procedure is computationally demanding, as noticed in~\cite{fptaylor15}.
 
@@ -1123,7 +1123,7 @@ Branch and bound methods with Taylor models~\cite{Berz09} are not restricted to 
 \section{Conclusion and Perspectives} %0.5p
 %
 Our verification framework allows us to over-approximate roundoff errors occurring while executing nonlinear programs implemented with finite precision.
-The framework relies on semidefinite optimization, ensuring certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables. 
+The framework relies on semidefinite optimization, ensuring certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and roundoff error variables. 
 Experimental results indicate that the optimization algorithm implemented in our $\realtofloat$ software package often produces tighter error bounds than the ones provided by the competitive solvers $\rosa$ and $\fptaylor$.  In addition, $\realtofloat$ produces sums of squares certificates which guarantee the correctness of these upper bounds and can can be efficiently verified inside the $\coq$ proof assistant.
 
 This work yields several directions for further research investigation. 

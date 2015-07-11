@@ -273,12 +273,12 @@
 
 \begin{abstract}
 
-Rounding errors cannot be avoided when implementing numerical programs with finite precision.         
+Roundoff errors cannot be avoided when implementing numerical programs with finite precision.         
 The ability to reason about rounding is especially important if one wants to explore a range of potential representations, for instance in the world of FPGAs. This problem becomes challenging when the program does not employ solely linear operations as non-linearities are inherent to many interesting computational problems in real-world applications. 
 
 Existing solutions to reasoning are limited in presence of nonlinear correlations between variables, leading to either imprecise bounds or high analysis time. Furthermore, while it is easy to implement a straightforward method such as interval arithmetic, sophisticated techniques are less straightforward to implement in a formal setting. Thus there is a need for methods which output certificates that can be formally  validated inside a proof assistant.
 
-We present a framework to provide upper bounds of absolute rounding errors. This framework is based on optimization techniques employing  semidefinite programming and sums of squares certificates, which can be formally checked inside the Coq theorem prover.
+We present a framework to provide upper bounds of absolute roundoff errors. This framework is based on optimization techniques employing  semidefinite programming and sums of squares certificates, which can be formally checked inside the Coq theorem prover.
 Our tool covers a wide range of nonlinear programs, including polynomials and transcendental operations as well as conditional statements.                                                             We illustrate the efficiency and  precision of this tool on non-trivial programs coming from biology, optimization and space control.
 \end{abstract}
 
@@ -296,12 +296,12 @@ hardware precision tuning; round-off error; numerical accuracy; floating-point a
 \section{Introduction} %3p
 \label{sec:intro}
 %
-Constructing numerical programs which perform accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce rounding errors,  and knowledge of the range of these rounding errors is required to fulfil safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers. Such a knowledge can be used in general for developing accurate numerical software, but appears to be particularly relevant while considering algorithms migration onto reconfigurable hardware (e.g. FPGAs). The advantage of architectures based on FPGAs is that they allow more flexible choices, rather than choosing either for IEEE standard single or double precision. Indeed, in this case, we benefit from a more flexible number representation while ensuring guaranteed bounds on the program output. 
+Constructing numerical programs which perform accurate computation turns out to be difficult, due to finite numerical precision of implementations such as floating-point or fixed-point representations. Finite-precision numbers induce roundoff errors,  and knowledge of the range of these roundoff errors is required to fulfill safety criteria of critical programs, as typically arising in modern embedded systems such as aircraft controllers. Such a knowledge can be used in general for developing accurate numerical software, but appears to be particularly relevant while considering algorithms migration onto reconfigurable hardware (e.g. FPGAs). The advantage of architectures based on FPGAs is that they allow more flexible choices, rather than choosing either for IEEE standard single or double precision. Indeed, in this case, we benefit from a more flexible number representation while ensuring guaranteed bounds on the program output. 
 
-To obtain lower bounds over rounding errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximation tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain precise upper bounds over the error. This problem boils down to finding tight abstractions of linearities or non-linearities while being able to bound the resulting approximations in an efficient way.  
+To obtain lower bounds over roundoff errors, one can rely on testing approaches, such as meta-heuristic search~\cite{Borges12Test} or under-approximation tools (e.g.~$\sthreefp$~\cite{Chiang14s3fp}). Here, we are interested in handling efficiently the complementary over-approximation problem, namely to obtain precise upper bounds over the error. This problem boils down to finding tight abstractions of linearities or non-linearities while being able to bound the resulting approximations in an efficient way.  
 %
 For computer programs consisting of linear operations, automatic error analysis can be obtained with well-studied optimization techniques based on SAT/SMT solvers~\cite{hgbk2012fmcad}, affine arithmetic~\cite{fluctuat}. However, non-linear operations are key to many interesting computational problems arising in physics, biology, controller implementations and global optimization. 
-Recently, two promising frameworks have been designed to provide upper bounds for rounding errors of nonlinear programs. The corresponding algorithms rely on Taylor-interval methods~\cite{fptaylor15}, implemented in the $\fptaylor$ tool, and on combining SMT with affine arithmetic~\cite{Darulova14Popl}, implemented in the $\rosa$ real compiler.
+Recently, two promising frameworks have been designed to provide upper bounds for roundoff errors of nonlinear programs. The corresponding algorithms rely on Taylor-interval methods~\cite{fptaylor15}, implemented in the $\fptaylor$ tool, and on combining SMT with affine arithmetic~\cite{Darulova14Popl}, implemented in the $\rosa$ real compiler.
 
 The common drawback of these two frameworks is that they do not fully take into account the correlations between program variables. Thus they may output coarse error bounds or perform analysis within a large amount of time.  
 
@@ -329,7 +329,7 @@ This function $f$ together with the set $X$ appear in many inequalities arising 
 
 The polynomial expression $f$ is obtained by performing 15 basic operations (1 negation, 3 subtractions, 6 additions and 5 multiplications). 
 When executing this program with a set of floating-point numbers $\hat{\x} :=  (\hat{x}_1, \hat{x}_2, \hat{x}_3, \hat{x}_4, \hat{x}_5, \hat{x}_6) \in \X$, one actually computes a floating-point result $\hat{f}$, where all operations $+, -, \times$ are replaced by the respectively associated floating-point operations $\oplus, \ominus, \otimes$. 
-The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$, where the bound $\epsilon$ is the machine precision (e.g.~$\epsilon = 2^{-24}$ for single precision). One would like to bound the absolute rounding error $|r(\x, \e)| := | \hat{f}(\x, \e) - f (\x) |$ over  all possible input variables $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$. Let us define $\E := [-\epsilon, \epsilon]^{15}$ and $\K := \X \times \E$, then our bound problem can be cast as finding the maximum $r^\star$ of $\mid r \mid$ over $\K$, yielding the following nonlinear optimization problem:
+The results of these operations comply with IEEE 754 standard arithmetic~\cite{IEEE} (see relevant background in Section~\ref{sec:fpbackground}). For instance, one can write $\hat{x}_2 \otimes \hat{x}_5 =  (x_2 \times x_5) (1 + e_1)$, by introducing an error variable $e_1$ such that $-\epsilon \leq e_1 \leq \epsilon$, where the bound $\epsilon$ is the machine precision (e.g.~$\epsilon = 2^{-24}$ for single precision). One would like to bound the absolute roundoff error $|r(\x, \e)| := | \hat{f}(\x, \e) - f (\x) |$ over  all possible input variables $\x \in \X$ and error variables $e_1, \dots, e_{15} \in [-\epsilon, \epsilon]$. Let us define $\E := [-\epsilon, \epsilon]^{15}$ and $\K := \X \times \E$, then our bound problem can be cast as finding the maximum $r^\star$ of $\mid r \mid$ over $\K$, yielding the following nonlinear optimization problem:
 %
 \begin{align}
 \begin{split}
@@ -376,13 +376,13 @@ Our implementation tool is built in top of the $\nlcertify$ verification system~
 
 The paper is organized as follows.
 %
-In Section~\ref{sec:background}, we recall mandatory background on rounding errors due to finite precision arithmetic before describing our nonlinear program semantics (Section~\ref{sec:fpbackground}). Then we remind how to perform certified polynomial optimization based on semidefinite programming (Section~\ref{sec:sdpbackground}) and how to obtain formal bounds while checking the certificates inside the $\coq$ proof assistant (Section~\ref{sec:coqbackground}).
+In Section~\ref{sec:background}, we recall mandatory background on roundoff errors due to finite precision arithmetic before describing our nonlinear program semantics (Section~\ref{sec:fpbackground}). Then we remind how to perform certified polynomial optimization based on semidefinite programming (Section~\ref{sec:sdpbackground}) and how to obtain formal bounds while checking the certificates inside the $\coq$ proof assistant (Section~\ref{sec:coqbackground}).
 %
-Section~\ref{sec:fpsdp} contains the main contribution of the paper, namely how to compute tight over-approximations for rounding errors of nonlinear programs with sparse semidefinite relaxations.
+Section~\ref{sec:fpsdp} contains the main contribution of the paper, namely how to compute tight over-approximations for roundoff errors of nonlinear programs with sparse semidefinite relaxations.
 %
 Finally, Section~\ref{sec:benchs} is devoted to the evaluation of our nonlinear verification tool $\realtofloat$ on benchmarks arising from control systems, optimization, physics and biology.
 %Verifying simple linear algebra algorithms can be troublesome from the  computational point of view.
-\vspace*{-0.2cm}
+%\vspace*{-0.2cm}
 \section{Preliminaries}
 \label{sec:background}
 
@@ -422,30 +422,31 @@ let cstr_prog   $x_1 \dots x_n = [g_1 (\x); \dots; g_k(\x)]$;;
 let uncert_prog $x_1 \dots x_n = [u_1; \dots; u_n]$;;
 \end{lstlisting}
 Here, the first line encodes interval constraints for input variables, namely $\x := (x_1, \dots, x_n) \in [a_1, b_1]\times \dots \times [a_n, b_n]$.
-The second line provides the function $f(\x)$ as well as the total rounding error bound $\epsilon_{\realtofloat}$.
+The second line provides the function $f(\x)$ as well as the total roundoff error bound $\epsilon_{\realtofloat}$.
 Then, one encodes polynomial nonnegativity constraints over the input variables, namely $g_1(\x) \geq 0, \dots, g_k(\x) \geq 0$. Finally, the last line allows the user to specify a numerical constant $u_i$ to associate a given uncertainty to the variable $x_i$, for each $i= 1, \dots, n$.
 
 The type of numerical constants is denoted by \code{C}. In our current implementation, the user can choose either 64 bits floating-point or arbitrary-size rational numbers. This type \code{C} is used for the terms $\epsilon_{\realtofloat}$, $u_1, \dots, u_n$, $a_1, \dots, a_n$, $b_1, \dots, b_n$.
 %
-The inductive type of polynomial expressions with coefficients in \code{C} is \code{polC} defined as follows:
+The inductive type of polynomial expressions with coefficients in \code{C} is \code{pExprC} defined as follows:
 \begin{lstlisting}
-type polC = | Pc of C | Px of positive 
-| Psub of polC$\,$*$\,$polC | Pneg of polC 
-| Padd of polC$\,$*$\,$polC | Pmul of polC$\,$*$\,$polC
+type pexprC = | Pc of C | Px of positive 
+| Psub of pexprC$\,$*$\,$pexprC | Pneg of pexprC 
+| Padd of pexprC$\,$*$\,$pexprC 
+| Pmul of pexprC$\,$*$\,$pexprC
 \end{lstlisting}
 %
 The constructor \code{Px} takes a positive integer as argument to represent either an input or local variable.
-%The polynomial expressions $g_1(\x), \dots, g_k(\x)$ have this type \code{polC}.
+%The polynomial expressions $g_1(\x), \dots, g_k(\x)$ have this type \code{pexprC}.
 The inductive type \code{nlexpr} of nonlinear expressions (such as $f(\x)$) is defined as follows:
 \begin{lstlisting}
 type nlexpr = 
-| Pol of polC | Neg of nlexpr
+| Pol of pexprC | Neg of nlexpr
 | Add of nlexpr$\,$*$\,$nlexpr 
 | Mul of nlexpr$\,$*$\,$nlexpr 
 | Sub of nlexpr$\,$*$\,$nlexpr 
 | Div of nlexpr$\,$*$\,$nlexpr | Sqrt of nlexpr 
 | Transc of transc$\,$*$\,$nlexpr
-| IfThenElse of polC$\,$*$\,$nlexpr$\,$*$\,$nlexpr
+| IfThenElse of pexprC$\,$*$\,$nlexpr$\,$*$\,$nlexpr
 | Let of positive$\,$*$\,$nlexpr$\,$*$\,$nlexpr
 \end{lstlisting}
 %
@@ -455,7 +456,7 @@ Given a polynomial expression $p$ and two nonlinear expressions $f$ and $g$, the
 %\end{lstlisting}
 %
 
-Finally, one obtains rounded nonlinear expressions using an inductive procedure~\lstinline|rounding : nlexpr $\to$ nlexpr|, defined accordingly to Equation~\eqref{eq:roundbop} and Equation~\eqref{eq:roundtransc}. When an uncertainty $u_i$ is specified for an input variable $x_i$, the corresponding rounded expression is given by $x_i \, (1 + e)$, with $\mid e \mid \, \leq u_i$.
+Finally, one obtains rounded nonlinear expressions using an inductive procedure~\lstinline|round : nlexpr $\to$ nlexpr|, defined accordingly to Equation~\eqref{eq:roundbop} and Equation~\eqref{eq:roundtransc}. When an uncertainty $u_i$ is specified for an input variable $x_i$, the corresponding rounded expression is given by $x_i \, (1 + e)$, with $\mid e \mid \, \leq u_i$.
 %to when solving optimization problems involving maximal absolute rounding errors. allowing to consider a single error variable bounded using $(k + 1) \epsilon$, thus saving $(k - 1)$ error variables.
 
 %One can exploit sparsity in a way similar to the one described in~\cite{Waki06SparseSOS,Las06SparseSOS} to handle high dimensional problems.
@@ -679,8 +680,8 @@ The advantage of such relaxations is that they provide SOS certificates, which c
 %about the mechanisms of formal polynomial optimization within the $\coq$ proof assistant.
 For more details on $\coq$, we recommend the
 documentation available in~\cite{bertot2004interactive}.
-Giving a polynomial $r$ and a set of constraints $\K$, one can obtain a lower bound of $r$ by solving any instance of Problem~$(\P_d)$. Then, one can verify formally the correctness of the lower bound $r_d^\star$, using the SOS certificate output $\sigma_0, \dots, \sigma_k$. Indeed it is enough to prove the polynomial equality $r(\x) - r_d^\star = \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ inside $\coq$. Such equalities can be efficiently proved using $\coq$'s ring tactic~\cite{ring05} via the mechanism of computational reflection~\cite{Boutin97usingreflection}.
-For the sake of clarity, let consider the unconstrained case, i.e.~$\K = \R^n$. One encodes an SOS certificate $\sigma_0(\x) = \sum_{i=1}^m q_i^2$  with the sequence of polynomials $[q_1; \dots; q_m]$, with each $q_i$ being of type \code{polC} (see Section~\ref{sec:fpbackground}). To prove the equality $r = \sigma_0$, our version of the ring tactic normalizes both $r$ and the sequence $[q_1; \dots; q_m]$ and compares the two normalization results. This mechanism is illustrated in Figure~\ref{fig:reflexion} with the polynomial $p := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ (see Example~\ref{ex:sdp}) being encoded by \code{p : polC}  and the polynomials $1/2$ and $x_1^2 - x_2^2$ being encoded respectively by $\mathtt{q_1}$ and $\mathtt{q_2}$. 
+Giving a polynomial $r$ and a set of constraints $\K$, one can obtain a lower bound of $r$ by solving any instance of Problem~$(\P_d)$. Then, one can verify formally the correctness of the lower bound $r_d^\star$, using the SOS certificate output $\sigma_0, \dots, \sigma_k$. Indeed it is enough to prove the polynomial equality $r(\x) - r_d^\star = \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ inside $\coq$. Such equalities can be efficiently proved using $\coq$'s ring tactic~\cite{ring05} via the mechanism of computational reflection~\cite{Boutin97usingreflection}. Any polynomial of type \code{pexprC} (see Section~\ref{sec:fpbackground}) can be normalized to a unique polynomial of type \code{polC} (see~\cite{ring05} for more details on the constructors of this type).
+For the sake of clarity, let consider the unconstrained case, i.e.~$\K = \R^n$. One encodes an SOS certificate $\sigma_0(\x) = \sum_{i=1}^m q_i^2$  with the sequence of polynomials $[q_1; \dots; q_m]$, with each $q_i$ being of type \code{polC} . To prove the equality $r = \sigma_0$, our version of the ring tactic normalizes both $r$ and the sequence $[q_1; \dots; q_m]$ and compares the two normalization results. This mechanism is illustrated in Figure~\ref{fig:reflexion} with the polynomial $p := \frac{1}{4} + x_1^4 - 2 x_1^2 x_2^2 + x_2^4$ (see Example~\ref{ex:sdp}) being encoded by \code{p}  and the polynomials $1/2$ and $x_1^2 - x_2^2$ being encoded respectively by $\mathtt{q_1}$ and $\mathtt{q_2}$. 
 
 \if{
 In the general case, one applies a correctness lemma:
@@ -702,11 +703,11 @@ In the general case, this computational step is done through a \code{checker_sos
 In practice, the SDP solvers are implemented in floating-point precision, thus the above equality between $r - r_d^\star$ and the SOS certificate does not hold. However, following Remark~\ref{rk:arch}, each variable lies in a closed interval, thus one can bound the remainder polynomial $\epsilon(\x) := r(\x) - r_d^\star - \sum_{j=0}^k \sigma_j(\x) g_j(\x)$ using basic interval arithmetic, so that the lower bound $\epsilon^\star$ of $\epsilon$ yields the valid inequality: $\forall \x \in \K, r(\x) \geq r_d^\star + \epsilon^\star$.
 For more explanation, we refer the interested reader to the formal framework~\cite{jfr14}. Note that this formal verification remains valid when considering the sparse variant~$(\S_d)$.
 %
-\vspace*{-0.2cm}
+%\vspace*{-0.2cm}
 \section{Guaranteed Roundoff Error Bounds using SDP Relaxations}
 \label{sec:fpsdp}
-In this section, we present our new algorithm to bound rounding errors of nonlinear transcendental programs, relying on sparse SDP relaxations. After stating our general algorithm (Section~\ref{sec:transcsdp}), we detail how this procedure can handle polynomial programs (Section~\ref{sec:polsdp}) and then present extensions to the non-polynomial case (Section~\ref{sec:nonpolsdp}).
-\vspace*{-0.2cm}
+In this section, we present our new algorithm to bound roundoff errors of nonlinear transcendental programs, relying on sparse SDP relaxations. After stating our general algorithm (Section~\ref{sec:transcsdp}), we detail how this procedure can handle polynomial programs (Section~\ref{sec:polsdp}) and then present extensions to the non-polynomial case (Section~\ref{sec:nonpolsdp}).
+%\vspace*{-0.2cm}
 \subsection{The General Optimization Framework}
 \label{sec:transcsdp}
 %
@@ -716,7 +717,7 @@ Here we consider a given program which implements a nonlinear transcendental exp
 \]
 for polynomial functions $g_1, \dots, g_k$. 
 %
-Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|rounding| procedure (see Section~\ref{sec:fpbackground}), introducing additional error variables $\e$. 
+Then, we denote by $\hat{f}(\x,\e)$ the rounded expression of $f$ after applying the ~\lstinline|round| procedure (see Section~\ref{sec:fpbackground}), introducing additional error variables $\e$. 
 
 The algorithm \code{bound}, depicted in Figure~\ref{alg:bound}, takes as input $\x$, $\X$, $f$, $\hat{f}$, $\e$ as well as the set $\E$ of bound constraints over $\e$. Here we assume that our program implementing $f$ does not involve conditional statements (this case will be discussed later in Section~\ref{sec:nonpolsdp}). For a given machine $\epsilon$, one has $\E := [-\epsilon, \epsilon]^m$, with $m$ being the number of error variables. This algorithm actually relies on the sparse SDP optimization procedure $(\S_d)$ (see Section~\ref{sec:sdpbackground} for more details), thus~\code{bound} also takes as input a relaxation order $d \in \N$. The algorithm provides as output an interval enclosure $I_d$ of the absolute error $\mid \hat{f}(\x,\e) - f(\x) \mid$ over $\K$. 
 From this interval $I_d:= [\underline{f_d}, \overline{f_d}]$, one can compute $f_d := \max \{- \underline{f_d}, \overline{f_d} \}$, which is a sound upper bound of the maximal absolute error $r^\star := \max_{(\x,\e)\in \K} \mid \hat{f}(\x,\e) - f(\x) \mid $.
@@ -732,13 +733,13 @@ From this interval $I_d:= [\underline{f_d}, \overline{f_d}]$, one can compute $f
 \State Compute interval bounds for $l$: $I_d^l := \sdpboundfun{l}{\K}{d}$  \label{line:sdpbound}
 \State \Return $I_d := I_d^l + I^h$ 
 \end{algorithmic}
-\caption{\code{bound}: our algorithm to compute rounding errors bounds of nonlinear programs}
+\caption{\code{bound}: our algorithm to compute roundoff errors bounds of nonlinear programs}
 \label{alg:bound}
 \end{figure}
 
-After computing the absolute rounding error $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of an expression $l$ which is affine w.r.t.~the error variable $\e$ and a remainder $h$. One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of \textit{a priori} much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). 
+After computing the absolute roundoff error $r := \hat{f} - f$ (Line~\lineref{line:r}), one decomposes $r$ as the sum of an expression $l$ which is affine w.r.t.~the error variable $\e$ and a remainder $h$. One way to obtain $l$ is to compute the vector of partial derivatives of $r$ w.r.t.~$\e$ evaluated at $(\x, 0)$ and finally to take the inner product of this vector and $\e$ (Line~\lineref{line:l}). Then, the idea is to compute a precise bound of $l$ and a coarse bound of $h$. The underlying reason is that $h$ involves error term products of degree greater than 2 (e.g.~$e_1 e_2$), yielding an interval enclosure $I^h$ of \textit{a priori} much smaller width, compared to the interval enclosure $I^l$ of $l$. One obtains $I^h$ using the procedure $\iabound$ implementing basic interval arithmetic (Line~\lineref{line:iabound}). 
 %
-\vspace*{-0.2cm}
+%\vspace*{-0.2cm}
 \subsection{Polynomial Programs}
 \label{sec:polsdp}
 %
@@ -821,7 +822,7 @@ The next lemma states that one can approximate $I^l$ as closely as desired using
 Let $I_d^l$ be the interval enclosure returned by the procedure $\sdppolyfun{l}{\K}{d}$. The sequence $(I_d^l)_{d \in \N}$ converges to $I^l$.
 \end{lemma}
 %
-\vspace*{-0.2cm}
+%\vspace*{-0.2cm}
 \begin{proof}
 It is sufficient to show the similar convergence result for $l' = l/\epsilon$, as it implies the convergence for $l$ by a scaling argument.
 The sets $C_1,\dots, C_m$ satisfy the RIP property (see Definition~\ref{def:rip}). Moreover, the encoding of $\K'$ satisfies the assumption mentioned in Remark~\ref{rk:sparsearch}. Thus, Theorem~\ref{th:sparsesdp} implies that the sequence of lower bounds $(\underline{l_d'})_{d \in \N}$ converges to $\underline{l'} := \inf_{(\x,\e) \in \K'} l'(\x,\e)$. Similarly, the sequence of upper bounds converge to $\overline{l'}$, yielding the desired result.
@@ -883,8 +884,8 @@ For the sake of consistency, we omit the other cases (\code{Neg}, \code{Add}, \c
 \label{alg:lift}
 \end{figure}
 
-Finally, notice that the final set of variables $\y\poly$ can be decomposed as $(\x\poly, \e)$, where $\x\poly$ gathers the input variables together with the lifting variables.  
-Denoting by $n\poly$ the cardinality of $\x\poly$, one easily shows that the sets $\{1, \dots, n\poly, e_1\},\dots,\{1, \dots, n\poly, e_m\}$ satisfy the RIP, thus ensuring to solve efficiently the corresponding instances of Problem~\eqref{eq:lscalesdp2}.
+The set of variables $\y\poly$ can be decomposed as $(\x\poly, \e)$, where $\x\poly$ gathers input variables with lifting variables and has a cardinality equal to $n\poly$.
+Then, one easily shows that the sets $\{1, \dots, n\poly, e_1\}$,$\dots$,$\{1, \dots, n\poly, e_m\}$ satisfy the RIP, thus ensuring to solve efficiently the corresponding instances of Problem~\eqref{eq:lscalesdp2}.
 %
 \paragraph{Transcendental programs}
 %
@@ -926,7 +927,7 @@ Then, the interval enclosure of $l$ over $\K$ is equal to the interval enclosure
 \paragraph{Programs with conditionals}
 %
 Finally, we explain how to extend our bounding procedure to nonlinear programs involving conditionals through the recursive algorithm given in Figure~\ref{alg:bound_nlprog}.
-The $\boundnlprog$ algorithm relies on the $\bound$ procedure (see Figure~\ref{alg:bound} in Section~\ref{sec:transcsdp}) to compute rounding error bounds of programs implementing transcendental functions (Line~\lineref{line:noncnd}).
+The $\boundnlprog$ algorithm relies on the $\bound$ procedure (see Figure~\ref{alg:bound} in Section~\ref{sec:transcsdp}) to compute roundoff error bounds of programs implementing transcendental functions (Line~\lineref{line:noncnd}).
 From Line~\lineref{line:cnd} to Line~\lineref{line:endcnd}, the algorithm handles the case when the program implements a function $f$ defined as follows:
 \[   
 f (\x) := 
@@ -958,18 +959,18 @@ The first branch output is $g$ while the second one is $h$.
 \EndIf
 %
 \end{algorithmic}
-\caption{\code{bound_nlprog}: our algorithm to compute rounding error bounds of  programs with conditional statements}
+\caption{\code{bound_nlprog}: our algorithm to compute roundoff error bounds of  programs with conditional statements}
 \label{alg:bound_nlprog}
 \end{figure}
 %
 
-A preliminary step consists of computing the rounding error enclosure $I_d^p := [\underline{p_d}, \overline{p_d}]$ (Line~\lineref{line:polcnd}) for the program implementing the polynomial $p$. 
+A preliminary step consists of computing the roundoff error enclosure $I_d^p := [\underline{p_d}, \overline{p_d}]$ (Line~\lineref{line:polcnd}) for the program implementing the polynomial $p$. 
 Then the procedure computes bounds related to the divergence path error, that is the maximal value between the four following errors: 
 \begin{itemize}[noitemsep,nolistsep]
 \item (Line~\lineref{line:I1}) the error obtained while computing the rounded result $\hat{h}$ of the second branch instead of computing the exact result $g$ of the first one, occurring for the set of variables $(\x,\e)$ such that $\hat{p}(\x,\e) \leq 0 \leq p(\x)$. For scalability and numerical issues, we consider an over-approximation $\X_1$ (Line~\lineref{line:X1}) of this set, where the variables $\x$ satisfy the relaxed constraints $0 \leq p(\x) \leq \overline{p_d}$.
 \item (Line~\lineref{line:I2}) the error obtained while computing the rounded result $\hat{g}$ of the first branch instead of computing the exact result $h$ of the second one, occurring for the set of variables $(\x,\e)$ such that $p(\x) \leq 0 \leq \hat{p}(\x,\e)$. We also consider an over-approximation $\X_2$ (Line~\lineref{line:X2}), where the variables $\x$ satisfy the relaxed constraints $\underline{p_d} \leq p(\x) \leq 0$.
-\item (Line~\lineref{line:I3}) the rounding error corresponding to the program implementation of $g$.
-\item(Line~\lineref{line:I4}) the rounding error corresponding to the program implementation of $h$.
+\item (Line~\lineref{line:I3}) the roundoff error corresponding to the program implementation of $g$.
+\item(Line~\lineref{line:I4}) the roundoff error corresponding to the program implementation of $h$.
 \end{itemize}
 %
 \paragraph{Simplification of error terms}
@@ -983,7 +984,7 @@ We can also simplify error term products, thanks to the following lemma.
 Let $\epsilon < \frac{1}{k}$ and $\gamma_k := \frac{k \epsilon}{1 - k \epsilon}$. Then, for all $e_1, \dots, e_k \in [-\epsilon, \epsilon]$, there exists $\theta_k$ such that ${\prod_{i=1}^k (1 + e_i) = 1 + \theta_k}$ and $\mid \theta_k \mid \leq \gamma_k$.
 \end{lemma}
 %
-Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Our algorithm has an option to automatically derive safe over-approximations of the absolute rounding error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
+Lemma~\ref{th:redproduct} implies that for any $k$ such that $\epsilon < \frac{1}{k}$, one has $\gamma_k \leq (k + 1) \epsilon$. Our algorithm has an option to automatically derive safe over-approximations of the absolute roundoff error while introducing only one variable $e_1$ (bounded by $(k + 1) \epsilon$) instead of $k$ error variables $e_1, \dots, e_k$ (bounded by $\epsilon$). The cost of solving the corresponding optimization problem can be significantly reduced but it yields coarser error bounds.
 %
 %\vspace*{-0.2cm}
 \section{Experimental Evaluation}
@@ -997,11 +998,11 @@ All examples are displayed in Appendix A as the corresponding $\realtofloat$ inp
 %\vspace*{-0.2cm}
 \subsection{Benchmark Presentation}
 %For each problem presented in Table~\ref{table:error}, 
-For each example, we compared the quality of the rounding error bounds (Table~\ref{table:error}) and corresponding execution times (Table~\ref{table:cpu}) while running our tool $\realtofloat$, $\fptaylor$ (version from May $2015$)~\cite{fptaylor15} and $\rosa$ (version from  May $2014$)~\cite{Darulova14Popl}.
+For each example, we compared the quality of the roundoff error bounds (Table~\ref{table:error}) and corresponding execution times (Table~\ref{table:cpu}) while running our tool $\realtofloat$, $\fptaylor$ (version from May $2015$)~\cite{fptaylor15} and $\rosa$ (version from  May $2014$)~\cite{Darulova14Popl}.
 A given program implements a nonlinear function $f(\x)$, involving variables $\x$ lying in a set $\X$ contained in a box $[\a, \b]$.
 Applying our rounding model on $f$ yields the nonlinear expression $\hat{f}(\x,\e)$, involving additional error variables $\e$ lying in a set $\E$. 
-At a given semidefinite relaxation order $d$, our tool computes the upper bound $f_d$ of the absolute rounding $\mid f - \hat{f} \mid $ over $\K := \X \times \E$ and verifies that it is less than a requested number $\epsilon_{\realtofloat}$. As we keep the relaxation order $d$ as low as possible to ensure tractable SDP programs, it can happen that $f_d > \epsilon_{\realtofloat}$. 
- In this case, we subdivide a randomly chosen interval of the box  $[\a, \b]$ in two halves to obtain two sub-sets $\X_1$ and $\X_2$, fulfilling $\X := \X_1 \cup \X_2$, and apply the $\boundnlprog$ algorithm on both sub-sets until we succeed to certify that $\epsilon_{\realtofloat}$ is a sound upper bound of the rounding error.
+At a given semidefinite relaxation order $d$, our tool computes the upper bound $f_d$ of the absolute roundoff error $\mid f - \hat{f} \mid $ over $\K := \X \times \E$ and verifies that it is less than a requested number $\epsilon_{\realtofloat}$. As we keep the relaxation order $d$ as low as possible to ensure tractable SDP programs, it can happen that $f_d > \epsilon_{\realtofloat}$. 
+ In this case, we subdivide a randomly chosen interval of the box  $[\a, \b]$ in two halves to obtain two sub-sets $\X_1$ and $\X_2$, fulfilling $\X := \X_1 \cup \X_2$, and apply the $\boundnlprog$ algorithm on both sub-sets until we succeed to certify that $\epsilon_{\realtofloat}$ is a sound upper bound of the roundoff error.
 
 The number $\epsilon_{\realtofloat}$ is compared with the upper bounds computed by $\fptaylor$, which relies on Taylor Symbolic expansions~\cite{fptaylor15}, $\rosa$, which relies on SMT and affine arithmetic~\cite{Darulova14Popl}, as well as a third procedure, IA, relying on interval arithmetic. We designed IA to follow the same steps than $\boundnlprog$, together with the sub-procedure $\bound$, but to compute an interval enclosure of $l$ with the procedure $\iabound$ using a basic interval arithmetic procedure, instead of calling the $\sdpbound$ procedure (see Line~\lineref{line:sdpbound} of the algorithm depicted in Figure~\ref{alg:bound}). For comparison purpose, we also executed each program using random inputs, following the approach used
 in the $\rosa$ paper~\cite{Darulova14Popl}.  Specifically,
@@ -1011,7 +1012,7 @@ samples provide lower bounds on the absolute error.
 \begin{table*}[!ht]
 %\small
 \begin{center}
-\caption{Comparison results of upper and lower bounds for absolute rounding errors (the best results are emphasized using \textbf{bold fonts})}
+\caption{Comparison results of upper and lower bounds for absolute roundoff errors (the best results are emphasized using \textbf{bold fonts})}
 \input{error}
 \label{table:error}
 \end{center}
@@ -1021,7 +1022,7 @@ For the sake of further presentation, we associate an alphabet character (from \
 %
 %\vspace*{-0.5cm}
 \begin{itemize}[noitemsep,nolistsep]
-\item The first $14$ programs implement polynomial and semialgebraic functions: \code{a-e} come from physics, \code{f} and \code{h} from biology, \code{g} from control, \code{i-k} are derived from expressions involved in the proof of Kepler Conjecture (for more details, see~\cite{halesalgo} and the related formalisation project~\cite{Flyspeck06}) and \code{l-n} implement polynomial approximations of the sine and square root functions. With the exception of \code{i-k}, all these programs are used to compare $\fptaylor$ and $\rosa$ in~\cite{fptaylor15}. 
+\item The first $14$ programs implement polynomial and semialgebraic functions: \code{a-e} come from physics, \code{f} and \code{h} from biology, \code{g} from control, \code{i-k} are derived from expressions involved in the proof of Kepler Conjecture (for more details, see~\cite{halesalgo} and the related formalization project~\cite{Flyspeck06}) and \code{l-n} implement polynomial approximations of the sine and square root functions. With the exception of \code{i-k}, all these programs are used to compare $\fptaylor$ and $\rosa$ in~\cite{fptaylor15}. 
 \item The three polynomial programs \code{o-q} come from the global optimization literature and correspond respectively to Problem 3.3, 4.6 and 4.7 in~\cite{Floudas90}. We selected them as they typically involve nontrivial polynomial preconditions (i.e. $\X$ is not a simple box but rather a set defined with conjunction of nonlinear polynomial inequalities).
 \item The four programs \code{r-u} involve transcendental functions. The two programs \code{r} and \code{s} are used in the $\fptaylor$ paper~\cite{fptaylor15} and correspond respectively to the program \code{logexp} (see Example~\ref{ex:logexp}) and the program \code{sphere} taken from NASA World Wind Java SDK~\cite{NASA}. The $2$ programs \code{t} and \code{q} respectively implement the functions coming from the optimization problems \textit{Hartman 3} and \textit{Hartman 6} in~\cite{Ali05}, involving both sums of exponential functions composed with quadratic polynomials.
 \item The last two programs \code{v-w} involve conditional statements and come from the static analysis literature. They correspond to the two respective running examples of~\cite{Zonotope10} and~\cite{Marechal14}. The first program \code{v} is used in the $\rosa$ paper~\cite{Darulova14Popl} for the analysis of divergence path error.
@@ -1044,14 +1045,14 @@ Accordingly with the $\fptaylor$ paper~\cite{fptaylor15}, the $\rosa$ real compi
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[scale=0.76]{timebound2.pdf}
-\caption{Comparisons of execution times and upper bounds of rounding errors obtained with $\rosa$ and $\fptaylor$, relatively to $\realtofloat$}\label{fig:timebound}
+\caption{Comparisons of execution times and upper bounds of roundoff errors obtained with $\rosa$ and $\fptaylor$, relatively to $\realtofloat$}\label{fig:timebound}
 \end{center}
 \end{figure}
 %
 \begin{table}[!ht]
 %\small
 \begin{center}
-\caption{Comparison of execution times (in seconds) for absolute rounding error bounds (the best results are emphasized using \textbf{bold fonts})}
+\caption{Comparison of execution times (in seconds) for absolute roundoff error bounds (the best results are emphasized using \textbf{bold fonts})}
 \input{time}
 \label{table:cpu}
 \end{center}
@@ -1074,13 +1075,13 @@ and
 the last one $(-,+)$ for which $\realtofloat$ is faster but less accurate. On the quadrant $(+,-)$, one can see that $\realtofloat$ computes bound which are less accurate than $\fptaylor$ on programs \code{a-c} and \code{t}, but much faster for program \code{b}. The quadrant $(-, +)$ indicates that $\rosa$ (resp.~$\fptaylor$) is more efficient but less precise than $\realtofloat$ on program \code{d} (resp.~\code{o}). The presence of the majority of plots on the nonnegative quadrant $(+, +)$ confirms that $\realtofloat$ does not compromise efficiency at the expense of accuracy.
 %
 
-For each program implementing polynomials, our tool has an option to provide formal guarantees for the corresponding rounding error bound $\epsilon_{\realtofloat}$. Using the formal mechanism described in Section~\ref{sec:coqbackground}, $\realtofloat$  formally checks inside $\coq$ the SOS certificates generated by the SDP solver. 
+For each program implementing polynomials, our tool has an option to provide formal guarantees for the corresponding roundoff error bound $\epsilon_{\realtofloat}$. Using the formal mechanism described in Section~\ref{sec:coqbackground}, $\realtofloat$  formally checks inside $\coq$ the SOS certificates generated by the SDP solver. 
 
 %
 \begin{figure}[!ht]
 \begin{center}
 \includegraphics[scale=0.76]{formal.pdf}
-\caption{Comparisons of informal and formal execution times to certify bounds of rounding errors obtained with $\fptaylor$, relatively to $\realtofloat$}
+\caption{Comparisons of informal and formal execution times to certify bounds of roundoff errors obtained with $\fptaylor$, relatively to $\realtofloat$}
 \label{fig:formal}
 \end{center}
 \end{figure}
@@ -1100,33 +1101,38 @@ Note that all points have nonnegative y-axis coordinates, as our tool formally c
 \section{Related Works}
 %
 \paragraph{Satisfiability Modulo Theories (SMT)}
-SMT solvers allow to analyse programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetic. 
-Several solvers, including {\sc Z3}~\cite{DeMoura08}, provide partial support for the IEEE floating-point standard~\cite{smtFPA2010}. They suffer from a lack of scalability when used for rounding error analysis in isolation (as emphasized in~\cite{Darulova14Popl}), but can be integrated into existing frameworks, e.g.~{\sc FPhile}~\cite{PaganelliA13}. The procedure in~\cite{dReal13} can solve SMT problems over the real numbers, using interval constraint propagation but has not yet been applied to quantification of rounding error.
+SMT solvers allow to analyze programs with various semantics or specifications but are limited for the manipulation of problems involving nonlinear arithmetic. 
+Several solvers, including {\sc Z3}~\cite{DeMoura08}, provide partial support for the IEEE floating-point standard~\cite{smtFPA2010}. They suffer from a lack of scalability when used for roundoff error analysis in isolation (as emphasized in~\cite{Darulova14Popl}), but can be integrated into existing frameworks, e.g.~{\sc FPhile}~\cite{PaganelliA13}. The procedure in~\cite{dReal13} can solve SMT problems over the real numbers, using interval constraint propagation but has not yet been applied to quantification of roundoff error.
 The $\rosa$ tool~\cite{Darulova14Popl} provides a way to compile real programs involving semialgebraic functions and conditional statements.
-The tool uses affine arithmetic to provide sound over-approximations of rounding errors, allowing for generation of finite precision implementations which fulfil the required precision given as input by the user. Bounds of the affine expressions are provided through an optimization procedure based on SMT. In our case, we use the same rounding model but provide approximations which are affine w.r.t. the additional error variables and nonlinear w.r.t. the input variables. Instead of using SMT, we bound the resulting expressions with optimization techniques based on semidefinite programming.
-At the moment (and in contrast to our method) the $\rosa$ tool does not formally verify the output bound provided by the SMT solver, but such a feature could be embedded through an interface with the $\smtcoq$ framework~\cite{smtcoq}. This latter tool allows the proof witness generated by an SMT solver to be formally (and independently) re-checked inside $\coq$.  While ensuring soundness, the efficiency of this procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
+The tool uses affine arithmetic to provide sound over-approximations of roundoff errors, allowing for generation of finite precision implementations which fulfill the required precision given as input by the user. Bounds of the affine expressions are provided through an optimization procedure based on SMT. In our case, we use the same rounding model but provide approximations which are affine w.r.t. the additional error variables and nonlinear w.r.t. the input variables. Instead of using SMT, we bound the resulting expressions with optimization techniques based on semidefinite programming.
+At the moment (and in contrast to our method) the $\rosa$ tool does not formally verify the output bound provided by the SMT solver, but such a feature could be embedded through an interface with the $\smtcoq$ framework~\cite{smtcoq}. This latter tool allows the proof witness generated by an SMT solver to be formally (and independently) re-checked inside $\coq$.  
+The $\smtcoq$ framework uses tactics based on {\em computational reflection} to enable this re-checking to be performed efficiently.
+%While ensuring soundness, the efficiency of this procedure is not compromised due to tactics enjoying the mechanism of computational reflection.
 %
 \paragraph{Abstract Domains}
-Abstract interpretation~\cite{CousotCousot77} has been extensively used in the context of static analysis to provide sound over-approximations, called {\em abstractions}, of the sets of values the variables of a program may take at each program point. The effects of variable assignments, guards and conditional loops statements are handled with several domain specific operators (e.g. inclusion, meet and join). Well studied abstract domains include intervals~\cite{Moore62} as well as more complicated frameworks based on affine arithmetic~\cite{Stolfi03}, octogons~\cite{octogons}, zonotopes~\cite{Zonotope10}, polyhedra~\cite{polyhedra08}, interval polyhedra~\cite{IntervalPoly09}, some of them being implemented inside a tool called {\sc Apron}~\cite{Apron09}. Abstract domains provide sound over-approximations of program expressions, and allow upper bounds on roundoff error to be computed. The {\sc Gappa} tool~\cite{Daumas10} relies on interval abstract domains with an extension to affine domains~\cite{Linderman10}. As demonstrated in~\cite{fptaylor15}, the bounds obtained inside {\sc Gappa} are often coarser than other methods which take into account the variable correlations. Formal guarantees can be provided as {\sc Gappa} benefits from an interface with $\coq$ while making use of interval libraries~\cite{Melquiond201214} relying on formalized floating-points~\cite{BM11Flocq}. The static analysis tool {\sc Fluctuat} relies on affine abstract domains~\cite{Blanchet03}. {\sc Gappa} and {\sc Fluctuat} tools use a different rounding model (also available as an option inside $\fptaylor$) based on a piecewise constant relative error bound. This is more precise than our current rounding model but requires extensive use of a branch and bound algorithm as each interval has to be subdivided in intervals $[2^n, 2^{n+1}]$ for several values of the integer $n$.  As a side effect, the corresponding optimization procedure is computationally demanding, as noticed in~\cite{fptaylor15}.
+Abstract interpretation~\cite{CousotCousot77} has been extensively used in the context of static analysis to provide sound over-approximations, called {\em abstractions}, of the sets of values the variables of a program may take at each program point. The effects of variable assignments, guards and conditional loops statements are handled with several domain specific operators (e.g. inclusion, meet and join). Well studied abstract domains include intervals~\cite{Moore62} as well as more complicated frameworks based on affine arithmetic~\cite{Stolfi03}, octogons~\cite{octogons}, zonotopes~\cite{Zonotope10}, polyhedra~\cite{polyhedra08}, interval polyhedra~\cite{IntervalPoly09}, some of them being implemented inside a tool called {\sc Apron}~\cite{Apron09}. Abstract domains provide sound over-approximations of program expressions, and allow upper bounds on roundoff error to be computed. 
+The {\sc Gappa} tool~\cite{Daumas10} relies on interval abstract domains with an extension to affine domains~\cite{Linderman10}, to reason about roundoff errors.
+As demonstrated in~\cite{fptaylor15}, the bounds obtained inside {\sc Gappa} are often coarser than other methods which take into account the variable correlations. Formal guarantees can be provided as {\sc Gappa} benefits from an interface with $\coq$ while making use of interval libraries~\cite{Melquiond201214} relying on formalized floating-points~\cite{BM11Flocq}. The static analysis tool {\sc Fluctuat} relies on affine abstract domains~\cite{Blanchet03}. {\sc Gappa} and {\sc Fluctuat} tools use a different rounding model (also available as an option inside $\fptaylor$) based on a piecewise constant relative error bound. This is more precise than our current rounding model but requires extensive use of a branch and bound algorithm as each interval has to be subdivided in intervals $[2^n, 2^{n+1}]$ for several values of the integer $n$.  As a side effect, the corresponding optimization procedure is computationally demanding, as noticed in~\cite{fptaylor15}.
 
 \paragraph{Global Optimization Frameworks}
 Computing sound bounds of nonlinear expressions is mandatory to perform formal analysis of finite precision implementations and can be performed with various optimization tools. 
-In the polynomial case, alternative approaches to semidefinite relaxations are based on decomposition in the multivariate Bernstein basis. Formal verification of bounds obtained with this decomposition has been investigated in the thesis of Zumkeller~\cite{ZumkellerPhD} and by Mun\~oz and Narkawicz~\cite{MN13} in the PVS theorem prover~\cite{PVS}. We are not aware of any work based on these techniques which can quantify rounding errors. Another decomposition of nonnegative polynomials into SOS certificates consists in using the Krivine~\cite{Krivine1964b}-Handelman~\cite{Handelman1988} representation and boils down to solving linear programming (LP) relaxations. In our case, we use a different representation, leading to solve SDP relaxations. The Krivine-Handelman representation has been used in~\cite{Boland10HGR} to compute rounding error bounds. LP relaxations often provide coarser bounds than SDP relaxations and it has been proven in~\cite{lasserre2009moments} that generically finite convergence does not occur for convex problems, at the exception of the linear case. 
-Branch and bound methods with Taylor models~\cite{Berz09} are not restricted to polynomial systems and have been formalized~\cite{SolovyevH13} to solve nonlinear inequalities occurring in the proof of Kepler Conjecture. Symbolic Taylor Expansions~\cite{fptaylor15} have been implemented in the $\fptaylor$ tool to compute formal bounds of rounding errors for programs involving both polynomial and transcendental functions. This method happens to be efficient and precise to analyze various programs and it would be interesting to design a procedure combining $\fptaylor$ with our tool on specific subsets of input constraints.
+In the polynomial case, alternative approaches to semidefinite relaxations are based on decomposition in the multivariate Bernstein basis. Formal verification of bounds obtained with this decomposition has been investigated in the thesis of Zumkeller~\cite{ZumkellerPhD} and by Mun\~oz and Narkawicz~\cite{MN13} in the PVS theorem prover~\cite{PVS}. We are not aware of any work based on these techniques which can quantify roundoff errors. Another decomposition of nonnegative polynomials into SOS certificates consists in using the Krivine~\cite{Krivine1964b}-Handelman~\cite{Handelman1988} representation and boils down to solving linear programming (LP) relaxations. In our case, we use a different representation, leading to solve SDP relaxations. The Krivine-Handelman representation has been used in~\cite{Boland10HGR} to compute roundoff error bounds. LP relaxations often provide coarser bounds than SDP relaxations and it has been proven in~\cite{lasserre2009moments} that generically finite convergence does not occur for convex problems, at the exception of the linear case. 
+Branch and bound methods with Taylor models~\cite{Berz09} are not restricted to polynomial systems and have been formalized~\cite{SolovyevH13} to solve nonlinear inequalities occurring in the proof of Kepler Conjecture. Symbolic Taylor Expansions~\cite{fptaylor15} have been implemented in the $\fptaylor$ tool to compute formal bounds of roundoff errors for programs involving both polynomial and transcendental functions. This method happens to be efficient and precise to analyze various programs and it would be interesting to design a procedure combining $\fptaylor$ with our tool on specific subsets of input constraints.
 %
-\vspace*{-0.2cm}
+%\vspace*{-0.3cm}
 \section{Conclusion and Perspectives} %0.5p
 %
-Our verification framework allows us to over-approximate rounding errors occurring while executing nonlinear programs implemented with finite precision.
-The framework relies on semidefinite optimization, ensuring tight and certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables. Experimental results indicate that the optimization algorithm implemented in our $\realtofloat$ tool produces tight error bounds. In addition, the tool produces sums of squares certificates which guarantee the correctness of these upper bounds and can can be efficiently verified inside the $\coq$ proof assistant.
+Our verification framework allows us to over-approximate roundoff errors occurring while executing nonlinear programs implemented with finite precision.
+The framework relies on semidefinite optimization, ensuring certified approximations. Our approach extends to medium-size nonlinear problems, due to  automatic detection of the correlation sparsity pattern of input variables and round-off error variables. 
+Experimental results indicate that the optimization algorithm implemented in our $\realtofloat$ software package often produces tighter error bounds than the ones provided by the competitive solvers $\rosa$ and $\fptaylor$.  In addition, $\realtofloat$ produces sums of squares certificates which guarantee the correctness of these upper bounds and can can be efficiently verified inside the $\coq$ proof assistant.
 
 This work yields several directions for further research investigation. 
-First, we intend to increase the size of graspable instances by exploiting symmetry patterns of certain program sub-classes to use specific SDP hierarchies~\cite{Riener2013SymmetricSDP}. We could also provide rounding error bounds for more general programs, involving either finite or infinite conditional loops. A preliminary mandatory step is to be able to generate inductive invariants with SDP relaxations. Another interesting direction would be to apply the method used in~\cite{Lasserre11} to derive sequences of lower rounding error bounds together with SDP-based certificates.
+First, we intend to increase the size of graspable instances by exploiting symmetry patterns of certain program sub-classes to use specific SDP hierarchies~\cite{Riener2013SymmetricSDP}. We could also provide roundoff error bounds for more general programs, involving either finite or infinite conditional loops. A preliminary mandatory step is to be able to generate inductive invariants with SDP relaxations. Another interesting direction would be to apply the method used in~\cite{Lasserre11} to derive sequences of lower roundoff error bounds together with SDP-based certificates.
 On the formal proof side, we could benefit from floating-point/interval arithmetic libraries available inside $\coq$, first to improve the efficiency of the formal polynomial checker, currently relying on exact arithmetic, then to extend the formal verification to non-polynomial programs.
 %
 %to improve the efficiency of the formal polynomial checker inside Coq by using the interval libraries available inside the proof assistant, rather than using exact polynomial arithmetic as in the current framework. We also plan to use these interval libraries extend our formal verification framework to the non-polynomial programs.
 %Such extensions have become realistic as recent works allow to approximate inductive invariants with semidefinite relaxations.
-Finally, we plan to combine this optimization framework with the procedure in~\cite{Gao15FPGA} to improve the automatic reordering of arithmetic expressions, thus allowing more efficient optimization of FPGA implementations.
+Finally, we plan to combine this optimization framework with the procedure in~\cite{Gao15FPGA} to improve the automatic reordering of arithmetic expressions, allowing more efficient optimization of FPGA implementations.
 
 \acks
 This work was partly funded by the Engineering and Physical Sciences Research Council (EPSRC) Challenging Engineering Grant (EP/I020457/1).
@@ -1149,11 +1155,14 @@ P. Q. Smith, and X. Y. Jones. ...reference text...
 \end{thebibliography}
 }\fi
 
-\appendix
-\section*{Appendix A: Nonlinear Programs}
-\label{sec:appa}
+%\newpage
+%~
+%\newpage
+%\appendix
+%\section*{Appendix A: Nonlinear Programs}
+%\label{sec:appa}
 %
-\input{appendix}
+%\input{appendix}
 
 \end{document}
 

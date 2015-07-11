@@ -1,0 +1,287 @@
+%-----------------------------------------------------------------------------
+%
+%               Template for sigplanconf LaTeX Class
+%
+% Name:         sigplanconf-template.tex
+%
+% Purpose:      A template for sigplanconf.cls, which is a LaTeX 2e class
+%               file for SIGPLAN conference proceedings.
+%
+% Guide:        Refer to "Author's Guide to the ACM SIGPLAN Class,"
+%               sigplanconf-guide.pdf
+%
+% Author:       Paul C. Anagnostopoulos
+%               Windfall Software
+%               978 371-2316
+%               paul@windfall.com
+%
+% Created:      15 February 2005
+%
+%-----------------------------------------------------------------------------
+
+
+\documentclass[preprint,fleqn,nocopyrightspace]{sigplanconf}
+
+% The following \documentclass options may be useful:
+
+% preprint      Remove this option only once the paper is in final form.
+% 10pt          To set in 10-point type instead of 9-point.
+% 11pt          To set in 11-point type instead of 9-point.
+% authoryear    To obtain author/year citation style instead of numeric.
+\usepackage{listings}
+\def\lstlanguagefiles{defManOcaml.tex}
+\lstset{language = Ocaml}
+\newcommand{\code}[1]{\lstinline{#1}}
+%\begin{lstlisting}\end{lstlisting}
+
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage{graphicx}  % for pdf, bitmapped graphics files
+\usepackage{amsmath} % assumes amsmath package installed
+\usepackage{amssymb}  % assumes amsmath package installed
+\usepackage{color}
+\usepackage{enumitem}
+\usepackage{myalgo}
+\let\proof\relax
+\let\endproof\relax
+\usepackage{amsthm}
+%\usepackage{ntheorem}
+\usepackage{hyperref}
+\usepackage{subfigure}
+\usepackage{enumerate}
+%\usepackage{caption}
+\usepackage{multirow}
+\usepackage{tikz, pgfplots}
+\pgfplotsset{compat=1.8}
+%\usepackage{natbib} %for bibliography via bibtex
+%\usepackage{enumitem}
+%\lstMakeShortInline{$}
+\newcommand{\add}[1]{#1}
+\newcommand{\del}[1]{\textcolor{gray}{#1}}
+
+%\newcommand{\P}{\mathbb{P}}
+%\newcommand{\Q}{\mathbb{Q}}
+%\newcommand{\E}{\mathbb{E}}
+\def\sizefig{0.35}
+\def\sizesmallfig{0.30}
+\def\sizetinyfig{0.24}
+\newcommand{\setA}{\mathcal{A}} % Semialgebraic functions
+\newcommand{\setD}{\mathcal{D}} % Dictionnary of Univariate transcendental functions
+\newcommand{\setU}{\mathcal{U}} % Univariate functions := \setT \cup {sqrt, abs, power functions}
+\newcommand{\suppf}[1]{\text{supp}(#1)}
+\newcommand{\mons}[2]{\N_{#1}^{#2}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\F}{\mathbb{F}}
+\newcommand{\Pcal}{\mathcal{P}}
+\newcommand{\Pcalp}{\Pcal^{(p)}}
+\newcommand{\Scal}{\mathcal{S}}
+\newcommand{\N}{\mathbb{N}}
+\newcommand{\x}{\mathbf{x}}
+\newcommand{\e}{\mathbf{e}}
+\newcommand{\y}{\mathbf{y}}
+\newcommand{\z}{\mathbf{z}}
+\newcommand{\nbenchs}{23}
+\newcommand{\alphab}{\boldsymbol{\alpha}}
+\newcommand{\epsilonb}{\boldsymbol{\epsilon}}
+\newcommand{\deltab}{\boldsymbol{\delta}}
+\renewcommand{\b}{\mathbf{b}}
+\newcommand{\f}{\mathbf{f}} 
+\newcommand{\Plam}{\P_{\lambda}}
+\newcommand{\Plamp}{\P_{\lambda}^{(p)}}
+\def\P{\mathbf{P}}
+\def\Q{\mathbf{Q}}
+\def\L{\mathbf{L}}
+\def\D{\mathbf{D}}
+\def\q{\mathbf{q}}
+\newcommand{\M}{\mathbf{M}}
+\def\m{\mathbf{m}}
+\def\H{\mathbf{H}}
+\def\h{\mathbf{h}}
+\def\f{f}
+\def\a{\mathbf{a}}
+\def\m{\mathbf{m}}
+\def\p{\mathbf{p}}
+\def\S{\mathbf{S}}
+\def\B{\mathbf{B}}
+\def\E{\mathbf{E}}
+\def\K{\mathbf{K}}
+\def\S{\mathbf{S}}
+\def\Q{\mathbf{Q}}
+\def\X{\mathbf{X}}
+\def\Y{\mathbf{Y}}
+\newcommand{\A}{\mathbf{A}}
+\newcommand{\Shat}{\hat{\S}}
+\newcommand{\Bb}{\mathbf{B}}
+\newcommand{\flam}{{f}_{{\lambda}}}
+\newcommand{\flamfun}[1]{f_{\lambda}(#1)}
+\newcommand{\flamfunp}[2]{f^{(#2)}_{\lambda}(#1)}
+\newcommand{\flamx}{\flamfun{\x}}
+\newcommand{\flampx}{\flamfunp{\x}{p}}
+\newcommand{\flamstar}{f^*({\lambda})}
+\newcommand{\flamstarj}[1]{f_{#1}^*({\lambda})}
+\newcommand{\Mcal}{\mathcal{M}}
+\newcommand{\nsdp}{n_{\text{sdp}}}
+\newcommand{\divzero}{\text{Div0}}
+\newcommand{\nlift}{n_{\text{lift}}}
+\newcommand{\Slift}{\S_{\text{lift}}}
+\renewcommand{\prec}{\text{prec}}
+\newcommand{\mlift}{m_{\text{lift}}}
+\newcommand{\dlift}{r_{\text{lift}}}
+\newcommand{\msdp}{m_{\text{sdp}}}
+\newcommand{\xlamstar}{{\x}^*({\lambda})}
+\newcommand{\Kpol}{\K_{\text{poly}}}
+\newcommand{\transpose}{\top}%\newcommand{\transpose}{\mathbf{\intercal}}
+\DeclareMathOperator{\vol}{vol}
+%\DeclareMathOperator{\op}{op}
+\DeclareMathOperator{\conv}{conv}
+\newcommand{\red}[1]{\textbf{{\color{red}#1}}}
+\newcommand{\iaboundfun}[2]{\mathtt{ia\_bound}(#1, #2)}
+\newcommand{\iabound}{\mathtt{ia\_bound}}
+\newcommand{\sdpboundfun}[3]{\mathtt{sdp\_bound}(#1, #2, #3)}
+\newcommand{\sdpbound}{\mathtt{sdp\_bound}}
+\newcommand{\boundfun}[7]{\mathtt{bound}(#1, #2, #3, #4, #5, #6, #7)}
+\newcommand{\bound}{\mathtt{bound}}
+\newcommand{\boundnlprogfun}[7]{\mathtt{bound\_nlprog}(#1, #2, #3, #4, #5, #6, #7)}
+\newcommand{\boundnlprog}{\mathtt{bound\_nlprog}}
+\newcommand{\sdppolyfun}[3]{\mathtt{sdp\_poly}(#1, #2, #3)}
+\newcommand{\sdppoly}{\mathtt{sdp\_poly}}
+\newcommand{\liftfun}[3]{\mathtt{lift}(#1, #2, #3)}
+\newcommand{\lift}{\mathtt{lift}}
+\newcommand{\poly}{_\text{poly}}
+\newcommand{\sa}{_\text{sa}}
+\newcommand{\sdpsafun}[3]{\mathtt{sdp\_sa}(#1, #2, #3)}
+\newcommand{\sdpsa}{\mathtt{sdp\_sa}}
+\newcommand{\sdptranscfun}[3]{\mathtt{sdp\_trancs}(#1, #2, #3)}
+\newcommand{\sdptransc}{\mathtt{sdp\_transc}}
+%\newcommand{\brev}{\color{red}}
+%\newcommand{\erev}{\color{black}}
+\newcommand{\sthreefp}{\mathtt{s3fp}}
+\newcommand{\realtofloat}{\mathtt{Real2Float}}
+\newcommand{\smtcoq}{\mathtt{smtcoq}}
+\newcommand{\dreal}{\mathtt{dReal}}
+\newcommand{\hol}{\text{\sc Hol-light}}
+\newcommand{\op}{\mathtt{op}}
+\newcommand{\bop}{\mathtt{bop}}
+\newcommand{\coq}{\text{\sc Coq}}
+\newcommand{\ocaml}{\text{\sc OCaml}}
+\newcommand{\rosa}{\mathtt{Rosa}}
+\newcommand{\sdpa}{\text{\sc Sdpa}}
+\newcommand{\fptaylor}{\mathtt{FPTaylor}}
+\newcommand{\nlcertify}{\mathtt{NLCertify}}
+\makeatletter
+\newcommand*{\circled}{\@ifstar\circledstar\circlednostar}
+\newcommand*{\squared}{\@ifstar\squaredstar\squarednostar}
+\makeatother
+
+\newcommand*\circledstar[1]{%
+  \tikz[baseline=(C.base)]
+    \node[%
+      fill,
+      circle,
+      minimum size=1.em,
+      text=white,
+%      font=\sffamily,
+      inner sep=0.5pt
+    ](C) {\texttt{#1}};%
+}
+\newcommand*\circlednostar[1]{%
+  \tikz[baseline=(C.base)]
+    \node[%
+      draw,
+      circle,
+      minimum size=1.em,
+%      font=\sffamily,
+      inner sep=0.5pt
+    ](C) {\texttt{#1}};%
+}
+\newcommand*\squaredstar[1]{%
+  \tikz[baseline=(C.base)]
+    \node[%
+      fill,
+      rectangle,
+      minimum size=1.em,
+      text=white,
+%      font=\sffamily,
+      inner sep=0.5pt
+    ](C) {\texttt{#1}};%
+}
+\newcommand*\squarednostar[1]{%
+  \tikz[baseline=(C.base)]
+    \node[%
+      draw,
+      rectangle,
+      minimum size=1.em,
+%      font=\sffamily,
+      inner sep=0.5pt
+    ](C) {\texttt{#1}};%
+}
+%\newcommand{\II}{\mathbb{I}}
+%\theoremstyle{plain}
+%\newtheorem{thm}{Theorem}[section]
+\newtheorem{theorem}{Theorem}[section]
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{proposition}[theorem]{Proposition}
+\newtheorem{corollary}[theorem]{Corollary}
+
+\theoremstyle{plain}
+\newtheorem{definition}[theorem]{Definition}
+\newtheorem{hypothesis}[theorem]{Assumption}
+\newtheorem{conjecture}[theorem]{Conjecture}
+\newtheorem{assumption}[theorem]{Assumption}
+\newtheorem{example}{Example}
+
+%\theoremstyle{remark}
+\newtheorem{remark}{Remark}
+%\newtheorem*{note}{Note}
+\newtheorem{case}{Case}
+
+
+
+
+\begin{document}
+
+\conferenceinfo{CONF 'yy}{Month d--d, 20yy, City, ST, Country} 
+\copyrightyear{20yy} 
+\copyrightdata{978-1-nnnn-nnnn-n/yy/mm} 
+\doi{nnnnnnn.nnnnnnn}
+
+% Uncomment one of the following two, if you are not going for the 
+% traditional copyright transfer agreement.
+
+%\exclusivelicense                % ACM gets exclusive license to publish, 
+                                  % you retain copyright
+
+%\permissiontopublish             % ACM gets nonexclusive license to publish
+                                  % (paid open-access papers, 
+                                  % short abstracts)
+
+%\titlebanner{banner above paper title}        % These are ignored unless
+%\preprintfooter{short description of paper}   % 'preprint' option specified.
+\title{}
+%\title{Automated Precision Tuning using Semidefinite Programming}
+%\title{Certified Roundoff Error Bounds Using Semidefinite Programming}
+
+%\subtitle{Subtitle Text, if any}
+
+\authorinfo{}{}{}
+%\authorinfo{Name2\and Name3}
+%           {Affiliation2/3}
+%           {Email2/3}
+
+\maketitle
+\appendix
+\section*{Appendix A: Nonlinear Programs}
+\label{sec:appa}
+%
+\input{appendix}
+
+\end{document}
+
+%                       Revision History
+%                       -------- -------
+%  Date         Person  Ver.    Change
+%  ----         ------  ----    ------
+
+%  2013.06.29   TU      0.1--4  comments on permission/copyright notices
+
